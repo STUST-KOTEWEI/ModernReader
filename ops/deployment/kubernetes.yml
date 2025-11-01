@@ -1,0 +1,347 @@
+# Kubernetes Deployment Configuration for ModernReader
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: modernreader
+
+---
+# ConfigMap for Backend
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: modernreader
+data:
+  DATABASE_URL: "sqlite:///./modernreader.db"
+  USE_MOCK_LLM: "false"
+  USE_MOCK_EMBEDDINGS: "false"
+  ALLOWED_ORIGINS: "https://modernreader.app,https://www.modernreader.app"
+  LOG_LEVEL: "INFO"
+
+---
+# Secret for API Keys (create with: kubectl create secret)
+apiVersion: v1
+kind: Secret
+metadata:
+  name: api-keys
+  namespace: modernreader
+type: Opaque
+stringData:
+  OPENAI_API_KEY: "your-openai-key-here"
+  ANTHROPIC_API_KEY: "your-anthropic-key-here"
+  GOOGLE_API_KEY: "your-google-key-here"
+  SECRET_KEY: "your-jwt-secret-key-here"
+
+---
+# PersistentVolumeClaim for ChromaDB
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: chroma-db-pvc
+  namespace: modernreader
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard
+
+---
+# PersistentVolumeClaim for Vectors
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vectors-pvc
+  namespace: modernreader
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: standard
+
+---
+# Backend Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: modernreader
+  labels:
+    app: backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: ghcr.io/your-org/modernreader-backend:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8001
+          name: http
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: DATABASE_URL
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: api-keys
+              key: OPENAI_API_KEY
+        - name: ANTHROPIC_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: api-keys
+              key: ANTHROPIC_API_KEY
+        - name: GOOGLE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: api-keys
+              key: GOOGLE_API_KEY
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: api-keys
+              key: SECRET_KEY
+        - name: USE_MOCK_LLM
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: USE_MOCK_LLM
+        - name: ALLOWED_ORIGINS
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: ALLOWED_ORIGINS
+        volumeMounts:
+        - name: chroma-db
+          mountPath: /app/chroma_db
+        - name: vectors
+          mountPath: /app/vectors
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1000m"
+          limits:
+            memory: "4Gi"
+            cpu: "2000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8001
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8001
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+      volumes:
+      - name: chroma-db
+        persistentVolumeClaim:
+          claimName: chroma-db-pvc
+      - name: vectors
+        persistentVolumeClaim:
+          claimName: vectors-pvc
+
+---
+# Backend Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  namespace: modernreader
+  labels:
+    app: backend
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8001
+    targetPort: 8001
+    protocol: TCP
+    name: http
+  selector:
+    app: backend
+
+---
+# Frontend Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: modernreader
+  labels:
+    app: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: ghcr.io/your-org/modernreader-frontend:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+          name: http
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
+
+---
+# Frontend Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: modernreader
+  labels:
+    app: frontend
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  selector:
+    app: frontend
+
+---
+# Ingress for HTTP/HTTPS
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: modernreader-ingress
+  namespace: modernreader
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - modernreader.app
+    - www.modernreader.app
+    - api.modernreader.app
+    secretName: modernreader-tls
+  rules:
+  - host: modernreader.app
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-service
+            port:
+              number: 80
+  - host: www.modernreader.app
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-service
+            port:
+              number: 80
+  - host: api.modernreader.app
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-service
+            port:
+              number: 8001
+
+---
+# HorizontalPodAutoscaler for Backend
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: backend-hpa
+  namespace: modernreader
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: backend
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+---
+# HorizontalPodAutoscaler for Frontend
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: frontend-hpa
+  namespace: modernreader
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: frontend
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70

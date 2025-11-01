@@ -1,0 +1,76 @@
+[
+  {
+    "title": "Forest Stories",
+    "authors": ["Amis Community Storytellers"],
+    "language": "amis",
+    "topics": ["culture", "oral history", "ecology"],
+    "summary": "Oral histories from the Amis people collected across generations.",
+    "source": "ELAR",
+    "metadata": {
+      "keywords": "Amis cultural heritage forest",
+      "award_winning": true,
+      "reading_level": "intermediate",
+      "isbn": "9789861234567"
+    }
+  },
+  {
+    "title": "Songs of the River",
+    "authors": ["Atayal Youth Ensemble"],
+    "language": "atayal",
+    "topics": ["music", "ritual", "identity"],
+    "summary": "Annotated songbook featuring river-themed chants with translations.",
+    "source": "National Library",
+    "metadata": {
+      "keywords": "Atayal songs river ceremony",
+      "reading_level": "beginner"
+    }
+  },
+  {
+    "title": "Healing Plants of the Highlands",
+    "authors": ["Paiwan Knowledge Circle"],
+    "language": "paiwan",
+    "topics": ["ecology", "medicine", "knowledge"],
+    "summary": "Field guide describing traditional Paiwan medicinal plants with AR markers.",
+    "source": "University Archive",
+    "metadata": {
+      "keywords": "Paiwan botany healing",
+      "reading_level": "advanced"
+    }
+  },
+  {
+    "title": "Stories Woven in Patterns",
+    "authors": ["Rukai Textile Collective"],
+    "language": "rukai",
+    "topics": ["myth", "craft", "identity"],
+    "summary": "Illustrated tales mapping textile patterns to ancestral myths.",
+    "source": "ELAR",
+    "metadata": {
+      "keywords": "Rukai textile myth",
+      "reading_level": "intermediate"
+    }
+  },
+  {
+    "title": "Sky Dancers",
+    "authors": ["Seediq Storykeepers"],
+    "language": "seediq",
+    "topics": ["adventure", "myth", "festival"],
+    "summary": "Epic stories of the Seediq sky dancers retold for modern readers.",
+    "source": "Indie Press",
+    "metadata": {
+      "keywords": "Seediq adventure festival",
+      "reading_level": "intermediate"
+    }
+  },
+  {
+    "title": "Guardians of the Reef",
+    "authors": ["Tao Maritime Council"],
+    "language": "tao",
+    "topics": ["ecology", "ritual", "navigation"],
+    "summary": "Bilingual compendium documenting Tao canoe rituals and reef stewardship.",
+    "source": "National Museum",
+    "metadata": {
+      "keywords": "Tao reef navigation ecology",
+      "reading_level": "advanced"
+    }
+  }
+]

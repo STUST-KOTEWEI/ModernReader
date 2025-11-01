@@ -1,0 +1,1038 @@
+{
+  "builtTestProducts" : [
+    {
+      "binaryPath" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderApplePackageTests.xctest/Contents/MacOS/ModernReaderApplePackageTests",
+      "packagePath" : "/Users/kedewei/modernreader/clients/apple",
+      "productName" : "ModernReaderApplePackageTests"
+    }
+  ],
+  "copyCommands" : {
+
+  },
+  "explicitTargetDependencyImportCheckingMode" : {
+    "none" : {
+
+    }
+  },
+  "generatedSourceTargetSet" : [
+
+  ],
+  "pluginDescriptions" : [
+
+  ],
+  "swiftCommands" : {
+    "C.ModernReaderApplePackageTests-arm64-apple-macosx26.0-debug.module" : {
+      "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderApplePackageTests.build/sources",
+      "importPath" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderApplePackageTests.derived/runner.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/Modules/ModernReaderUITests.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderApplePackageTests.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "ModernReaderApplePackageTests",
+      "moduleOutputPath" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/Modules/ModernReaderApplePackageTests.swiftmodule",
+      "objects" : [
+        "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderApplePackageTests.build/runner.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx14.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-Onone",
+        "-enable-testing",
+        "-Xfrontend",
+        "-enable-cross-import-overlays",
+        "-j8",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderApplePackageTests.build/include/ModernReaderApplePackageTests-Swift.h",
+        "-Xfrontend",
+        "-experimental-lazy-typecheck",
+        "-Xfrontend",
+        "-experimental-skip-all-function-bodies",
+        "-Xfrontend",
+        "-experimental-allow-module-with-compiler-errors",
+        "-Xfrontend",
+        "-empty-abi-descriptor",
+        "-plugin-path",
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.0.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.0.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "apple"
+      ],
+      "outputFileMapPath" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderApplePackageTests.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/Modules/ModernReaderApplePackageTests.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : true,
+      "sources" : [
+        "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderApplePackageTests.derived/runner.swift"
+      ],
+      "tempsPath" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderApplePackageTests.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.ModernReaderServices-arm64-apple-macosx26.0-debug.module" : {
+      "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderServices.build/sources",
+      "importPath" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/kedewei/modernreader/clients/apple/Sources/ModernReaderServices/APIClient.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/kedewei/modernreader/clients/apple/Sources/ModernReaderServices/AuthStore.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/kedewei/modernreader/clients/apple/Sources/ModernReaderServices/Models.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderServices.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "ModernReaderServices",
+      "moduleOutputPath" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/Modules/ModernReaderServices.swiftmodule",
+      "objects" : [
+        "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderServices.build/APIClient.swift.o",
+        "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderServices.build/AuthStore.swift.o",
+        "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderServices.build/Models.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx14.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-Onone",
+        "-enable-testing",
+        "-j8",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderServices.build/include/ModernReaderServices-Swift.h",
+        "-swift-version",
+        "5",
+        "-Xfrontend",
+        "-experimental-lazy-typecheck",
+        "-Xfrontend",
+        "-experimental-skip-all-function-bodies",
+        "-Xfrontend",
+        "-experimental-allow-module-with-compiler-errors",
+        "-Xfrontend",
+        "-empty-abi-descriptor",
+        "-plugin-path",
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.0.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.0.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "apple"
+      ],
+      "outputFileMapPath" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderServices.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/Modules/ModernReaderServices.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : true,
+      "sources" : [
+        "/Users/kedewei/modernreader/clients/apple/Sources/ModernReaderServices/APIClient.swift",
+        "/Users/kedewei/modernreader/clients/apple/Sources/ModernReaderServices/AuthStore.swift",
+        "/Users/kedewei/modernreader/clients/apple/Sources/ModernReaderServices/Models.swift"
+      ],
+      "tempsPath" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderServices.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.ModernReaderUI-arm64-apple-macosx26.0-debug.module" : {
+      "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderUI.build/sources",
+      "importPath" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/kedewei/modernreader/clients/apple/Sources/ModernReaderUI/ContentView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/Modules/ModernReaderServices.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderUI.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "ModernReaderUI",
+      "moduleOutputPath" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/Modules/ModernReaderUI.swiftmodule",
+      "objects" : [
+        "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderUI.build/ContentView.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx14.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-Onone",
+        "-enable-testing",
+        "-j8",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderUI.build/include/ModernReaderUI-Swift.h",
+        "-swift-version",
+        "5",
+        "-Xfrontend",
+        "-experimental-lazy-typecheck",
+        "-Xfrontend",
+        "-experimental-skip-all-function-bodies",
+        "-Xfrontend",
+        "-experimental-allow-module-with-compiler-errors",
+        "-Xfrontend",
+        "-empty-abi-descriptor",
+        "-plugin-path",
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.0.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.0.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "apple"
+      ],
+      "outputFileMapPath" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderUI.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/Modules/ModernReaderUI.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : true,
+      "sources" : [
+        "/Users/kedewei/modernreader/clients/apple/Sources/ModernReaderUI/ContentView.swift"
+      ],
+      "tempsPath" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderUI.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.ModernReaderUITests-arm64-apple-macosx26.0-debug.module" : {
+      "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderUITests.build/sources",
+      "importPath" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/kedewei/modernreader/clients/apple/Tests/ModernReaderUITests/ModernReaderUITests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/Modules/ModernReaderUI.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderUITests.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "ModernReaderUITests",
+      "moduleOutputPath" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/Modules/ModernReaderUITests.swiftmodule",
+      "objects" : [
+        "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderUITests.build/ModernReaderUITests.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx14.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-Onone",
+        "-enable-testing",
+        "-Xfrontend",
+        "-enable-cross-import-overlays",
+        "-j8",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-swift-version",
+        "5",
+        "-Xfrontend",
+        "-experimental-lazy-typecheck",
+        "-Xfrontend",
+        "-experimental-skip-all-function-bodies",
+        "-Xfrontend",
+        "-experimental-allow-module-with-compiler-errors",
+        "-Xfrontend",
+        "-empty-abi-descriptor",
+        "-plugin-path",
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.0.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.0.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "apple"
+      ],
+      "outputFileMapPath" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderUITests.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/Modules/ModernReaderUITests.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : true,
+      "sources" : [
+        "/Users/kedewei/modernreader/clients/apple/Tests/ModernReaderUITests/ModernReaderUITests.swift"
+      ],
+      "tempsPath" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderUITests.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.ModernReaderWatch-arm64-apple-macosx26.0-debug.module" : {
+      "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderWatch.build/sources",
+      "importPath" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/kedewei/modernreader/clients/apple/Sources/ModernReaderWatch/ComplicationController.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/Modules/ModernReaderServices.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderWatch.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "ModernReaderWatch",
+      "moduleOutputPath" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/Modules/ModernReaderWatch.swiftmodule",
+      "objects" : [
+        "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderWatch.build/ComplicationController.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx14.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-Onone",
+        "-enable-testing",
+        "-j8",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderWatch.build/include/ModernReaderWatch-Swift.h",
+        "-swift-version",
+        "5",
+        "-Xfrontend",
+        "-experimental-lazy-typecheck",
+        "-Xfrontend",
+        "-experimental-skip-all-function-bodies",
+        "-Xfrontend",
+        "-experimental-allow-module-with-compiler-errors",
+        "-Xfrontend",
+        "-empty-abi-descriptor",
+        "-plugin-path",
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.0.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.0.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "apple"
+      ],
+      "outputFileMapPath" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderWatch.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/Modules/ModernReaderWatch.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : true,
+      "sources" : [
+        "/Users/kedewei/modernreader/clients/apple/Sources/ModernReaderWatch/ComplicationController.swift"
+      ],
+      "tempsPath" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderWatch.build",
+      "wholeModuleOptimization" : false
+    }
+  },
+  "swiftFrontendCommands" : {
+
+  },
+  "swiftTargetScanArgs" : {
+    "ModernReaderApplePackageTests" : [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "ModernReaderApplePackageTests",
+      "-package-name",
+      "apple",
+      "-c",
+      "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderApplePackageTests.derived/runner.swift",
+      "-I",
+      "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx14.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-Onone",
+      "-enable-testing",
+      "-Xfrontend",
+      "-enable-cross-import-overlays",
+      "-j8",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderApplePackageTests.build/include/ModernReaderApplePackageTests-Swift.h",
+      "-Xfrontend",
+      "-experimental-lazy-typecheck",
+      "-Xfrontend",
+      "-experimental-skip-all-function-bodies",
+      "-Xfrontend",
+      "-experimental-allow-module-with-compiler-errors",
+      "-Xfrontend",
+      "-empty-abi-descriptor",
+      "-plugin-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.0.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.0.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "apple",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ],
+    "ModernReaderServices" : [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "ModernReaderServices",
+      "-package-name",
+      "apple",
+      "-c",
+      "/Users/kedewei/modernreader/clients/apple/Sources/ModernReaderServices/APIClient.swift",
+      "/Users/kedewei/modernreader/clients/apple/Sources/ModernReaderServices/AuthStore.swift",
+      "/Users/kedewei/modernreader/clients/apple/Sources/ModernReaderServices/Models.swift",
+      "-I",
+      "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx14.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-Onone",
+      "-enable-testing",
+      "-j8",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderServices.build/include/ModernReaderServices-Swift.h",
+      "-swift-version",
+      "5",
+      "-Xfrontend",
+      "-experimental-lazy-typecheck",
+      "-Xfrontend",
+      "-experimental-skip-all-function-bodies",
+      "-Xfrontend",
+      "-experimental-allow-module-with-compiler-errors",
+      "-Xfrontend",
+      "-empty-abi-descriptor",
+      "-plugin-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.0.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.0.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "apple",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ],
+    "ModernReaderUI" : [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "ModernReaderUI",
+      "-package-name",
+      "apple",
+      "-c",
+      "/Users/kedewei/modernreader/clients/apple/Sources/ModernReaderUI/ContentView.swift",
+      "-I",
+      "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx14.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-Onone",
+      "-enable-testing",
+      "-j8",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderUI.build/include/ModernReaderUI-Swift.h",
+      "-swift-version",
+      "5",
+      "-Xfrontend",
+      "-experimental-lazy-typecheck",
+      "-Xfrontend",
+      "-experimental-skip-all-function-bodies",
+      "-Xfrontend",
+      "-experimental-allow-module-with-compiler-errors",
+      "-Xfrontend",
+      "-empty-abi-descriptor",
+      "-plugin-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.0.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.0.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "apple",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ],
+    "ModernReaderUITests" : [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "ModernReaderUITests",
+      "-package-name",
+      "apple",
+      "-c",
+      "/Users/kedewei/modernreader/clients/apple/Tests/ModernReaderUITests/ModernReaderUITests.swift",
+      "-I",
+      "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx14.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-Onone",
+      "-enable-testing",
+      "-Xfrontend",
+      "-enable-cross-import-overlays",
+      "-j8",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-swift-version",
+      "5",
+      "-Xfrontend",
+      "-experimental-lazy-typecheck",
+      "-Xfrontend",
+      "-experimental-skip-all-function-bodies",
+      "-Xfrontend",
+      "-experimental-allow-module-with-compiler-errors",
+      "-Xfrontend",
+      "-empty-abi-descriptor",
+      "-plugin-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.0.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.0.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "apple",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ],
+    "ModernReaderWatch" : [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "ModernReaderWatch",
+      "-package-name",
+      "apple",
+      "-c",
+      "/Users/kedewei/modernreader/clients/apple/Sources/ModernReaderWatch/ComplicationController.swift",
+      "-I",
+      "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx14.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-Onone",
+      "-enable-testing",
+      "-j8",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderWatch.build/include/ModernReaderWatch-Swift.h",
+      "-swift-version",
+      "5",
+      "-Xfrontend",
+      "-experimental-lazy-typecheck",
+      "-Xfrontend",
+      "-experimental-skip-all-function-bodies",
+      "-Xfrontend",
+      "-experimental-allow-module-with-compiler-errors",
+      "-Xfrontend",
+      "-empty-abi-descriptor",
+      "-plugin-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.0.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.0.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "apple",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ]
+  },
+  "targetDependencyMap" : {
+    "ModernReaderApplePackageTests" : [
+      "ModernReaderUITests",
+      "ModernReaderUI",
+      "ModernReaderServices"
+    ],
+    "ModernReaderServices" : [
+
+    ],
+    "ModernReaderUI" : [
+      "ModernReaderServices"
+    ],
+    "ModernReaderUITests" : [
+      "ModernReaderUI",
+      "ModernReaderServices"
+    ],
+    "ModernReaderWatch" : [
+      "ModernReaderServices"
+    ]
+  },
+  "testDiscoveryCommands" : {
+
+  },
+  "testEntryPointCommands" : {
+
+  },
+  "traitConfiguration" : {
+    "default" : {
+
+    }
+  },
+  "writeCommands" : {
+    "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderApplePackageTests.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderApplePackageTests.derived/runner.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderApplePackageTests.build/sources"
+    },
+    "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderServices.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/kedewei/modernreader/clients/apple/Sources/ModernReaderServices/APIClient.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/kedewei/modernreader/clients/apple/Sources/ModernReaderServices/AuthStore.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/kedewei/modernreader/clients/apple/Sources/ModernReaderServices/Models.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderServices.build/sources"
+    },
+    "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderUI.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/kedewei/modernreader/clients/apple/Sources/ModernReaderUI/ContentView.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderUI.build/sources"
+    },
+    "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderUITests.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/kedewei/modernreader/clients/apple/Tests/ModernReaderUITests/ModernReaderUITests.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderUITests.build/sources"
+    },
+    "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderWatch.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/kedewei/modernreader/clients/apple/Sources/ModernReaderWatch/ComplicationController.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderWatch.build/sources"
+    },
+    "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt" : {
+      "alwaysOutOfDate" : true,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<swift-get-version>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+        }
+      ],
+      "outputFilePath" : "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "": {
+    "swift-dependencies": "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderWatch.build/master.swiftdeps"
+  },
+  "/Users/kedewei/modernreader/clients/apple/Sources/ModernReaderWatch/ComplicationController.swift": {
+    "dependencies": "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderWatch.build/ComplicationController.d",
+    "object": "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderWatch.build/ComplicationController.swift.o",
+    "swiftmodule": "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderWatch.build/ComplicationController~partial.swiftmodule",
+    "swift-dependencies": "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderWatch.build/ComplicationController.swiftdeps",
+    "diagnostics": "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderWatch.build/ComplicationController.dia"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "": {
+    "swift-dependencies": "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderUITests.build/master.swiftdeps"
+  },
+  "/Users/kedewei/modernreader/clients/apple/Tests/ModernReaderUITests/ModernReaderUITests.swift": {
+    "dependencies": "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderUITests.build/ModernReaderUITests.d",
+    "object": "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderUITests.build/ModernReaderUITests.swift.o",
+    "swiftmodule": "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderUITests.build/ModernReaderUITests~partial.swiftmodule",
+    "swift-dependencies": "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderUITests.build/ModernReaderUITests.swiftdeps",
+    "diagnostics": "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderUITests.build/ModernReaderUITests.dia"
+  }
+}
