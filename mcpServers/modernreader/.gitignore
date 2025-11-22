@@ -1,0 +1,14 @@
+# dependencies
+node_modules/
+
+# misc
+.env
+.deployment
+.DS_Store
+
+# build
+lib/
+
+
+#Ignore vscode AI rules
+.github/instructions/codacy.instructions.md
