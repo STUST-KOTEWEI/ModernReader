@@ -3,6 +3,8 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
+  // Use relative base so build works when opened via file:// (offline demo)
+  base: './',
   server: {
     host: true, // allow access via custom local domain (e.g., modernreader.local)
     port: 5173,

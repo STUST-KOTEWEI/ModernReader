@@ -1,10 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authClient } from '../services/api';
 import { useI18n } from '../i18n/useI18n';
 import { LanguageSelect } from '../components/LanguageSelect';
 import { Button, Card } from '../design-system';
 import { useSessionStore } from '../state/session';
+import {
+  detectBot,
+  checkRateLimit,
+  createHoneypotField,
+  isHoneypotTriggered,
+  InteractionTracker,
+  validateFormTiming,
+  generateFingerprint,
+} from '../utils/antiBot';
 
 export const SignupPage: React.FC = () => {
   const navigate = useNavigate();
@@ -15,6 +24,29 @@ export const SignupPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [captchaQuestion, setCaptchaQuestion] = useState<{a:number;b:number}|null>(null);
+  const [captchaAnswer, setCaptchaAnswer] = useState<string>('');
+  const [captchaOk, setCaptchaOk] = useState<boolean>(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileSiteKey = (import.meta as any).env?.VITE_TURNSTILE_SITE_KEY as string | undefined;
+  const requireEmailVerification = String((import.meta as any).env?.VITE_REQUIRE_EMAIL_VERIFICATION ?? 'false').toLowerCase() === 'true';
+  const widgetRef = React.useRef<HTMLDivElement | null>(null);
+  
+  // Anti-bot state
+  const formLoadTime = useRef(Date.now());
+  const interactionTracker = useRef<InteractionTracker | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  
+  const isDemo = (() => {
+    try {
+      if (window.location.protocol === 'file:') return true;
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('demo')) return true;
+      return localStorage.getItem('mr_demo') === '1';
+    } catch { return false; }
+  })();
+  
+  const useTurnstile = !!turnstileSiteKey && !isDemo;
 
   // Detect if we're on localhost or production
   const isLocalhost =
@@ -45,15 +77,114 @@ export const SignupPage: React.FC = () => {
     }
   }, []);
 
+  useEffect(() => {
+    if (useTurnstile) {
+      const anyWindow = window as any;
+      const init = () => {
+        try {
+          if (widgetRef.current && anyWindow.turnstile) {
+            anyWindow.turnstile.render(widgetRef.current, {
+              sitekey: turnstileSiteKey,
+              callback: (t: string) => setTurnstileToken(t),
+              'error-callback': () => setTurnstileToken(null),
+              'timeout-callback': () => setTurnstileToken(null),
+            });
+          }
+        } catch {}
+      };
+      if (anyWindow.turnstile && anyWindow.turnstile.render) {
+        init();
+      } else {
+        const scriptId = 'cf-turnstile';
+        if (!document.getElementById(scriptId)) {
+          const s = document.createElement('script');
+          s.id = scriptId;
+          s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+          s.async = true;
+          s.defer = true;
+          s.onload = () => init();
+          document.head.appendChild(s);
+        } else {
+          setTimeout(init, 0);
+        }
+      }
+      return;
+    }
+    if (!isDemo) {
+      const a = Math.floor(3 + Math.random()*6);
+      const b = Math.floor(2 + Math.random()*7);
+      setCaptchaQuestion({a,b});
+      setCaptchaAnswer('');
+      setCaptchaOk(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
     
     try {
-      await authClient.signup({ email, password });
-      // Auto-login after signup for smoother onboarding
-      const login = await authClient.login({ email, password });
+      // === Multi-layer Bot Protection (without external service) ===
+      if (!isDemo) {
+        // 1. Rate limiting
+        const rateLimit = checkRateLimit('signup', 3, 10 * 60 * 1000); // 3 attempts per 10 minutes
+        if (!rateLimit.allowed) {
+          const waitMinutes = Math.ceil((rateLimit.resetTime - Date.now()) / 60000);
+          throw new Error(`註冊嘗試次數過多，請於 ${waitMinutes} 分鐘後再試`);
+        }
+        
+        // 2. Honeypot check
+        if (isHoneypotTriggered('signup-form')) {
+          console.warn('[Anti-bot] Honeypot triggered');
+          throw new Error('驗證失敗，請稍後再試');
+        }
+        
+        // 3. Bot detection
+        const botCheck = detectBot();
+        if (botCheck.isBot) {
+          console.warn('[Anti-bot] Bot detected:', botCheck.reasons);
+          throw new Error('偵測到異常行為，請使用正常瀏覽器註冊');
+        }
+        
+        // 4. Timing validation (form not submitted too quickly)
+        if (!validateFormTiming(formLoadTime.current, 3)) {
+          console.warn('[Anti-bot] Form submitted too quickly');
+          throw new Error('註冊速度過快，請仔細填寫表單');
+        }
+        
+        // 5. Interaction validation
+        if (interactionTracker.current && !interactionTracker.current.hasHumanInteraction()) {
+          console.warn('[Anti-bot] No human interaction detected');
+          throw new Error('請與頁面正常互動後再提交');
+        }
+        
+        // 6. Basic captcha or Turnstile
+        if (!useTurnstile) {
+          if (!captchaQuestion) throw new Error('驗證尚未就緒，請稍後再試');
+          const expected = captchaQuestion.a + captchaQuestion.b;
+          if (String(expected) !== String(captchaAnswer).trim()) {
+            throw new Error('請完成「我不是機器人」驗證');
+          }
+        } else if (!turnstileToken) {
+          throw new Error('請完成「我不是機器人」驗證');
+        }
+        
+        // 7. Generate browser fingerprint (for backend correlation if needed)
+        const fingerprint = generateFingerprint();
+        console.log('[Anti-bot] Browser fingerprint:', fingerprint);
+      }
+      
+      await authClient.signup({ email, password, captcha_token: turnstileToken || undefined });
+      if (requireEmailVerification && !isDemo) {
+        try { await authClient.sendVerificationEmail(email); } catch {}
+        alert('註冊成功，請前往信箱收取驗證信並完成驗證後再登入。');
+        navigate('/login');
+        return;
+      }
+      // Auto-login after signup for smoother onboarding (demo or when email verification not enforced)
+      const login = await authClient.login({ email, password, captcha_token: turnstileToken || undefined });
       if (login?.access_token) {
         setSession({ token: login.access_token, user: { email } });
         navigate('/');
@@ -61,7 +192,9 @@ export const SignupPage: React.FC = () => {
         navigate('/login');
       }
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Signup failed');
+      const detail = err.response?.data?.detail || err.message || 'Signup failed';
+      setError(detail);
+      console.error('Signup error:', err);
     } finally {
       setLoading(false);
     }
@@ -82,49 +215,137 @@ export const SignupPage: React.FC = () => {
           </div>
         )}
 
-        <form onSubmit={handleSignup} className="space-y-4">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium mb-1">{t('email')}</label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder={t('email')}
-              className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-indigo-500"
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium mb-1">{t('password')}</label>
-            <div className="relative">
-              <input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder={t('password')}
-                className="w-full px-3 py-2 pr-12 border rounded focus:ring-2 focus:ring-indigo-500"
-                required
-                minLength={6}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((s) => !s)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 hover:text-gray-700"
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-              >
-                {showPassword ? '隱藏' : '顯示'}
-              </button>
+        {isDemo && (
+          <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200">
+            <div className="flex items-start gap-3">
+              <span className="text-2xl">✨</span>
+              <div>
+                <h3 className="font-semibold text-emerald-800 mb-1">試用模式（免註冊）</h3>
+                <p className="text-sm text-emerald-700 mb-2">
+                  不需要真的註冊！直接回到登入頁點擊「立即開始試用」按鈕即可。
+                </p>
+                <button
+                  type="button"
+                  onClick={() => navigate('/login')}
+                  className="text-sm font-medium text-emerald-700 hover:text-emerald-900 underline"
+                >
+                  ← 回到登入頁（免註冊直接試用）
+                </button>
+              </div>
             </div>
-            <p className="mt-2 text-xs text-gray-500">至少 6 位字元</p>
           </div>
+        )}
 
-          <Button type="submit" className="w-full" disabled={loading || !email || password.length < 6}>
-            {loading ? t('loading') : t('signup')}
-          </Button>
+        <form ref={formRef} onSubmit={handleSignup} className="space-y-4">
+          {!isDemo && (
+            <>
+              <div className="p-3 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 text-sm">
+                <div className="flex items-center gap-2 mb-1">
+                  <span>🔒</span>
+                  <span className="font-semibold">線上版註冊</span>
+                </div>
+                <p className="text-xs">請填寫有效 Email、設定密碼並通過人機驗證。</p>
+                <button
+                  type="button"
+                  className="mt-2 text-xs font-medium text-blue-600 hover:text-blue-800 underline"
+                  onClick={() => { 
+                    try { 
+                      localStorage.setItem('mr_demo', '1');
+                      localStorage.setItem('mr_demo_forced', '1');
+                    } catch {}
+                    navigate('/login');
+                  }}
+                >
+                  ← 改用試用模式（免註冊免登入）
+                </button>
+              </div>
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium mb-1">{t('email')}</label>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder={t('email')}
+                  autoComplete="email"
+                  className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-indigo-500 bg-white text-gray-900 placeholder-gray-400"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium mb-1">{t('password')}</label>
+                <div className="relative">
+                  <input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder={t('password')}
+                    autoComplete="new-password"
+                    className="w-full px-3 py-2 pr-12 border rounded focus:ring-2 focus:ring-indigo-500 bg-white text-gray-900 placeholder-gray-400"
+                    required
+                    minLength={6}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((s) => !s)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 hover:text-gray-700"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? '隱藏' : '顯示'}
+                  </button>
+                </div>
+                <p className="mt-2 text-xs text-gray-500">至少 6 位字元</p>
+              </div>
+
+              {!useTurnstile && (
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">我不是機器人</label>
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-1 rounded bg-gray-100 border text-sm">
+                      {(captchaQuestion?.a ?? '?')} + {(captchaQuestion?.b ?? '?')} =
+                    </span>
+                    <input
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      value={captchaAnswer}
+                      onChange={(e) => { setCaptchaAnswer(e.target.value); const ok = Number(e.target.value) === ((captchaQuestion?.a||0)+(captchaQuestion?.b||0)); setCaptchaOk(ok); }}
+                      className="w-24 px-3 py-2 border rounded"
+                      placeholder="答案"
+                      aria-label="anti-bot answer"
+                      required
+                    />
+                    {captchaOk && <span className="text-emerald-600 text-sm">✓</span>}
+                  </div>
+                </div>
+              )}
+
+              {useTurnstile && (
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">我不是機器人</label>
+                  <div ref={widgetRef} className="cf-turnstile" data-sitekey={turnstileSiteKey}></div>
+                </div>
+              )}              <Button type="submit" className="w-full" disabled={loading || !email || password.length < 6 || (!isDemo && !useTurnstile && !captchaOk) || (useTurnstile && !turnstileToken)}>
+                {loading ? t('loading') : t('signup')}
+              </Button>
+            </>
+          )}
         </form>
+
+        <div className="mt-3 text-xs text-gray-500">
+          {isDemo ? (
+            <button
+              className="underline"
+              onClick={() => { try { localStorage.removeItem('mr_demo'); localStorage.removeItem('mr_demo_forced'); localStorage.setItem('mr_online_requested', '1'); } catch {}; window.location.reload(); }}
+            >切換到線上版</button>
+          ) : (
+            <button
+              className="underline"
+              onClick={() => { try { localStorage.setItem('mr_demo','1'); } catch {}; window.location.reload(); }}
+            >改用試用模式</button>
+          )}
+        </div>
 
         {enableOAuth && (
           <>

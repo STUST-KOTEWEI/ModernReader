@@ -6,6 +6,7 @@ from app.models.recommendation import RecommendationEvent
 from app.models.session import ReadingSession, SessionEvent
 from app.models.user import User, UserRole
 from app.models.epaper import EPaperJob, EPaperCard
+from app.models.prototype import PrototypeInterest
 
 __all__ = [
     "Base",
@@ -19,4 +20,5 @@ __all__ = [
     "UserRole",
     "EPaperJob",
     "EPaperCard",
+    "PrototypeInterest",
 ]

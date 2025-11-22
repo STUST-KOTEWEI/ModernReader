@@ -1,13 +1,18 @@
-"""
-AI 相關的 API 路由（LLM + RAG）
-"""
-from fastapi import APIRouter, Depends, HTTPException
+"""AI 相關的 API 路由（LLM + RAG + 多模態）"""
+from __future__ import annotations
+
+import base64
+import binascii
+import logging
 from typing import Any
+
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
 from app.services.ai_engine import get_ai_engine, MultimodalInput
 from app.services.rag import RAGService
+from app.services.speech import get_speech_service
 from app.schemas.rag import (
     RAGIngestRequest,
     RAGIngestResponse,
@@ -16,10 +21,60 @@ from app.schemas.rag import (
 )
 from pydantic import BaseModel, Field
 
+from app.core.llm_config import LLMProvider
+
+logger = logging.getLogger(__name__)
+
+PROVIDER_LABELS: dict[LLMProvider, str] = {
+    LLMProvider.OPENAI: "OpenAI (GPT-4o)",
+    LLMProvider.ANTHROPIC: "Anthropic (Claude)",
+    LLMProvider.GOOGLE: "Google Gemini",
+    LLMProvider.GPT_OSS: "GPT-OSS / 自架模型",
+}
+
+
 router = APIRouter()
 
 
 # ===== LLM 相關端點 =====
+
+
+def _decode_base64_payload(data: str) -> bytes:
+    """Decode base64 data, allowing optional data URI prefix."""
+    payload = data
+    if "," in payload:
+        payload = payload.split(",", 1)[1]
+    try:
+        return base64.b64decode(payload, validate=True)
+    except binascii.Error as exc:  # pragma: no cover - input validation
+        raise HTTPException(
+            status_code=400, detail=f"Invalid base64 payload: {exc}"
+        ) from exc
+
+
+def _parse_provider(value: str) -> LLMProvider:
+    try:
+        return LLMProvider(value)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=400, detail=f"Unsupported provider '{value}'"
+        ) from exc
+
+
+def _build_priority(
+    provider: str | None, provider_priority: list[str] | None
+) -> list[LLMProvider] | None:
+    overrides: list[LLMProvider] = []
+    if provider:
+        overrides.append(_parse_provider(provider))
+    if provider_priority:
+        for item in provider_priority:
+            if not item:
+                continue
+            enum = _parse_provider(item)
+            if enum not in overrides:
+                overrides.append(enum)
+    return overrides or None
 
 
 class UnderstandRequest(BaseModel):
@@ -29,6 +84,25 @@ class UnderstandRequest(BaseModel):
         None, description="輸入文本", max_length=10000
     )
     image_url: str | None = Field(None, description="圖片 URL（可選）")
+    image_base64: str | None = Field(
+        None, description="Base64 圖片內容（data URI 亦可）"
+    )
+    image_mime_type: str | None = Field(
+        None, description="圖片 MIME 類型，如 image/png"
+    )
+    audio_base64: str | None = Field(
+        None, description="Base64 語音內容"
+    )
+    audio_mime_type: str | None = Field(
+        None, description="語音 MIME 類型，如 audio/webm"
+    )
+    provider: str | None = Field(
+        None, description="指定 LLM provider（例如 openai、anthropic、gpt_oss）"
+    )
+    provider_priority: list[str] | None = Field(
+        default=None,
+        description="自訂 provider 嘗試順序（例如 ['openai','gpt_oss']）",
+    )
     context: dict[str, Any] | None = Field(None, description="額外上下文")
 
 
@@ -50,12 +124,53 @@ class AdaptiveContentRequest(BaseModel):
     cultural_context: dict[str, Any] | None = Field(
         None, description="文化上下文（語言、背景等）"
     )
+    provider: str | None = Field(
+        None, description="指定 LLM provider"
+    )
+    provider_priority: list[str] | None = Field(
+        default=None, description="自訂 provider 嘗試順序"
+    )
 
 
 class AdaptiveContentResponse(BaseModel):
     """認知負荷自適應內容生成回應"""
 
     content: str = Field(description="生成的內容")
+
+
+class TranscribeRequest(BaseModel):
+    """語音轉文字請求"""
+
+    audio_base64: str = Field(..., description="Base64 語音內容")
+    mime_type: str | None = Field(
+        "audio/wav", description="語音 MIME 類型"
+    )
+    prompt: str | None = Field(
+        None, description="可選的轉寫提示，提高準確度"
+    )
+
+
+class TranscribeResponse(BaseModel):
+    """語音轉文字回應"""
+
+    text: str = Field(description="轉寫後的文字")
+
+
+class ProviderInfo(BaseModel):
+    """LLM provider state."""
+
+    id: str = Field(description="Provider ID，例如 openai")
+    label: str = Field(description="易讀名稱")
+    available: bool = Field(description="是否已設定並可用")
+    default_model: str | None = Field(
+        default=None, description="預設文字模型"
+    )
+    supports_vision: bool = Field(
+        description="是否支援圖片/多模態理解"
+    )
+    supports_transcription: bool = Field(
+        description="是否支援語音轉文字"
+    )
 
 
 # ===== Emotion Detection（Text-based） =====
@@ -88,14 +203,63 @@ async def understand_content(request: UnderstandRequest):
     """
     engine = get_ai_engine()
 
+    system_prompt = (
+        request.context.get("system_prompt")
+        if isinstance(request.context, dict)
+        else None
+    )
+    context = dict(request.context or {})
+
+    priority_override = _build_priority(
+        request.provider, request.provider_priority
+    )
+    if priority_override:
+        configured = list(priority_override)
+        for provider in engine.config.provider_priority:
+            if provider not in configured:
+                configured.append(provider)
+        priority_override = configured
+
+    image_bytes = None
+    if request.image_base64:
+        image_bytes = _decode_base64_payload(request.image_base64)
+        context.setdefault("media", {})["image_mime_type"] = (
+            request.image_mime_type or "image/jpeg"
+        )
+
+    audio_transcript = None
+    if request.audio_base64:
+        audio_bytes = _decode_base64_payload(request.audio_base64)
+        try:
+            speech_service = get_speech_service()
+            audio_transcript = await speech_service.transcribe(
+                audio_bytes,
+                mime_type=request.audio_mime_type,
+            )
+            context.setdefault("media", {})["audio_transcript"] = (
+                audio_transcript
+            )
+        except RuntimeError as err:
+            logger.warning("Audio transcription unavailable: %s", err)
+        except Exception as err:  # pragma: no cover - provider error
+            logger.error("Audio transcription failed: %s", err)
+
+    text_payload = request.text or ""
+    if audio_transcript:
+        text_payload = (
+            f"{text_payload}\n\n{audio_transcript}" if text_payload else audio_transcript
+        )
+
     try:
-        # 現階段 MultimodalInput 僅支援 image bytes；
-        # 若提供 image_url，可由前端或後端擴充下載後再傳入。
         result = await engine.understand(
             MultimodalInput(
-                text=request.text,
-                context=request.context,
-            )
+                text=text_payload or None,
+                image=image_bytes,
+                image_mime_type=request.image_mime_type,
+                context=context or None,
+            ),
+            system_prompt=system_prompt,
+            provider_priority=priority_override,
         )
         return UnderstandResponse(
             content=result.content,
@@ -119,14 +283,45 @@ async def generate_adaptive(request: AdaptiveContentRequest):
     engine = get_ai_engine()
 
     try:
+        priority_override = _build_priority(
+            request.provider, request.provider_priority
+        )
+        if priority_override:
+            configured = list(priority_override)
+            for provider in engine.config.provider_priority:
+                if provider not in configured:
+                    configured.append(provider)
+            priority_override = configured
+
         content = await engine.generate_adaptive_content(
             prompt=request.prompt,
             cognitive_load=request.cognitive_load,
             cultural_context=request.cultural_context,
+            provider_priority=priority_override,
         )
         return AdaptiveContentResponse(content=content)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/transcribe", response_model=TranscribeResponse)
+async def transcribe_audio(request: TranscribeRequest) -> TranscribeResponse:
+    """語音轉文字服務。"""
+
+    audio_bytes = _decode_base64_payload(request.audio_base64)
+
+    try:
+        service = get_speech_service()
+        text = await service.transcribe(
+            audio_bytes,
+            mime_type=request.mime_type,
+            prompt=request.prompt,
+        )
+        return TranscribeResponse(text=text)
+    except RuntimeError as err:
+        raise HTTPException(status_code=503, detail=str(err)) from err
+    except Exception as err:  # pragma: no cover - provider errors
+        raise HTTPException(status_code=500, detail=str(err)) from err
 
 
 @router.post("/emotion/analyze", response_model=EmotionAnalyzeResponse)
@@ -199,3 +394,44 @@ async def health_check():
         "ai_engine": "operational",
         "rag_system": "operational",
     }
+
+
+@router.get("/providers", response_model=list[ProviderInfo])
+async def list_providers() -> list[ProviderInfo]:
+    """列出所有已配置的 LLM provider 狀態。"""
+    engine = get_ai_engine()
+    config = engine.config
+    infos: list[ProviderInfo] = []
+
+    for provider in LLMProvider:
+        available = provider in engine.clients
+        if provider == LLMProvider.OPENAI:
+            default_model = config.default_text_model
+            supports_vision = True
+            supports_transcription = bool(config.openai_api_key)
+        elif provider == LLMProvider.GOOGLE:
+            default_model = "gemini-2.0-flash-exp"
+            supports_vision = True
+            supports_transcription = False
+        elif provider == LLMProvider.ANTHROPIC:
+            default_model = "claude-3-5-sonnet-20241022"
+            supports_vision = False
+            supports_transcription = False
+        else:  # GPT_OSS
+            default_model = config.oss_text_model or config.default_text_model
+            supports_vision = bool(config.oss_vision_model)
+            supports_transcription = bool(
+                config.oss_transcribe_model or config.oss_text_model
+            )
+
+        infos.append(
+            ProviderInfo(
+                id=provider.value,
+                label=PROVIDER_LABELS.get(provider, provider.value),
+                available=available,
+                default_model=default_model,
+                supports_vision=supports_vision,
+                supports_transcription=supports_transcription,
+            )
+        )
+    return infos

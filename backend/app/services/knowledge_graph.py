@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import logging
-import builtins
 from dataclasses import dataclass
 from typing import Any
 
@@ -328,12 +327,15 @@ class KnowledgeGraph:
         }
 
     def _average_degree(self) -> float:
-        """Compute average degree without relying on built-in sum (avoids shadowing)."""
+        """
+        Compute average degree without relying on built-in sum
+        (avoids shadowing).
+        """
         n = self.graph.number_of_nodes()
         if n == 0:
             return 0.0
         total = 0
-        for v in dict(self.graph.degree()).values():
+        for _, v in self.graph.degree():
             total += int(v)
         return total / n
 

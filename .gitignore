@@ -148,3 +148,10 @@ ops/deployment/secrets/
 .local/
 local/
 scratch/
+
+# Apple client build artifacts
+clients/apple/.build/
+
+
+#Ignore vscode AI rules
+.github/instructions/codacy.instructions.md

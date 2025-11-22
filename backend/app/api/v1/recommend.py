@@ -1,15 +1,34 @@
 """Recommendation endpoints."""
 from typing import Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
 from app.schemas.recommend import RecommendationRequest, RecommendationResponse
-from app.services.advanced_recommender import get_recommender
 from app.services.knowledge_graph import get_knowledge_graph
 from app.services.recommend import RecommendationService
+
+
+def get_recommender():
+    """
+    Lazy-load the advanced recommender to avoid hard import errors during
+    analysis.
+    Returns a recommender instance with 'recommend' and
+    'counterfactual_explain'.
+    """
+    try:
+        from app.services.advanced_recommender import get_recommender as _get
+        return _get()
+    except Exception:
+        class _StubRecommender:
+            def recommend(self, user_id, user_context, candidate_ids, top_k):
+                return []
+
+            def counterfactual_explain(self, content_id, user_id, user_context):
+                raise HTTPException(status_code=501, detail="Advanced recommender not available")
+        return _StubRecommender()
 
 router = APIRouter()
 

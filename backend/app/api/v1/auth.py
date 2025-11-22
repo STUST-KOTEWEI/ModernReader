@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from urllib.parse import urlencode
 import json
 import urllib.request
+from pydantic import BaseModel, EmailStr
 
 from app.schemas.auth import AuthResponse, LoginRequest, SignupRequest
 from app.services.auth import AuthService
@@ -33,6 +34,39 @@ async def login(
     service: AuthService = Depends(get_auth_service),
 ) -> AuthResponse:
     return await service.login(request)
+
+
+class EmailRequest(BaseModel):
+    email: EmailStr
+
+
+@router.post("/email/send-verification")
+async def send_verification(
+    req: EmailRequest,
+    service: AuthService = Depends(get_auth_service),
+):
+    ev = await service.create_email_verification(req.email)
+    # Build a verification URL; prefer frontend route
+    frontend_url = settings.FRONTEND_REDIRECT_URL or "/verify-email"
+    if frontend_url.startswith("/"):
+        # relative path; the frontend will handle token via query
+        verify_url = f"{frontend_url}?token={ev.token}"
+    else:
+        verify_url = (
+            f"{frontend_url.rstrip('/')}/verify-email?token={ev.token}"
+        )
+    # For now, log the URL (SMTP optional)
+    print(f"[EmailVerification] Send to {req.email}: {verify_url}")
+    return {"status": "ok"}
+
+
+@router.get("/email/verify")
+async def verify_email(
+    token: str,
+    service: AuthService = Depends(get_auth_service),
+):
+    email = await service.verify_email_token(token)
+    return {"status": "verified", "email": email}
 
 
 # ===== OAuth (stubs) =====

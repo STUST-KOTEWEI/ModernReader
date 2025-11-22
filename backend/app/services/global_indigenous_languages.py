@@ -373,6 +373,7 @@ class ChatbotResponse:
     pronunciation_guide: Optional[str]
     related_phrases: list[str]
     source: str  # llm, rule-based, hybrid
+    media_context: Optional[dict[str, Any]] = None
 
 
 class GlobalIndigenousLanguageEngine:
@@ -510,6 +511,7 @@ class GlobalIndigenousLanguageEngine:
         context: Optional[list[dict]] = None,
         include_translation: bool = True,
         include_cultural_notes: bool = True,
+        media_context: Optional[dict[str, Any]] = None,
     ) -> ChatbotResponse:
         """
         Chat with indigenous language LLM chatbot.
@@ -552,8 +554,28 @@ class GlobalIndigenousLanguageEngine:
                 language_code, mock_responses["mi"]
             )
 
+            base_message = response_set["greeting"]
+            extras: list[str] = []
+            if media_context and media_context.get("audio_transcript"):
+                extras.append(
+                    "收到你的語音訊息，我已根據轉寫內容提供回覆。"
+                )
+            if media_context and media_context.get("preferred_provider"):
+                extras.append(
+                    f"此次回覆使用 {media_context['preferred_provider']} 模型。"
+                )
+            if media_context and media_context.get("image_summary"):
+                extras.append(
+                    f"也看到了你分享的圖片，重點如下：{media_context['image_summary']}"
+                )
+            full_message = (
+                f"{base_message}\n\n{' '.join(extras)}"
+                if extras
+                else base_message
+            )
+
             return ChatbotResponse(
-                message=response_set["greeting"],
+                message=full_message,
                 language=language_code,
                 confidence=0.94,
                 cultural_context=response_set["cultural"] if include_cultural_notes else None,
@@ -565,6 +587,7 @@ class GlobalIndigenousLanguageEngine:
                     "See you later",
                 ],
                 source="fine-tuned-llm",
+                media_context=media_context,
             )
 
         # TODO: Implement actual LLM chat

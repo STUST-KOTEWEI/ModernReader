@@ -9,7 +9,15 @@ from app.db.database import engine
 from app.models.base import Base
 
 # 導入所有模型以確保它們被註冊到 Base.metadata
-from app.models import catalog, consent, epaper, recommendation, session, user  # noqa: F401
+from app.models import (  # noqa: F401
+    catalog,
+    consent,
+    epaper,
+    recommendation,
+    session,
+    user,
+    email_verification,
+)
 
 
 def main():

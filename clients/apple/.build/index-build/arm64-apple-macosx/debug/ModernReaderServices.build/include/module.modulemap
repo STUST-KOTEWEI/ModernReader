@@ -1,3 +1,0 @@
-module ModernReaderServices {
-    header "/Users/kedewei/modernreader/clients/apple/.build/index-build/arm64-apple-macosx/debug/ModernReaderServices.build/include/ModernReaderServices-Swift.h"
-}

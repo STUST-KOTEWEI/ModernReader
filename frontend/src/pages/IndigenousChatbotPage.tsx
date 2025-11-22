@@ -22,8 +22,11 @@ import {
   CheckCircle,
   Loader,
   Settings,
+  Image as ImageIcon,
+  Square,
+  XCircle,
 } from 'lucide-react';
-import { indigenousChatClient } from '../services/api';
+import { aiClient, indigenousChatClient } from '../services/api';
 
 interface ChatMessage {
   id: string;
@@ -34,6 +37,15 @@ interface ChatMessage {
   culturalContext?: string;
   relatedPhrases?: string[];
   timestamp: string;
+  attachments?: {
+    imagePreview?: string;
+    audioTranscript?: string;
+  };
+  mediaContext?: {
+    imageSummary?: string;
+    audioTranscript?: string;
+    preferred_provider?: string;
+  };
 }
 
 interface LanguageOption {
@@ -47,6 +59,20 @@ interface LanguageOption {
 
 export default function IndigenousChatbotPage() {
   const { t } = useI18n();
+  const uiLang = useI18n((s) => s.language);
+  const localName = (code: string, fallback: string) => {
+    const zh: Record<string,string> = {
+      ami: '阿美語', pwn: '排灣語', trv: '太魯閣語', tay: '泰雅語', bnn: '布農語', pyu: '卑南語',
+      dru: '魯凱語', tsu: '鄒語', xsy: '賽夏語', tao: '達悟語（雅美語）', ssf: '邵語', ckv: '噶瑪蘭語'
+    };
+    const ja: Record<string,string> = {
+      ami: 'アミ語', pwn: 'パイワン語', trv: 'タロコ語', tay: 'タイヤル語', bnn: 'ブヌン語', pyu: 'プユマ語',
+      dru: 'ルカイ語', tsu: 'ツォウ語', xsy: 'サイシャット語', tao: 'ヤミ（タオ）語', ssf: 'サオ語', ckv: 'カバラン語'
+    };
+    if (uiLang === 'zh') return zh[code] || fallback;
+    if (uiLang === 'ja') return ja[code] || fallback;
+    return fallback;
+  };
 
   // State
   const [selectedLanguage, setSelectedLanguage] = useState<string>('mi');
@@ -54,21 +80,71 @@ export default function IndigenousChatbotPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [errorText, setErrorText] = useState<string>('');
   const [sessionId, setSessionId] = useState<string>('');
   const [showTranslation, setShowTranslation] = useState(true);
   const [showCulturalNotes, setShowCulturalNotes] = useState(true);
   const [showPronunciation, setShowPronunciation] = useState(true);
   const [isRecording, setIsRecording] = useState(false);
   const [statistics, setStatistics] = useState<any>(null);
+  const [showSettings, setShowSettings] = useState(false);
+  const [imageAttachment, setImageAttachment] = useState<{
+    base64: string;
+    dataUrl: string;
+    mime: string;
+  } | null>(null);
+  const [audioAttachment, setAudioAttachment] = useState<{
+    base64: string;
+    mime: string;
+    transcript?: string;
+  } | null>(null);
+  const [audioUploading, setAudioUploading] = useState(false);
+  const [llmProvider, setLlmProvider] = useState<string>('auto');
+  const [availableProviders, setAvailableProviders] = useState<Array<{ id: string; label: string }>>([]);
 
   // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   // Load languages on mount
   useEffect(() => {
     loadLanguages();
     loadStatistics();
+    (async () => {
+      try {
+        const providers = await aiClient.listProviders();
+        const usable = providers
+          .filter((p) => p.available)
+          .map((p) => ({ id: p.id, label: p.label }));
+        setAvailableProviders(usable);
+      } catch (error) {
+        console.warn('Failed to load providers', error);
+      }
+      if (typeof window !== 'undefined') {
+        try {
+          const saved = localStorage.getItem('mr_llm_provider');
+          if (saved) {
+            setLlmProvider(saved);
+          }
+        } catch {}
+      }
+    })();
+    if (typeof window === 'undefined') {
+      return () => {};
+    }
+
+    const syncFromStorage = (event: StorageEvent) => {
+      if (event.key === 'mr_llm_provider' && event.newValue) {
+        setLlmProvider(event.newValue);
+      }
+    };
+    window.addEventListener('storage', syncFromStorage);
+    return () => {
+      window.removeEventListener('storage', syncFromStorage);
+    };
   }, []);
 
   // Auto-scroll to bottom when new message
@@ -80,7 +156,16 @@ export default function IndigenousChatbotPage() {
   const loadLanguages = async () => {
     try {
       const response = await indigenousChatClient.listLanguages();
-      setLanguages(response.languages);
+      // response.languages may be string codes or objects; normalize and localize
+      const list = (response.languages || []).map((it: any) => {
+        if (typeof it === 'string') {
+          const code = it.toLowerCase();
+          return { code, name: localName(code, code.toUpperCase()), nativeName: code.toUpperCase(), region: '', speakers: 0, endangerment: 'unknown' };
+        }
+        const code = (it.code || '').toLowerCase();
+        return { ...it, code, name: localName(code, it.name || code.toUpperCase()) };
+      });
+      setLanguages(list);
     } catch (error) {
       console.error('Failed to load languages:', error);
     }
@@ -98,13 +183,28 @@ export default function IndigenousChatbotPage() {
 
   // Send message
   const sendMessage = async () => {
-    if (!inputMessage.trim() || isLoading) return;
+    if (isLoading || audioUploading) return;
+
+    const trimmed = inputMessage.trim();
+    const audioText = audioAttachment?.transcript?.trim() || '';
+    const voicePlaceholder = audioAttachment ? '[voice]' : '';
+    const imagePlaceholder = imageAttachment ? '[image]' : '';
+    const outgoingText = trimmed || audioText || imagePlaceholder || voicePlaceholder;
+
+    if (!outgoingText) {
+      setErrorText(t('typeMessagePlaceholder'));
+      return;
+    }
 
     const userMessage: ChatMessage = {
       id: `msg-${Date.now()}`,
       role: 'user',
-      message: inputMessage,
+      message: outgoingText,
       timestamp: new Date().toISOString(),
+      attachments: {
+        imagePreview: imageAttachment?.dataUrl,
+        audioTranscript: audioAttachment?.transcript,
+      },
     };
 
     setMessages((prev) => [...prev, userMessage]);
@@ -112,13 +212,19 @@ export default function IndigenousChatbotPage() {
     setIsLoading(true);
 
     try {
+      setErrorText('');
       const response = await indigenousChatClient.chat({
-        message: inputMessage,
+        message: outgoingText,
         language_code: selectedLanguage,
         session_id: sessionId || undefined,
         include_translation: showTranslation,
         include_cultural_notes: showCulturalNotes,
         include_pronunciation: showPronunciation,
+        image_base64: imageAttachment?.base64,
+        image_mime_type: imageAttachment?.mime,
+        audio_base64: audioAttachment?.base64,
+        audio_mime_type: audioAttachment?.mime,
+        provider: llmProvider !== 'auto' ? llmProvider : undefined,
       });
 
       // Update session ID
@@ -135,12 +241,17 @@ export default function IndigenousChatbotPage() {
         culturalContext: response.cultural_context || undefined,
         relatedPhrases: response.related_phrases || [],
         timestamp: response.timestamp,
+        mediaContext: response.media_context || undefined,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
-    } catch (error) {
+      setImageAttachment(null);
+      setAudioAttachment(null);
+    } catch (error: any) {
       console.error('Failed to send message:', error);
-      alert('Failed to send message. Please try again.');
+      // Show inline, localized error instead of blocking alert
+      const detail = error?.response?.data?.detail || '';
+      setErrorText(`${t('failedToSendMessage')}${detail ? ` — ${detail}` : ''}`);
     } finally {
       setIsLoading(false);
       inputRef.current?.focus();
@@ -155,14 +266,88 @@ export default function IndigenousChatbotPage() {
     }
   };
 
-  // Voice recording (mock)
-  const startRecording = () => {
-    setIsRecording(true);
-    // TODO: Implement actual voice recording
-    setTimeout(() => {
+  // Voice recording & transcription
+  const startRecording = async () => {
+    if (isRecording) {
+      stopRecording();
+      return;
+    }
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setErrorText('Voice recording is not supported in this browser.');
+      return;
+    }
+
+    try {
+      setErrorText('');
+      setAudioAttachment(null);
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      audioChunksRef.current = [];
+
+      recorder.ondataavailable = (event) => {
+        if (event.data && event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      recorder.onstop = async () => {
+        stream.getTracks().forEach((track) => track.stop());
+        const blob = new Blob(audioChunksRef.current, { type: recorder.mimeType });
+        if (!blob.size) {
+          setIsRecording(false);
+          mediaRecorderRef.current = null;
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          const result = reader.result as string | null;
+          if (!result) {
+            setIsRecording(false);
+            return;
+          }
+          const [prefix, base64] = result.split(',', 2);
+          const mimeMatch = prefix.match(/data:(.*?);base64/);
+          const mime = mimeMatch?.[1] || recorder.mimeType || 'audio/webm';
+
+          setAudioAttachment({ base64, mime });
+          setAudioUploading(true);
+          try {
+            const response = await aiClient.transcribeAudio({
+              audio_base64: base64,
+              mime_type: mime,
+              prompt: 'Transcribe user voice message for indigenous language learning.',
+            });
+            setAudioAttachment({ base64, mime, transcript: response.text });
+            setInputMessage((prev) => prev || response.text);
+          } catch (error) {
+            console.error('Failed to transcribe audio', error);
+            setErrorText(t('failedToSendMessage'));
+          } finally {
+            setAudioUploading(false);
+          }
+        };
+
+        reader.readAsDataURL(blob);
+        setIsRecording(false);
+        mediaRecorderRef.current = null;
+      };
+
+      recorder.start();
+      mediaRecorderRef.current = recorder;
+      setIsRecording(true);
+    } catch (error) {
+      console.error('Unable to access microphone', error);
+      setErrorText('Unable to access microphone. Please check permissions.');
       setIsRecording(false);
-      setInputMessage(t('helloSample'));
-    }, 2000);
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+    }
   };
 
   // Text-to-speech (mock)
@@ -173,6 +358,33 @@ export default function IndigenousChatbotPage() {
       window.speechSynthesis.speak(utterance);
     }
   };
+
+  const triggerImagePicker = () => {
+    setErrorText('');
+    fileInputRef.current?.click();
+  };
+
+  const handleImageSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const result = reader.result as string | null;
+      if (!result) return;
+      const [prefix, base64] = result.split(',', 2);
+      const mimeMatch = prefix.match(/data:(.*?);base64/);
+      const mime = mimeMatch?.[1] || file.type || 'image/png';
+      setImageAttachment({ base64, dataUrl: result, mime });
+    };
+    reader.readAsDataURL(file);
+
+    // reset input value for subsequent selections of the same file
+    event.target.value = '';
+  };
+
+  const removeImageAttachment = () => setImageAttachment(null);
+  const removeAudioAttachment = () => setAudioAttachment(null);
 
   // Get endangerment badge color
   const getEndangermentColor = (status: string) => {
@@ -212,10 +424,18 @@ export default function IndigenousChatbotPage() {
 
           {/* Language Selector */}
           <div className="flex items-center gap-4">
+            {/* Current language badge */}
+            {selectedLangInfo && (
+              <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-700 border border-gray-200" title={t('currentLanguage')}>
+                {selectedLangInfo.name} ({selectedLanguage.toUpperCase()})
+              </span>
+            )}
             <select
               value={selectedLanguage}
               onChange={(e) => setSelectedLanguage(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              aria-label={t('selectLanguage')}
+              title={t('selectLanguage')}
             >
               {languages.map((lang) => (
                 <option key={lang.code} value={lang.code}>
@@ -228,6 +448,7 @@ export default function IndigenousChatbotPage() {
             <button
               className="p-2 hover:bg-gray-100 rounded-lg"
               title={t('settings')}
+              onClick={() => setShowSettings(true)}
             >
               <Settings className="w-5 h-5 text-gray-600" />
             </button>
@@ -307,12 +528,26 @@ export default function IndigenousChatbotPage() {
                     <button
                       onClick={() => speakMessage(msg.message)}
                       className="p-1 hover:bg-gray-100 rounded"
-                      title="Speak"
+                      title={t('speak')}
                     >
                       <Volume2 className="w-4 h-4 text-gray-600" />
                     </button>
                   )}
                 </div>
+
+                {msg.attachments?.imagePreview && (
+                  <img
+                    src={msg.attachments.imagePreview}
+                    alt="Attached context"
+                    className="mt-3 rounded-lg max-h-56 object-cover border border-white/20"
+                  />
+                )}
+
+                {msg.attachments?.audioTranscript && (
+                  <div className="mt-2 text-xs italic text-blue-100">
+                    {msg.attachments.audioTranscript}
+                  </div>
+                )}
 
                 {/* Translation */}
                 {msg.translation && (
@@ -346,7 +581,7 @@ export default function IndigenousChatbotPage() {
                 {/* Related Phrases */}
                 {msg.relatedPhrases && msg.relatedPhrases.length > 0 && (
                   <div className="mt-2 pt-2 border-t border-gray-200">
-                    <p className="text-xs text-gray-600 mb-2">Related phrases:</p>
+                    <p className="text-xs text-gray-600 mb-2">{t('relatedPhrases')}:</p>
                     <div className="flex flex-wrap gap-2">
                       {msg.relatedPhrases.map((phrase, idx) => (
                         <span
@@ -357,6 +592,27 @@ export default function IndigenousChatbotPage() {
                         </span>
                       ))}
                     </div>
+                  </div>
+                )}
+
+                {msg.mediaContext?.imageSummary && (
+                  <div className="mt-2 pt-2 border-t border-gray-200">
+                    <p className="text-xs text-gray-600 mb-1">Image insight:</p>
+                    <p className="text-sm text-gray-700">{msg.mediaContext.imageSummary}</p>
+                  </div>
+                )}
+
+                {msg.mediaContext?.audioTranscript && (
+                  <div className="mt-2 pt-2 border-t border-gray-200">
+                    <p className="text-xs text-gray-600 mb-1">Voice transcript:</p>
+                    <p className="text-sm text-gray-700 whitespace-pre-wrap">{msg.mediaContext.audioTranscript}</p>
+                  </div>
+                )}
+
+                {msg.mediaContext?.preferred_provider && (
+                  <div className="mt-2 pt-2 border-t border-gray-200">
+                    <p className="text-xs text-gray-600 mb-1">LLM Provider:</p>
+                    <p className="text-sm text-gray-700">{msg.mediaContext.preferred_provider}</p>
                   </div>
                 )}
 
@@ -382,7 +638,7 @@ export default function IndigenousChatbotPage() {
               onChange={(e) => setShowTranslation(e.target.checked)}
               className="rounded border-gray-300"
             />
-            Translation
+            {t('showTranslation')}
           </label>
           <label className="flex items-center gap-2 text-sm text-gray-700">
             <input
@@ -391,7 +647,7 @@ export default function IndigenousChatbotPage() {
               onChange={(e) => setShowPronunciation(e.target.checked)}
               className="rounded border-gray-300"
             />
-            Pronunciation
+            {t('showPronunciation')}
           </label>
           <label className="flex items-center gap-2 text-sm text-gray-700">
             <input
@@ -400,7 +656,32 @@ export default function IndigenousChatbotPage() {
               onChange={(e) => setShowCulturalNotes(e.target.checked)}
               className="rounded border-gray-300"
             />
-            Cultural Notes
+            {t('showCulturalNotes')}
+          </label>
+          <label className="flex items-center gap-2 text-sm text-gray-700">
+            <span>LLM</span>
+            <select
+              value={llmProvider}
+              onChange={(e) => {
+                const value = e.target.value;
+                setLlmProvider(value);
+                try {
+                  if (value === 'auto') {
+                    localStorage.removeItem('mr_llm_provider');
+                  } else {
+                    localStorage.setItem('mr_llm_provider', value);
+                  }
+                } catch {}
+              }}
+              className="border border-gray-300 rounded px-2 py-1 text-sm"
+            >
+              <option value="auto">Auto</option>
+              {availableProviders.map((provider) => (
+                <option key={provider.id} value={provider.id}>
+                  {provider.label}
+                </option>
+              ))}
+            </select>
           </label>
         </div>
 
@@ -408,17 +689,38 @@ export default function IndigenousChatbotPage() {
         <div className="flex items-center gap-2">
           {/* Voice Input */}
           <button
-            onClick={startRecording}
-            disabled={isRecording}
-            className={`p-3 rounded-lg ${
+            onClick={isRecording ? stopRecording : startRecording}
+            disabled={audioUploading || isLoading}
+            className={`p-3 rounded-lg transition ${
               isRecording
                 ? 'bg-red-600 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-            title={t('voiceInput')}
+            } ${audioUploading || isLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
+            title={isRecording ? 'Stop recording' : t('voiceInput')}
           >
-            <Mic className={`w-5 h-5 ${isRecording ? 'animate-pulse' : ''}`} />
+            {isRecording ? (
+              <Square className="w-5 h-5" />
+            ) : (
+              <Mic className={`w-5 h-5 ${audioUploading ? 'animate-pulse' : ''}`} />
+            )}
           </button>
+
+          {/* Image Attachment */}
+          <button
+            onClick={triggerImagePicker}
+            disabled={isLoading}
+            className={`p-3 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition ${isLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
+            title="Attach image"
+          >
+            <ImageIcon className="w-5 h-5" />
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleImageSelected}
+          />
 
           {/* Text Input */}
           <input
@@ -435,7 +737,11 @@ export default function IndigenousChatbotPage() {
           {/* Send Button */}
           <button
             onClick={sendMessage}
-            disabled={!inputMessage.trim() || isLoading}
+            disabled={
+              isLoading ||
+              audioUploading ||
+              (!inputMessage.trim() && !audioAttachment && !imageAttachment)
+            }
             className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {isLoading ? (
@@ -447,14 +753,81 @@ export default function IndigenousChatbotPage() {
           </button>
         </div>
 
+        {(imageAttachment || audioAttachment) && (
+          <div className="mt-3 flex flex-wrap gap-4">
+            {imageAttachment && (
+              <div className="relative">
+                <img
+                  src={imageAttachment.dataUrl}
+                  alt="Image attachment preview"
+                  className="w-32 h-32 object-cover rounded-lg border border-gray-200"
+                />
+                <button
+                  onClick={removeImageAttachment}
+                  className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow hover:bg-red-50"
+                  title="Remove image"
+                >
+                  <XCircle className="w-4 h-4 text-red-500" />
+                </button>
+              </div>
+            )}
+            {audioAttachment && (
+              <div className="flex items-center gap-2 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg">
+                <Mic className="w-4 h-4" />
+                <span className="text-sm">
+                  {audioAttachment.transcript || 'Voice clip ready'}
+                </span>
+                {audioUploading && <Loader className="w-4 h-4 animate-spin" />}
+                <button
+                  onClick={removeAudioAttachment}
+                  className="p-1 hover:bg-gray-200 rounded"
+                  title="Remove audio"
+                >
+                  <XCircle className="w-4 h-4 text-red-500" />
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Status */}
-        {isLoading && (
+        {(isLoading || audioUploading || errorText) && (
           <div className="mt-2 flex items-center gap-2 text-sm text-gray-600">
-            <Loader className="w-4 h-4 animate-spin" />
-            {t('aiThinking')}
+            {(isLoading || audioUploading) && <Loader className="w-4 h-4 animate-spin" />}
+            {isLoading
+              ? t('aiThinking')
+              : audioUploading
+                ? 'Transcribing audio...'
+                : <span className="text-red-600">{errorText}</span>}
           </div>
         )}
       </div>
+
+      {/* Settings Modal */}
+      {showSettings && (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50" role="dialog" aria-modal>
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+            <h3 className="text-lg font-semibold mb-4">{t('settings')}</h3>
+            <div className="space-y-3">
+              <label className="flex items-center gap-2 text-sm text-gray-700">
+                <input type="checkbox" className="rounded" checked={showTranslation} onChange={(e)=>setShowTranslation(e.target.checked)} />
+                {t('showTranslation')}
+              </label>
+              <label className="flex items-center gap-2 text-sm text-gray-700">
+                <input type="checkbox" className="rounded" checked={showPronunciation} onChange={(e)=>setShowPronunciation(e.target.checked)} />
+                {t('showPronunciation')}
+              </label>
+              <label className="flex items-center gap-2 text-sm text-gray-700">
+                <input type="checkbox" className="rounded" checked={showCulturalNotes} onChange={(e)=>setShowCulturalNotes(e.target.checked)} />
+                {t('showCulturalNotes')}
+              </label>
+            </div>
+            <div className="mt-6 flex justify-end gap-2">
+              <button className="px-4 py-2 bg-gray-100 rounded" onClick={()=>setShowSettings(false)}>{t('close')}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

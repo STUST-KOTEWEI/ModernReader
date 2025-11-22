@@ -1,0 +1,19 @@
+# Providers and queries for auto crawl
+providers:
+  - name: OpenLibrary
+    enabled: true
+    verify_ssl: true
+    limit: 20
+    queries:
+      - { q: "Taiwan indigenous", limit: 10 }
+      - { q: "aboriginal Taiwan", limit: 10 }
+      - { q: "Austronesian language", limit: 10 }
+      - { q: "children picture books", limit: 10 }
+  - name: NDL
+    enabled: true
+    verify_ssl: true
+    limit: 15
+    queries:
+      - { q: "先住民", limit: 10 }
+      - { q: "アイヌ", limit: 10 }
+      - { q: "台湾 原住民", limit: 10 }

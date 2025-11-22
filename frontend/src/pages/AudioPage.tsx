@@ -1,7 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { audioClient } from '../services/api';
 import { useI18n } from '../i18n/useI18n';
 import { Button, Card } from '../design-system';
+import { AudioPreviewPlayer } from '../components/AudioPreviewPlayer';
 
 export const AudioPage: React.FC = () => {
   const { t } = useI18n();
@@ -13,14 +14,32 @@ export const AudioPage: React.FC = () => {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<BlobPart[]>([]);
   const [isRecording, setIsRecording] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  // Cleanup object URL to avoid memory leaks
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setLoading(true);
-    const formData = new FormData();
-    formData.append('file', file);
+  const formData = new FormData();
+  // Backend expects 'audio' field name
+  formData.append('audio', file);
+
+    // create local preview for 60s player
+    try {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+    } catch {}
 
     try {
       const response = await audioClient.transcribe(formData);
@@ -41,9 +60,15 @@ export const AudioPage: React.FC = () => {
         if (ev.data && ev.data.size > 0) chunksRef.current.push(ev.data);
       };
       mr.onstop = async () => {
-        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
-        const form = new FormData();
-        form.append('file', blob, 'recording.webm');
+  const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+  const form = new FormData();
+  form.append('audio', blob, 'recording.webm');
+        // set preview URL for recorded audio
+        try {
+          if (previewUrl) URL.revokeObjectURL(previewUrl);
+          const url = URL.createObjectURL(blob);
+          setPreviewUrl(url);
+        } catch {}
         setLoading(true);
         try {
           const resp = await audioClient.transcribe(form);
@@ -75,19 +100,20 @@ export const AudioPage: React.FC = () => {
 
     setLoading(true);
     try {
-      const raw = await audioClient.synthesize({ text: ttsText, language: 'zh' });
-      const audioBlob = (raw && (raw as Blob).type) ? (raw as Blob) : new Blob([raw], { type: 'audio/mpeg' });
-      const audioUrl = URL.createObjectURL(audioBlob);
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = audioUrl;
-        audioRef.current.load();
-        try {
-          await audioRef.current.play();
-        } catch (e) {
-          console.error('Autoplay blocked or playback error', e);
-          // 使用者互動後再播
-        }
+      // Prefer on-device Web Speech API for immediate feedback
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(ttsText);
+        // Map UI language to a reasonable voice locale
+        const voices = window.speechSynthesis.getVoices();
+        const pick = (langs: string[]) => voices.find(v => langs.some(l => v.lang?.toLowerCase().startsWith(l)));
+        const voice = pick(['zh', 'cmn', 'yue']) || pick(['ja']) || pick(['en']);
+        if (voice) utterance.voice = voice;
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(utterance);
+      } else {
+        // Fallback: call backend mock to keep UI consistent
+        const resp = await audioClient.synthesize({ text: ttsText });
+        console.info('TTS mock job created:', resp.job_id, resp.audio_url);
       }
     } catch (err) {
       console.error('TTS failed', err);
@@ -119,6 +145,13 @@ export const AudioPage: React.FC = () => {
             )}
             {isRecording && <span className="text-red-600 text-sm">{t('recording')}</span>}
           </div>
+
+          {/* 60s Preview Player for uploaded/recorded audio */}
+          {previewUrl && (
+            <div className="mt-4">
+              <AudioPreviewPlayer audioUrl={previewUrl} previewDuration={60} />
+            </div>
+          )}
           
           {transcription && (
             <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded">
@@ -132,7 +165,11 @@ export const AudioPage: React.FC = () => {
       {/* Text-to-Speech */}
       <Card title={t('textToSpeech')}>
         <div className="space-y-4">
+          <label htmlFor="ttsText" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            {t('enterText')}
+          </label>
           <textarea
+            id="ttsText"
             value={ttsText}
             onChange={(e) => setTtsText(e.target.value)}
             placeholder={t('enterText')}

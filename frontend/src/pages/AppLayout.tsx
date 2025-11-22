@@ -4,6 +4,8 @@ import { useSessionStore } from "../state/session";
 import React from "react";
 import { userClient } from "../services/api";
 import { useI18n } from "../i18n/useI18n";
+import { HealthBanner } from "../components/HealthBanner";
+import { FloatingChatbot } from "../components/FloatingChatbot";
 
 export const AppLayout = () => {
   const { user, token } = useSessionStore();
@@ -34,9 +36,9 @@ export const AppLayout = () => {
     (async () => {
       if (!token) return;
       try {
-        const s = await userClient.getSettings(token);
+        const s: any = await userClient.getSettings(token);
         if (!mounted) return;
-        if (s?.default_language && typeof s.default_language === 'string') {
+        if (s && typeof s === 'object' && 'default_language' in s && typeof s.default_language === 'string') {
           setLanguage(s.default_language as any);
         }
       } catch {}
@@ -60,7 +62,9 @@ export const AppLayout = () => {
     <div className="app-shell">
       <Sidebar user={user} />
       <main className="app-content">
+        <HealthBanner />
         <Outlet />
+        <FloatingChatbot />
       </main>
     </div>
   );

@@ -13,6 +13,7 @@ from app.schemas.settings import (
     UserSettingsResponse,
     UpdateUserSettingsRequest,
 )
+from app.schemas.profile import UserProfileResponse, UpdateProfileRequest
 
 
 router = APIRouter()
@@ -121,4 +122,58 @@ async def update_my_settings(
         autoplay_tts=bool(row.autoplay_tts),
         learning_opt_in=bool(row.learning_opt_in),
         preferences=row.preferences,
+    )
+
+
+@router.get("/me", response_model=UserProfileResponse)
+async def get_my_profile(
+    user: User = Depends(get_current_user),
+):
+    """Get current user profile."""
+    return UserProfileResponse(
+        id=str(user.id),
+        email=user.email,
+        username=user.username,
+        avatar_url=user.avatar_url,
+        role=user.role.value,
+        language_goal=user.language_goal,
+        created_at=user.created_at.isoformat(),
+    )
+
+
+@router.put("/me", response_model=UserProfileResponse)
+async def update_my_profile(
+    request: UpdateProfileRequest,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Update current user profile."""
+    if request.username is not None:
+        # Check username uniqueness
+        existing = (
+            db.query(User)
+            .filter(User.username == request.username, User.id != user.id)
+            .one_or_none()
+        )
+        if existing:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Username already taken",
+            )
+        user.username = request.username
+    if request.avatar_url is not None:
+        user.avatar_url = request.avatar_url
+    if request.language_goal is not None:
+        user.language_goal = request.language_goal
+
+    db.commit()
+    db.refresh(user)
+    return UserProfileResponse(
+        id=str(user.id),
+        email=user.email,
+        username=user.username,
+        avatar_url=user.avatar_url,
+        role=user.role.value,
+        language_goal=user.language_goal,
+        created_at=user.created_at.isoformat(),
     )

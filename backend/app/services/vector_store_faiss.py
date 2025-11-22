@@ -16,15 +16,11 @@
 pip install faiss-cpu langchain-community langchain-openai
 """
 
-from typing import List, Dict, Optional, Tuple, Any
-import os
-import json
-import numpy as np
+from typing import List, Dict, Optional, Any
 from datetime import datetime
 from pathlib import Path
 
 try:
-    import faiss
     from langchain.text_splitter import RecursiveCharacterTextSplitter
     from langchain_openai import OpenAIEmbeddings
     from langchain_community.vectorstores import FAISS

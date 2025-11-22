@@ -16,6 +16,7 @@
 from datetime import datetime
 import uuid
 from typing import List, Dict, Any
+from typing import Optional
 
 from sqlalchemy.orm import Session
 
@@ -168,7 +169,11 @@ class RAGService:
         
         for book in books:
             # 組合書籍完整資訊
-            authors = ", ".join(book.authors) if getattr(book, "authors", None) else "未知"
+            authors = (
+                ", ".join(book.authors)
+                if getattr(book, "authors", None)
+                else "未知"
+            )
             full_text = f"""
 標題: {book.title}
 作者: {authors}
@@ -240,7 +245,7 @@ class RAGService:
     def _fallback_response(
         self,
         request: RAGQueryRequest,
-        error: str = None
+        error: Optional[str] = None
     ) -> RAGQueryResponse:
         """備援回應 (當檢索失敗時)"""
         # 嘗試從資料庫查詢

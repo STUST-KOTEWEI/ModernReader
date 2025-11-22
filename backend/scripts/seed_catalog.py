@@ -12,8 +12,8 @@ PROJECT_ROOT = CURRENT_DIR.parent
 REPO_ROOT = PROJECT_ROOT.parent
 sys.path.append(str(PROJECT_ROOT))
 
-from app.db.database import SessionLocal, engine  # noqa: E402
-from app.models import Base, Book, CatalogSource  # noqa: E402
+from app.db.database import SessionLocal, engine  # type: ignore  # noqa: E402
+from app.models import Base, Book, CatalogSource  # type: ignore  # noqa: E402
 
 DATA_PATH = REPO_ROOT / "data" / "catalogs" / "sample_books.json"
 
@@ -26,9 +26,16 @@ def load_data(path: Path) -> list[dict]:
 def seed(session: Session, records: list[dict]) -> None:
     for record in records:
         source_name = record.pop("source", "Unknown")
-        source = session.query(CatalogSource).filter_by(name=source_name).one_or_none()
+        source = (
+            session.query(CatalogSource)
+            .filter_by(name=source_name)
+            .one_or_none()
+        )
         if not source:
-            source = CatalogSource(name=source_name, description=f"Imported from {source_name}")
+            source = CatalogSource(
+                name=source_name,
+                description=f"Imported from {source_name}"
+            )
             session.add(source)
             session.flush()
 

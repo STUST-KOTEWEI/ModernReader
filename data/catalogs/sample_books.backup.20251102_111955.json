@@ -1,0 +1,1214 @@
+{
+  "metadata": {
+    "generated_at": "2025-11-02T11:18:38.728454",
+    "total_items": 56,
+    "description": "合併原住民語書籍與公開圖書館館藏",
+    "sources": [
+      "國立公共資訊圖書館 (NLPI)",
+      "南台科技大學圖書館 (STUST)",
+      "台北市立圖書館 (TPML)",
+      "高雄市立圖書館 (KSML)",
+      "Indigenous Language Collection"
+    ]
+  },
+  "items": [
+    {
+      "title": "Forest Stories",
+      "authors": [
+        "Amis Community Storytellers"
+      ],
+      "language": "amis",
+      "topics": [
+        "culture",
+        "oral history",
+        "ecology"
+      ],
+      "summary": "Oral histories from the Amis people collected across generations.",
+      "source": "ELAR",
+      "metadata": {
+        "keywords": "Amis cultural heritage forest",
+        "award_winning": true,
+        "reading_level": "intermediate",
+        "isbn": "9789861234567"
+      },
+      "id": "indigenous_001"
+    },
+    {
+      "title": "Songs of the River",
+      "authors": [
+        "Atayal Youth Ensemble"
+      ],
+      "language": "atayal",
+      "topics": [
+        "music",
+        "ritual",
+        "identity"
+      ],
+      "summary": "Annotated songbook featuring river-themed chants with translations.",
+      "source": "National Library",
+      "metadata": {
+        "keywords": "Atayal songs river ceremony",
+        "reading_level": "beginner"
+      },
+      "id": "indigenous_002"
+    },
+    {
+      "title": "Healing Plants of the Highlands",
+      "authors": [
+        "Paiwan Knowledge Circle"
+      ],
+      "language": "paiwan",
+      "topics": [
+        "ecology",
+        "medicine",
+        "knowledge"
+      ],
+      "summary": "Field guide describing traditional Paiwan medicinal plants with AR markers.",
+      "source": "University Archive",
+      "metadata": {
+        "keywords": "Paiwan botany healing",
+        "reading_level": "advanced"
+      },
+      "id": "indigenous_003"
+    },
+    {
+      "title": "Stories Woven in Patterns",
+      "authors": [
+        "Rukai Textile Collective"
+      ],
+      "language": "rukai",
+      "topics": [
+        "myth",
+        "craft",
+        "identity"
+      ],
+      "summary": "Illustrated tales mapping textile patterns to ancestral myths.",
+      "source": "ELAR",
+      "metadata": {
+        "keywords": "Rukai textile myth",
+        "reading_level": "intermediate"
+      },
+      "id": "indigenous_004"
+    },
+    {
+      "title": "Sky Dancers",
+      "authors": [
+        "Seediq Storykeepers"
+      ],
+      "language": "seediq",
+      "topics": [
+        "adventure",
+        "myth",
+        "festival"
+      ],
+      "summary": "Epic stories of the Seediq sky dancers retold for modern readers.",
+      "source": "Indie Press",
+      "metadata": {
+        "keywords": "Seediq adventure festival",
+        "reading_level": "intermediate"
+      },
+      "id": "indigenous_005"
+    },
+    {
+      "title": "Guardians of the Reef",
+      "authors": [
+        "Tao Maritime Council"
+      ],
+      "language": "tao",
+      "topics": [
+        "ecology",
+        "ritual",
+        "navigation"
+      ],
+      "summary": "Bilingual compendium documenting Tao canoe rituals and reef stewardship.",
+      "source": "National Museum",
+      "metadata": {
+        "keywords": "Tao reef navigation ecology",
+        "reading_level": "advanced"
+      },
+      "id": "indigenous_006"
+    },
+    {
+      "id": "nlpi_001",
+      "title": "那些得不到保護的人",
+      "authors": [
+        "中山七里"
+      ],
+      "publisher": "瑞昇文化",
+      "publication_date": "2023",
+      "isbn": "9789864015894",
+      "language": "zh",
+      "topics": [
+        "小說",
+        "推理",
+        "社會議題"
+      ],
+      "summary": "一部探討社會底層人物無法獲得保護的推理小說，揭露日本社會福利制度的缺陷。",
+      "metadata": {
+        "source": "NLPI",
+        "url": "https://ipac.nlpi.edu.tw/bookDetail/782668",
+        "reading_level": "general",
+        "keywords": [
+          "推理",
+          "社會議題",
+          "日本文學"
+        ]
+      }
+    },
+    {
+      "id": "nlpi_002",
+      "title": "東京攻略完全制霸 2023~2024",
+      "authors": [
+        "墨刻編輯部"
+      ],
+      "publisher": "墨刻出版",
+      "publication_date": "2023",
+      "isbn": "9789862897522",
+      "language": "zh",
+      "topics": [
+        "旅遊",
+        "日本",
+        "東京"
+      ],
+      "summary": "最新東京旅遊完全指南，涵蓋景點、美食、購物、交通等實用資訊。",
+      "metadata": {
+        "source": "NLPI",
+        "url": "https://ipac.nlpi.edu.tw/bookDetail/785911",
+        "reading_level": "general",
+        "keywords": [
+          "旅遊",
+          "東京",
+          "日本",
+          "攻略"
+        ]
+      }
+    },
+    {
+      "id": "nlpi_003",
+      "title": "10倍股法則：從企業成功軌跡解析股價上漲10倍的祕密",
+      "authors": [
+        "麥可·J·莫伯新"
+      ],
+      "publisher": "今周刊",
+      "publication_date": "2023",
+      "isbn": "9789579054867",
+      "language": "zh",
+      "topics": [
+        "投資",
+        "股票",
+        "財經"
+      ],
+      "summary": "分析成長型股票的投資策略，教導讀者如何識別具有10倍成長潛力的股票。",
+      "metadata": {
+        "source": "NLPI",
+        "url": "https://ipac.nlpi.edu.tw/bookDetail/786543",
+        "reading_level": "general",
+        "keywords": [
+          "投資",
+          "股票",
+          "成長股",
+          "財富"
+        ]
+      }
+    },
+    {
+      "id": "nlpi_004",
+      "title": "字彙贏家：從英文字根體悟人生",
+      "authors": [
+        "劉毅"
+      ],
+      "publisher": "學習出版",
+      "publication_date": "2024",
+      "isbn": "9789578904729",
+      "language": "zh",
+      "topics": [
+        "語言學習",
+        "英文",
+        "字彙"
+      ],
+      "summary": "透過英文字根字首的學習，不僅提升英文能力，更從語言中體悟人生哲理。",
+      "metadata": {
+        "source": "NLPI",
+        "url": "https://ipac.nlpi.edu.tw/",
+        "reading_level": "intermediate",
+        "keywords": [
+          "英文",
+          "字根",
+          "字彙",
+          "學習"
+        ]
+      }
+    },
+    {
+      "id": "nlpi_005",
+      "title": "再響·森之樂 2025",
+      "authors": [
+        "國立公共資訊圖書館策劃"
+      ],
+      "publisher": "國立公共資訊圖書館",
+      "publication_date": "2025",
+      "isbn": "",
+      "language": "zh",
+      "topics": [
+        "生態",
+        "環境",
+        "音樂",
+        "展覽"
+      ],
+      "summary": "結合自然生態與音樂藝術的特展，透過聲音探索森林的奧秘與生命力。",
+      "metadata": {
+        "source": "NLPI",
+        "url": "https://ipac.nlpi.edu.tw/",
+        "reading_level": "general",
+        "keywords": [
+          "森林",
+          "生態",
+          "音樂",
+          "藝術"
+        ]
+      }
+    },
+    {
+      "id": "stust_001",
+      "title": "深度學習：從理論到實踐",
+      "authors": [
+        "Ian Goodfellow",
+        "Yoshua Bengio",
+        "Aaron Courville"
+      ],
+      "publisher": "碁峰資訊",
+      "publication_date": "2020",
+      "isbn": "9789865022976",
+      "language": "zh",
+      "topics": [
+        "人工智慧",
+        "機器學習",
+        "深度學習",
+        "技術"
+      ],
+      "summary": "深度學習領域的經典教材，涵蓋理論基礎與實務應用，適合學術研究與工程開發。",
+      "metadata": {
+        "source": "STUST",
+        "url": "https://lis.stust.edu.tw/tc/",
+        "reading_level": "advanced",
+        "keywords": [
+          "AI",
+          "機器學習",
+          "神經網路",
+          "深度學習"
+        ]
+      }
+    },
+    {
+      "id": "stust_002",
+      "title": "Python 資料科學學習手冊",
+      "authors": [
+        "Jake VanderPlas"
+      ],
+      "publisher": "歐萊禮",
+      "publication_date": "2021",
+      "isbn": "9789865027520",
+      "language": "zh",
+      "topics": [
+        "程式設計",
+        "Python",
+        "資料科學",
+        "技術"
+      ],
+      "summary": "使用 Python 進行資料科學分析的完整指南，包含 NumPy、Pandas、Matplotlib 等工具。",
+      "metadata": {
+        "source": "STUST",
+        "url": "https://lis.stust.edu.tw/tc/",
+        "reading_level": "intermediate",
+        "keywords": [
+          "Python",
+          "資料科學",
+          "數據分析",
+          "程式設計"
+        ]
+      }
+    },
+    {
+      "id": "stust_003",
+      "title": "設計模式：可重用物件導向軟體的基礎",
+      "authors": [
+        "Erich Gamma",
+        "Richard Helm",
+        "Ralph Johnson",
+        "John Vlissides"
+      ],
+      "publisher": "博碩文化",
+      "publication_date": "2019",
+      "isbn": "9789864344178",
+      "language": "zh",
+      "topics": [
+        "軟體工程",
+        "設計模式",
+        "程式設計",
+        "技術"
+      ],
+      "summary": "軟體工程的經典之作，介紹23種基本設計模式，提升程式碼品質與可維護性。",
+      "metadata": {
+        "source": "STUST",
+        "url": "https://lis.stust.edu.tw/tc/",
+        "reading_level": "advanced",
+        "keywords": [
+          "設計模式",
+          "軟體工程",
+          "OOP",
+          "架構"
+        ]
+      }
+    },
+    {
+      "id": "stust_004",
+      "title": "區塊鏈革命：改變世界的分散式技術",
+      "authors": [
+        "Don Tapscott",
+        "Alex Tapscott"
+      ],
+      "publisher": "天下文化",
+      "publication_date": "2020",
+      "isbn": "9789863985341",
+      "language": "zh",
+      "topics": [
+        "區塊鏈",
+        "金融科技",
+        "科技",
+        "創新"
+      ],
+      "summary": "深入探討區塊鏈技術如何改變金融、商業、政府等各個領域，預見未來科技趨勢。",
+      "metadata": {
+        "source": "STUST",
+        "url": "https://lis.stust.edu.tw/tc/",
+        "reading_level": "intermediate",
+        "keywords": [
+          "區塊鏈",
+          "FinTech",
+          "加密貨幣",
+          "創新"
+        ]
+      }
+    },
+    {
+      "id": "stust_005",
+      "title": "物聯網實戰：從感測器到雲端",
+      "authors": [
+        "陳會安"
+      ],
+      "publisher": "旗標出版",
+      "publication_date": "2021",
+      "isbn": "9789863126287",
+      "language": "zh",
+      "topics": [
+        "物聯網",
+        "IoT",
+        "嵌入式系統",
+        "技術"
+      ],
+      "summary": "完整介紹物聯網技術架構，從硬體感測器到雲端平台的實作指南。",
+      "metadata": {
+        "source": "STUST",
+        "url": "https://lis.stust.edu.tw/tc/",
+        "reading_level": "intermediate",
+        "keywords": [
+          "IoT",
+          "感測器",
+          "雲端",
+          "嵌入式"
+        ]
+      }
+    },
+    {
+      "id": "tpml_001",
+      "title": "人生路引：我從閱讀中練就的28個基本功",
+      "authors": [
+        "楊斯棓"
+      ],
+      "publisher": "先覺出版",
+      "publication_date": "2023",
+      "isbn": "9789861343549",
+      "language": "zh",
+      "topics": [
+        "自我成長",
+        "閱讀",
+        "人生哲學"
+      ],
+      "summary": "醫師作家楊斯棓分享如何透過閱讀建立人生基本功，培養思考力與行動力。",
+      "metadata": {
+        "source": "Taipei Public Library",
+        "url": "https://www.tpml.edu.tw/",
+        "reading_level": "general",
+        "keywords": [
+          "閱讀",
+          "成長",
+          "人生",
+          "思考"
+        ]
+      }
+    },
+    {
+      "id": "tpml_002",
+      "title": "原子習慣：細微改變帶來巨大成就的實證法則",
+      "authors": [
+        "詹姆斯·克利爾"
+      ],
+      "publisher": "方智出版",
+      "publication_date": "2019",
+      "isbn": "9789861755267",
+      "language": "zh",
+      "topics": [
+        "習慣",
+        "自我成長",
+        "心理學"
+      ],
+      "summary": "暢銷全球的習慣養成指南，教你如何透過微小改變達成人生目標。",
+      "metadata": {
+        "source": "Taipei Public Library",
+        "url": "https://www.tpml.edu.tw/",
+        "reading_level": "general",
+        "keywords": [
+          "習慣",
+          "改變",
+          "成長",
+          "目標"
+        ]
+      }
+    },
+    {
+      "id": "ksml_001",
+      "title": "海風下的燕巢故事",
+      "authors": [
+        "高雄市立圖書館編"
+      ],
+      "publisher": "高雄市立圖書館",
+      "publication_date": "2024",
+      "isbn": "",
+      "language": "zh",
+      "topics": [
+        "地方文史",
+        "高雄",
+        "人文"
+      ],
+      "summary": "收錄高雄燕巢地區的歷史故事與在地文化，呈現南台灣的人文風貌。",
+      "metadata": {
+        "source": "Kaohsiung Public Library",
+        "url": "https://www.ksml.edu.tw/",
+        "reading_level": "general",
+        "keywords": [
+          "高雄",
+          "地方文史",
+          "文化",
+          "故事"
+        ]
+      }
+    },
+    {
+      "id": "ol_works_OL46125W",
+      "title": "Foundation",
+      "authors": [
+        "Isaac Asimov"
+      ],
+      "publisher": "",
+      "publication_date": "1951",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL46125W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL110971W",
+      "title": "Ficciones",
+      "authors": [
+        "Jorge Luis Borges"
+      ],
+      "publisher": "",
+      "publication_date": "1945",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL110971W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL85892W",
+      "title": "Dracula",
+      "authors": [
+        "Bram Stoker"
+      ],
+      "publisher": "",
+      "publication_date": "1897",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL85892W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL450124W",
+      "title": "The Last Man",
+      "authors": [
+        "Mary Shelley"
+      ],
+      "publisher": "",
+      "publication_date": "1826",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL450124W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL50548W",
+      "title": "Beloved",
+      "authors": [
+        "Toni Morrison"
+      ],
+      "publisher": "",
+      "publication_date": "1987",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL50548W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL52267W",
+      "title": "The Time Machine",
+      "authors": [
+        "H. G. Wells"
+      ],
+      "publisher": "",
+      "publication_date": "1895",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL52267W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL52266W",
+      "title": "The Invisible Man",
+      "authors": [
+        "H. G. Wells"
+      ],
+      "publisher": "",
+      "publication_date": "",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL52266W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL893415W",
+      "title": "Dune",
+      "authors": [
+        "Frank Herbert"
+      ],
+      "publisher": "",
+      "publication_date": "1965",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL893415W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL10215W",
+      "title": "Мы",
+      "authors": [
+        "Евгений Иванович Замятин",
+        "Gary Kern",
+        "Alejandro Ariel González"
+      ],
+      "publisher": "",
+      "publication_date": "1924",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL10215W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL39379W",
+      "title": "A Room of One's Own",
+      "authors": [
+        "Virginia Woolf"
+      ],
+      "publisher": "",
+      "publication_date": "1929",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL39379W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL86320W",
+      "title": "Dubliners",
+      "authors": [
+        "James Joyce"
+      ],
+      "publisher": "",
+      "publication_date": "1914",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL86320W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL52114W",
+      "title": "The War of the Worlds",
+      "authors": [
+        "H. G. Wells"
+      ],
+      "publisher": "",
+      "publication_date": "",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL52114W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL23797W",
+      "title": "The Riddle of the Sands",
+      "authors": [
+        "Erskine Childers"
+      ],
+      "publisher": "",
+      "publication_date": "1903",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL23797W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL19908W",
+      "title": "Kim",
+      "authors": [
+        "Rudyard Kipling"
+      ],
+      "publisher": "",
+      "publication_date": "1901",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL19908W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL77775W",
+      "title": "The blue castle",
+      "authors": [
+        "Lucy Maud Montgomery"
+      ],
+      "publisher": "",
+      "publication_date": "1926",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL77775W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL1253285W",
+      "title": "The Scarlet Pimpernel",
+      "authors": [
+        "Emmuska Orczy, Baroness Orczy"
+      ],
+      "publisher": "",
+      "publication_date": "1900",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL1253285W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL65430W",
+      "title": "The Awakening",
+      "authors": [
+        "Kate Chopin"
+      ],
+      "publisher": "",
+      "publication_date": "1899",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL65430W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL38684W",
+      "title": "Lord Jim",
+      "authors": [
+        "Joseph Conrad"
+      ],
+      "publisher": "",
+      "publication_date": "1900",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL38684W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL118388W",
+      "title": "Flatland",
+      "authors": [
+        "Edwin Abbott Abbott"
+      ],
+      "publisher": "",
+      "publication_date": "1884",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL118388W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL1095397W",
+      "title": "Shirley",
+      "authors": [
+        "Charlotte Brontë"
+      ],
+      "publisher": "",
+      "publication_date": "1800",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL1095397W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL505781W",
+      "title": "Of Human Bondage",
+      "authors": [
+        "William Somerset Maugham"
+      ],
+      "publisher": "",
+      "publication_date": "1915",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL505781W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL103134W",
+      "title": "The Martian Chronicles",
+      "authors": [
+        "Ray Bradbury"
+      ],
+      "publisher": "",
+      "publication_date": "1950",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL103134W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL262438W",
+      "title": "The Sign of Four",
+      "authors": [
+        "Arthur Conan Doyle"
+      ],
+      "publisher": "",
+      "publication_date": "1889",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL262438W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL66544W",
+      "title": "Persuasion",
+      "authors": [
+        "Jane Austen"
+      ],
+      "publisher": "",
+      "publication_date": "1789",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL66544W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL455305W",
+      "title": "The Scarlet Letter",
+      "authors": [
+        "Nathaniel Hawthorne"
+      ],
+      "publisher": "",
+      "publication_date": "1850",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL455305W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL36371W",
+      "title": "Le roman du masque de fer",
+      "authors": [
+        "Alexandre Dumas"
+      ],
+      "publisher": "",
+      "publication_date": "1600",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL36371W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL468488W",
+      "title": "This Side of Paradise",
+      "authors": [
+        "F. Scott Fitzgerald"
+      ],
+      "publisher": "",
+      "publication_date": "1920",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL468488W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL53919W",
+      "title": "The Adventures of Tom Sawyer",
+      "authors": [
+        "Mark Twain"
+      ],
+      "publisher": "",
+      "publication_date": "1817",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL53919W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL262384W",
+      "title": "The Sea Fairies",
+      "authors": [
+        "L. Frank Baum"
+      ],
+      "publisher": "",
+      "publication_date": "1911",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL262384W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL52260W",
+      "title": "The First Men in the Moon",
+      "authors": [
+        "H. G. Wells"
+      ],
+      "publisher": "",
+      "publication_date": "1900",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL52260W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL3388961W",
+      "title": "The Great God Pan",
+      "authors": [
+        "Arthur Machen"
+      ],
+      "publisher": "",
+      "publication_date": "1894",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL3388961W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL103123W",
+      "title": "Fahrenheit 451",
+      "authors": [
+        "Ray Bradbury"
+      ],
+      "publisher": "",
+      "publication_date": "1953",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL103123W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL262460W",
+      "title": "The Lost World",
+      "authors": [
+        "Arthur Conan Doyle"
+      ],
+      "publisher": "",
+      "publication_date": "1900",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL262460W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL8193416W",
+      "title": "The Picture of Dorian Gray",
+      "authors": [
+        "Oscar Wilde"
+      ],
+      "publisher": "",
+      "publication_date": "1890",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL8193416W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL15437W",
+      "title": "Lilith",
+      "authors": [
+        "George MacDonald"
+      ],
+      "publisher": "",
+      "publication_date": "1895",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL15437W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL81295W",
+      "title": "Sons and Lovers",
+      "authors": [
+        "D. H. Lawrence"
+      ],
+      "publisher": "",
+      "publication_date": "1913",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL81295W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    },
+    {
+      "id": "ol_works_OL21177W",
+      "title": "Wuthering Heights",
+      "authors": [
+        "Emily Brontë",
+        "Stephanie Baudet",
+        "Arianna Bellucci"
+      ],
+      "publisher": "",
+      "publication_date": "1846",
+      "isbn": "",
+      "language": "en",
+      "topics": [],
+      "summary": "",
+      "metadata": {
+        "source": "OpenLibrary",
+        "url": "https://openlibrary.org/works/OL21177W",
+        "reading_level": "general",
+        "keywords": []
+      }
+    }
+  ]
+}

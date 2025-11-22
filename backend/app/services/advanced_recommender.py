@@ -6,13 +6,25 @@ from dataclasses import dataclass
 from typing import Any, cast
 
 import numpy as np
-from sklearn.preprocessing import MinMaxScaler
 import networkx as nx
 
 from app.services.knowledge_graph import (
     KnowledgeGraph,
     get_knowledge_graph,
 )
+# (Assuming this is the top of your advanced_recommender.py file)
+
+
+def get_dummy_recommender():
+    # Implement or import your recommender logic here
+    class Recommender:
+        def recommend(self, user_id, user_context, candidate_ids, top_k):
+            # Dummy implementation
+            return []
+        def counterfactual_explain(self, content_id, user_id, user_context):
+            # Dummy implementation
+            return {"explanation": "Not implemented"}
+    return Recommender()
 
 logger = logging.getLogger(__name__)
 
@@ -69,10 +81,8 @@ class MultiObjectiveRecommender:
         """Initialize recommender."""
         self.kg = knowledge_graph or get_knowledge_graph()
         self.objectives = objectives or self._default_objectives()
-        self.scaler = MinMaxScaler()
 
     def _default_objectives(self) -> list[RecommendationObjective]:
-        """Default recommendation objectives."""
         return [
             RecommendationObjective("relevance", weight=0.35, maximize=True),
             RecommendationObjective(
@@ -181,8 +191,17 @@ class MultiObjectiveRecommender:
             content_id, user_context.get("history", [])
         )
 
-        # Engagement potential (based on historical engagement)
+        # Engagement potential with mood-aware boost
         engagement_potential = node_data.get("avg_engagement", 0.5)
+        try:
+            emo = str(user_context.get("emotion", "")).lower()
+            boost = self._mood_boost(node_data, emo)
+            engagement_potential = max(
+                0.0, min(1.0, float(engagement_potential) * boost)
+            )
+        except Exception:
+            # If anything goes wrong, keep the original engagement potential
+            pass
 
         return ContentFeatures(
             content_id=content_id,
@@ -192,6 +211,42 @@ class MultiObjectiveRecommender:
             novelty=novelty,
             engagement_potential=engagement_potential,
         )
+
+    def _mood_boost(self, node_data: dict[str, Any], emotion: str) -> float:
+        """Small multiplier [0.9, 1.1] to bias by user mood.
+
+        Heuristics:
+        - stressed/tired: boost calm topics (music, oral history, ecology),
+          reduce intense (adventure)
+        - happy/curious: boost stimulating topics (adventure, myth)
+        """
+        topics = set(map(str.lower, node_data.get("topics", []) or []))
+        calm = {
+            "music",
+            "oral history",
+            "ecology",
+            "medicine",
+            "knowledge",
+            "craft",
+        }
+        stimulating = {"adventure", "myth", "festival", "identity"}
+
+        if not emotion:
+            return 1.0
+
+        if emotion in {"stressed", "tired"}:
+            if topics & calm:
+                return 1.1
+            if topics & stimulating:
+                return 0.95
+            return 1.0
+
+        if emotion in {"happy", "curious"}:
+            if topics & stimulating:
+                return 1.1
+            return 1.0
+
+        return 1.0
 
     def _calculate_relevance(
         self, content_id: str, history: list[str]
@@ -331,7 +386,7 @@ class MultiObjectiveRecommender:
         scores = list(objective_scores.values())
         if len(scores) > 1:
             variance = np.var(scores)
-            confidence -= min(variance * 0.2, 0.2)
+            confidence -= min(float(variance) * 0.2, 0.2)
 
         # Bonus for graph connectivity
         if explanation.get("related_to"):
@@ -448,7 +503,8 @@ class MultiObjectiveRecommender:
         for obj in self.objectives:
             obj.weight /= total_weight
 
-        logger.info(f"Adjusted weights: {[(o.name, o.weight) for o in self.objectives]}")
+        adj = [(o.name, o.weight) for o in self.objectives]
+        logger.info(f"Adjusted weights: {adj}")
 
 
 # Global instance

@@ -6,11 +6,14 @@ from app.api.v1 import (
     audio,
     auth,
     catalog,
+    purchase,
+    health,
     cognitive,
     crowdsourcing,
     epaper,
     indigenous,
     indigenous_chat,
+    prototype,
     users,
     rag,
     rag_extended,
@@ -26,6 +29,12 @@ def register(app: FastAPI) -> None:
     router.include_router(auth.router, prefix="/v1/auth", tags=["auth"])
     router.include_router(
         catalog.router, prefix="/v1/catalog", tags=["catalog"]
+    )
+    router.include_router(
+        purchase.router, prefix="/v1", tags=["purchase"]
+    )
+    router.include_router(
+        health.router, prefix="/v1", tags=["health"]
     )
     router.include_router(
         recommend.router, prefix="/v1/recommend", tags=["recommend"]
@@ -63,6 +72,11 @@ def register(app: FastAPI) -> None:
         indigenous_chat.router,
         prefix="/v1",
         tags=["indigenous-chat"]
+    )
+    router.include_router(
+        prototype.router,
+        prefix="/v1/prototype",
+        tags=["prototype"],
     )
     app.include_router(router)
     # Crowdsourcing router has its own prefix, register directly

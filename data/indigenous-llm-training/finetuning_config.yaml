@@ -1,0 +1,74 @@
+# Fine-tuning Configuration for Indigenous Language Models
+
+## Model Configuration
+model:
+  base_model: "gpt-3.5-turbo"  # or "gpt2-medium" for GPT-OSS
+  task: "chat"
+  max_tokens: 2048
+
+## Training Parameters
+training:
+  epochs: 3
+  batch_size: 8
+  learning_rate: 5e-5
+  warmup_steps: 100
+  validation_split: 0.1
+  early_stopping: true
+  patience: 2
+
+## Data Configuration
+data:
+  training_dir: "jsonl/"
+  format: "openai-chat"
+  min_samples_per_language: 50
+  augmentation:
+    enabled: true
+    techniques:
+      - back_translation
+      - synonym_replacement
+      - paraphrasing
+
+## Language-Specific Settings
+languages:
+  ami:
+    priority: high
+    min_quality_score: 0.8
+  pwn:
+    priority: high
+    min_quality_score: 0.8
+  trv:
+    priority: high
+    min_quality_score: 0.8
+  # Add more as needed
+
+## Evaluation Metrics
+evaluation:
+  metrics:
+    - bleu
+    - perplexity
+    - cultural_accuracy
+    - native_speaker_rating
+  test_set_size: 0.1
+  evaluation_frequency: 500  # steps
+
+## Output Configuration
+output:
+  checkpoint_dir: "../models/"
+  save_frequency: 1000  # steps
+  keep_checkpoints: 3
+  export_format: "openai"  # or "huggingface"
+
+## CARE Compliance
+care:
+  require_community_consent: true
+  anonymize_pii: true
+  track_data_lineage: true
+  enable_opt_out: true
+
+## Logging
+logging:
+  level: "INFO"
+  tensorboard: true
+  wandb:
+    enabled: false
+    project: "modernreader-indigenous-llm"

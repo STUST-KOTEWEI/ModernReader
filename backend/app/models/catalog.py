@@ -33,6 +33,19 @@ class Book(Base):
     level: Mapped[str | None] = mapped_column(String(32))
     topics: Mapped[list[str]] = mapped_column(JSON, default=list)
     summary: Mapped[str] = mapped_column(Text)
+    
+    # Extended metadata for real-world books
+    year: Mapped[int | None] = mapped_column(nullable=True)
+    isbn: Mapped[str | None] = mapped_column(
+        String(20), index=True, nullable=True
+    )
+    publisher: Mapped[str | None] = mapped_column(
+        String(256), nullable=True
+    )
+    library_location: Mapped[str | None] = mapped_column(
+        String(512), nullable=True
+    )
+    
     extra_metadata: Mapped[dict[str, Any] | None] = mapped_column(
         "metadata",
         JSON,

@@ -1,28 +1,52 @@
-"""
-API endpoints for indigenous language LLM chatbot.
+"""API endpoints for indigenous language LLM chatbot."""
+from __future__ import annotations
 
-Features:
-- Real-time chat in 100+ indigenous languages
-- Cultural context awareness
-- Translation and pronunciation
-- LLM fine-tuning management
-"""
+import base64
+import binascii
+import logging
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from pydantic import BaseModel, Field
 
+from app.services.ai_engine import MultimodalInput, get_ai_engine
 from app.services.global_indigenous_languages import (
-    GlobalIndigenousLanguageEngine,
     ChatbotResponse as ServiceChatbotResponse,
+    GlobalIndigenousLanguageEngine,
     LLMFineTuningDataset,
 )
+from app.services.speech import get_speech_service
+from app.core.llm_config import LLMProvider
+
+logger = logging.getLogger(__name__)
+
 
 router = APIRouter(prefix="/indigenous-chat", tags=["Indigenous Chat"])
 
 # Initialize global engine
 engine = GlobalIndigenousLanguageEngine(use_mock=True)
+
+
+def _decode_base64_payload(data: str) -> bytes:
+    payload = data
+    if "," in payload:
+        payload = payload.split(",", 1)[1]
+    try:
+        return base64.b64decode(payload, validate=True)
+    except binascii.Error as exc:  # pragma: no cover - validation
+        raise HTTPException(
+            status_code=400, detail=f"Invalid base64 payload: {exc}"
+        ) from exc
+
+
+def _parse_provider(value: str) -> LLMProvider:
+    try:
+        return LLMProvider(value)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=400, detail=f"Unsupported provider '{value}'"
+        ) from exc
 
 
 # ========== Request/Response Models ==========
@@ -37,6 +61,18 @@ class ChatMessage(BaseModel):
     include_translation: bool = True
     include_cultural_notes: bool = True
     include_pronunciation: bool = True
+    image_base64: Optional[str] = Field(
+        None, description="Base64 圖片資料（data URI 可）"
+    )
+    image_mime_type: Optional[str] = Field(
+        None, description="圖片 MIME 類型，如 image/png"
+    )
+    audio_base64: Optional[str] = Field(
+        None, description="Base64 語音資料"
+    )
+    audio_mime_type: Optional[str] = Field(
+        None, description="語音 MIME 類型，如 audio/webm"
+    )
 
 
 class ChatResponse(BaseModel):
@@ -53,6 +89,7 @@ class ChatResponse(BaseModel):
     source: str
     session_id: str
     timestamp: str
+    media_context: Optional[dict[str, Any]] = None
 
 
 class FineTuningJobRequest(BaseModel):
@@ -136,13 +173,99 @@ async def chat_with_bot(request: ChatMessage) -> ChatResponse:
         # Get language info
         lang_info = engine.supported_languages[request.language_code]
 
+        media_context: dict[str, Any] = {}
+        priority_override: list[LLMProvider] | None = None
+        ai_engine = None
+
+        if request.provider:
+            ai_engine = get_ai_engine()
+            preferred = _parse_provider(request.provider)
+            priority_override = [preferred]
+            for provider in ai_engine.config.provider_priority:
+                if provider not in priority_override:
+                    priority_override.append(provider)
+            media_context["preferred_provider"] = request.provider
+
+        # Decode and summarize image if provided
+        if request.image_base64:
+            image_bytes = _decode_base64_payload(request.image_base64)
+            media_context["image_mime_type"] = (
+                request.image_mime_type or "image/jpeg"
+            )
+            try:
+                if ai_engine is None:
+                    ai_engine = get_ai_engine()
+                image_result = await ai_engine.understand(
+                    MultimodalInput(
+                        text=(
+                            "請以 2-3 句中文描述這張圖片，強調文化、人物或環境線索。"
+                        ),
+                        image=image_bytes,
+                        image_mime_type=request.image_mime_type,
+                        context={
+                            "source": "indigenous_chat_image",
+                            "language_code": request.language_code,
+                        },
+                    ),
+                    system_prompt=(
+                        "You assist indigenous language learners by providing "
+                        "concise cultural observations from images."
+                    ),
+                    provider_priority=priority_override,
+                )
+                media_context["image_summary"] = image_result.content
+            except Exception as err:
+                logger.warning("Image understanding failed: %s", err)
+
+        # Decode and transcribe audio
+        if request.audio_base64:
+            audio_bytes = _decode_base64_payload(request.audio_base64)
+            try:
+                speech_service = get_speech_service()
+                audio_text = await speech_service.transcribe(
+                    audio_bytes,
+                    mime_type=request.audio_mime_type,
+                    prompt="Transcribe indigenous language conversation."
+                )
+                media_context["audio_transcript"] = audio_text
+                media_context["audio_mime_type"] = (
+                    request.audio_mime_type or "audio/wav"
+                )
+            except RuntimeError as err:
+                logger.warning("Audio transcription unavailable: %s", err)
+            except Exception as err:  # pragma: no cover - provider errors
+                logger.error("Audio transcription failed: %s", err)
+
+        # Combine message with media context for the LLM
+        combined_message = request.message.strip() if request.message else ""
+        if media_context.get("audio_transcript"):
+            transcript = media_context["audio_transcript"]
+            combined_message = (
+                f"{combined_message}\n\n[Voice transcript]\n{transcript}"
+                if combined_message
+                else transcript
+            )
+        if media_context.get("image_summary"):
+            summary = media_context["image_summary"]
+            combined_message = (
+                f"{combined_message}\n\n[Image description]\n{summary}"
+                if combined_message
+                else summary
+            )
+
+        if not combined_message:
+            raise HTTPException(
+                status_code=400, detail="Message content cannot be empty"
+            )
+
         # Generate bot response
         response = await engine.chat(
-            message=request.message,
+            message=combined_message,
             language_code=request.language_code,
             context=None,  # TODO: Load from session
             include_translation=request.include_translation,
             include_cultural_notes=request.include_cultural_notes,
+            media_context=media_context or None,
         )
 
         # Generate or use provided session ID
@@ -160,6 +283,7 @@ async def chat_with_bot(request: ChatMessage) -> ChatResponse:
             source=response.source,
             session_id=session_id,
             timestamp=datetime.now().isoformat(),
+            media_context=response.media_context,
         )
 
     except Exception as e:

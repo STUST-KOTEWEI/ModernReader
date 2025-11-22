@@ -25,7 +25,9 @@ class MultimodalInput:
 
     text: str | None = None
     image: bytes | None = None
+    image_mime_type: str | None = None
     audio: bytes | None = None
+    audio_mime_type: str | None = None
     context: dict[str, Any] | None = None
 
 
@@ -66,14 +68,13 @@ class WorldClassAIEngine:
                 self.clients[LLMProvider.OPENAI] = ChatOpenAI(
                     model=self.config.default_text_model,
                     api_key=SecretStr(self.config.openai_api_key),
-                    temperature=self.config.temperature,
                     max_completion_tokens=self.config.max_tokens,
                     timeout=self.config.timeout,
                 )
                 logger.info("OpenAI client initialized")
             except Exception as e:
                 logger.warning(f"Failed to initialize OpenAI: {e}")
-                logger.warning(f"Failed to initialize OpenAI: {e}")
+
         # Anthropic
         if self.config.anthropic_api_key:
             try:
@@ -88,22 +89,40 @@ class WorldClassAIEngine:
                 logger.info("Anthropic client initialized")
             except Exception as e:
                 logger.warning(f"Failed to initialize Anthropic: {e}")
-                logger.warning(f"Failed to initialize Anthropic: {e}")
+
         # Google Gemini
         if self.config.google_api_key:
             try:
-                self.clients[LLMProvider.GOOGLE] = (
-                    ChatGoogleGenerativeAI(
-                        model="gemini-2.0-flash-exp",
-                        google_api_key=SecretStr(self.config.google_api_key),
-                        temperature=self.config.temperature,
-                        max_output_tokens=self.config.max_tokens,
-                    )
+                self.clients[LLMProvider.GOOGLE] = ChatGoogleGenerativeAI(
+                    model="gemini-2.0-flash-exp",
+                    google_api_key=SecretStr(self.config.google_api_key),
+                    temperature=self.config.temperature,
+                    max_output_tokens=self.config.max_tokens,
                 )
                 logger.info("Google Gemini client initialized")
             except Exception as e:
                 logger.warning(f"Failed to initialize Google: {e}")
-                logger.warning(f"Failed to initialize Google: {e}")
+
+        # GPT-OSS / OpenAI compatible
+        if self.config.oss_api_base:
+            try:
+                oss_api_key = self.config.oss_api_key or "oss-no-key"
+                model = (
+                    self.config.oss_text_model
+                    or self.config.default_text_model
+                )
+                self.clients[LLMProvider.GPT_OSS] = ChatOpenAI(
+                    model=model,
+                    api_key=SecretStr(oss_api_key),
+                    base_url=self.config.oss_api_base,
+                    max_completion_tokens=self.config.max_tokens,
+                    timeout=self.config.timeout,
+                )
+                logger.info("GPT-OSS client initialized")
+            except Exception as e:
+                logger.warning(
+                    f"Failed to initialize GPT-OSS provider: {e}"
+                )
 
         if not self.clients:
             raise RuntimeError(
@@ -114,6 +133,7 @@ class WorldClassAIEngine:
         self,
         input_data: MultimodalInput,
         system_prompt: str | None = None,
+        provider_priority: list[LLMProvider] | None = None,
     ) -> AIResponse:
         """
         Understand multimodal input with intelligent fallback.
@@ -128,8 +148,10 @@ class WorldClassAIEngine:
         errors: list[str] = []
         start_time = datetime.now()
 
+        priority = provider_priority or self.config.provider_priority
+
         # Try each provider in priority order
-        for provider in self.config.provider_priority:
+        for provider in priority:
             if provider not in self.clients:
                 continue
 
@@ -165,11 +187,33 @@ class WorldClassAIEngine:
     ) -> AIResponse:
         """Call specific provider."""
         client = self.clients[provider]
+        client_for_call: BaseChatModel = client
         messages: list[SystemMessage | HumanMessage] = []
 
         # Add system prompt
         if system_prompt:
             messages.append(SystemMessage(content=system_prompt))
+
+        # Switch to provider-specific vision model if needed
+        if input_data.image:
+            if (
+                provider == LLMProvider.OPENAI
+                and isinstance(client, ChatOpenAI)
+                and self.config.default_vision_model
+                and getattr(client, "model", None)
+                != self.config.default_vision_model
+            ):
+                client_for_call = client.bind(
+                    model=self.config.default_vision_model
+                )
+            elif (
+                provider == LLMProvider.GPT_OSS
+                and isinstance(client, ChatOpenAI)
+                and self.config.oss_vision_model
+            ):
+                client_for_call = client.bind(
+                    model=self.config.oss_vision_model
+                )
 
         # Build human message with multimodal content
         human_content: list[str | dict[str, Any]] = []
@@ -181,11 +225,12 @@ class WorldClassAIEngine:
         # Image (for vision models)
         if input_data.image:
             image_b64 = base64.b64encode(input_data.image).decode()
+            mime = input_data.image_mime_type or "image/jpeg"
             human_content.append(
                 {
                     "type": "image_url",
                     "image_url": {
-                        "url": f"data:image/jpeg;base64,{image_b64}"
+                        "url": f"data:{mime};base64,{image_b64}"
                     },
                 }
             )
@@ -200,7 +245,7 @@ class WorldClassAIEngine:
         messages.append(HumanMessage(content=human_content))
 
         # Invoke LLM
-        response = await client.ainvoke(messages)
+        response = await client_for_call.ainvoke(messages)
 
         # Ensure content is always a string
         if isinstance(response.content, str):
@@ -217,16 +262,26 @@ class WorldClassAIEngine:
             content_str = str(response.content)
 
         # Get model name attribute safely
-        model_name = getattr(client, "model", None) or getattr(client, "model_name", None) or "unknown"
+        model_name = (
+            getattr(client_for_call, "model", None)
+            or getattr(client_for_call, "model_name", None)
+            or "unknown"
+        )
+
+        metadata = getattr(response, "response_metadata", None)
+        token_usage = None
+        if metadata:
+            if isinstance(metadata, dict):
+                token_usage = metadata.get("token_usage")
+            else:
+                token_usage = getattr(metadata, "token_usage", None)
 
         return AIResponse(
             content=content_str,
             provider=provider,
             model=model_name,
-            tokens_used=getattr(
-                response.response_metadata, "token_usage", None
-            ),
-            metadata=response.response_metadata,
+            tokens_used=token_usage,
+            metadata=metadata if isinstance(metadata, dict) else metadata,
         )
 
     async def generate_adaptive_content(
@@ -234,6 +289,7 @@ class WorldClassAIEngine:
         prompt: str,
         cognitive_load: float = 0.5,
         cultural_context: dict[str, Any] | None = None,
+        provider_priority: list[LLMProvider] | None = None,
     ) -> str:
         """
         Generate content adapted to cognitive load and cultural context.
@@ -279,7 +335,9 @@ class WorldClassAIEngine:
         system_prompt = " ".join(system_parts)
 
         response = await self.understand(
-            MultimodalInput(text=prompt), system_prompt=system_prompt
+            MultimodalInput(text=prompt),
+            system_prompt=system_prompt,
+            provider_priority=provider_priority,
         )
 
         return response.content

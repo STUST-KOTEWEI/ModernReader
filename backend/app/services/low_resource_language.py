@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Optional
+from typing import Any, Optional, cast
 from datetime import datetime
 
 import torch
@@ -101,10 +101,13 @@ class LowResourceLanguageEngine:
             lazy_load: Load model only when needed (recommended)
         """
         # Use smaller model by default to avoid large downloads
-        if use_small_model and "distilled-600M" in model_name:
+        self.model_name = model_name
+        if use_small_model and "distilled-600M" in self.model_name:
             # Use the 200M version which is much smaller
             self.model_name = "facebook/nllb-200-distilled-1.3B"
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.device = torch.device(
+            "cuda" if torch.cuda.is_available() else "cpu"
+        )
         self.model: Optional[MBartForConditionalGeneration] = None
         self.tokenizer: Optional[NllbTokenizer] = None
         self.lora_model: Optional[Any] = None
@@ -165,7 +168,10 @@ class LowResourceLanguageEngine:
             self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
             model = AutoModelForSeq2SeqLM.from_pretrained(self.model_name)
             if isinstance(model, MBartForConditionalGeneration):
-                self.model = model.to(self.device)
+                # Move model to the configured device in-place.
+                # Satisfy type checkers.
+                self.model = cast(MBartForConditionalGeneration, model)
+                self.model.to(device=self.device)  # type: ignore[call-arg]
                 self.model.eval()
             logger.info("Model loaded successfully")
         except Exception as e:
@@ -267,21 +273,35 @@ class LowResourceLanguageEngine:
 
             # Tokenize
             self.tokenizer.src_lang = src_code
-            inputs = self.tokenizer(text, return_tensors="pt", max_length=max_length, truncation=True)
+            inputs = self.tokenizer(
+                text,
+                return_tensors="pt",
+                max_length=max_length,
+                truncation=True,
+            )
             inputs = {k: v.to(self.device) for k, v in inputs.items()}
 
             # Generate translation
             with torch.no_grad():
                 generated_tokens = self.model.generate(
                     **inputs,
-                    forced_bos_token_id=self.tokenizer.lang_code_to_id[tgt_code],
+                    forced_bos_token_id=(
+                        getattr(
+                            self.tokenizer,
+                            "lang_code_to_id",
+                            {}
+                        ).get(tgt_code, None)
+                    ),
                     max_length=max_length,
                     num_beams=5,
                     early_stopping=True,
                 )
 
             # Decode
-            translated = self.tokenizer.batch_decode(generated_tokens, skip_special_tokens=True)[0]
+            translated = self.tokenizer.batch_decode(
+                generated_tokens,
+                skip_special_tokens=True
+            )[0]
 
             # Calculate confidence (simplified)
             confidence = 0.75  # Would use model logits in production
@@ -456,7 +476,9 @@ class LowResourceLanguageEngine:
             ],
         }
 
-    def get_annotations_for_training(self, min_quality: float = 0.7) -> list[dict[str, Any]]:
+    def get_annotations_for_training(
+        self, min_quality: float = 0.7
+    ) -> list[dict[str, Any]]:
         """
         Get high-quality annotations for training.
 

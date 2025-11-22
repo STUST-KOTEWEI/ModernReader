@@ -14,6 +14,22 @@ export const LoginPage = () => {
   const [remember, setRemember] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [captchaQuestion, setCaptchaQuestion] = useState<{a:number;b:number}|null>(null);
+  const [captchaAnswer, setCaptchaAnswer] = useState<string>("");
+  const [captchaOk, setCaptchaOk] = useState<boolean>(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileSiteKey = (import.meta as any).env?.VITE_TURNSTILE_SITE_KEY as string | undefined;
+  const useTurnstile = !!turnstileSiteKey && !isDemo;
+  const widgetRef = React.useRef<HTMLDivElement | null>(null);
+
+  const isDemo = (() => {
+    try {
+      if (window.location.protocol === 'file:') return true;
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('demo')) return true;
+      return localStorage.getItem('mr_demo') === '1';
+    } catch { return false; }
+  })();
 
   // Detect if we're on localhost or production
   const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
@@ -49,13 +65,71 @@ export const LoginPage = () => {
     }
   }, []);
 
+  // Initialize CAPTCHA (Turnstile if configured, else simple math)
+  useEffect(() => {
+    if (useTurnstile) {
+      // Load script once
+      const anyWindow = window as any;
+      const init = () => {
+        try {
+          if (widgetRef.current && anyWindow.turnstile) {
+            anyWindow.turnstile.render(widgetRef.current, {
+              sitekey: turnstileSiteKey,
+              callback: (t: string) => setTurnstileToken(t),
+              'error-callback': () => setTurnstileToken(null),
+              'timeout-callback': () => setTurnstileToken(null),
+            });
+          }
+        } catch {}
+      };
+      if (anyWindow.turnstile && anyWindow.turnstile.render) {
+        init();
+      } else {
+        const scriptId = 'cf-turnstile';
+        if (!document.getElementById(scriptId)) {
+          const s = document.createElement('script');
+          s.id = scriptId;
+          s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+          s.async = true;
+          s.defer = true;
+          s.onload = () => init();
+          document.head.appendChild(s);
+        } else {
+          // if already added by another page
+          setTimeout(init, 0);
+        }
+      }
+      return;
+    }
+    // Fallback: simple math captcha
+    if (!isDemo) {
+      const a = Math.floor(3 + Math.random()*6); // 3..8
+      const b = Math.floor(2 + Math.random()*7); // 2..8
+      setCaptchaQuestion({a,b});
+      setCaptchaAnswer("");
+      setCaptchaOk(false);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setError(null);
     setLoading(true);
 
     try {
-      const response = await authClient.login({ email, password });
+      if (!isDemo && !useTurnstile) {
+        // minimal anti-bot check; replaced by Turnstile when configured
+        if (!captchaQuestion) throw new Error('驗證尚未就緒，請稍後再試');
+        const expected = captchaQuestion.a + captchaQuestion.b;
+        if (String(expected) !== String(captchaAnswer).trim()) {
+          throw new Error('請完成「我不是機器人」驗證');
+        }
+      }
+      if (useTurnstile && !turnstileToken) {
+        throw new Error('請完成「我不是機器人」驗證');
+      }
+      const response = await authClient.login({ email, password, captcha_token: turnstileToken || undefined });
       setSession({ token: response.access_token, user: { email } });
       try {
         if (remember) {
@@ -101,67 +175,177 @@ export const LoginPage = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="your@email.com"
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/50"
-              required
-            />
+        {isDemo && (
+          <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200">
+            <div className="flex items-start gap-3">
+              <span className="text-2xl">✨</span>
+              <div>
+                <h3 className="font-semibold text-emerald-800 mb-1">試用模式（免登入）</h3>
+                <p className="text-sm text-emerald-700 mb-2">
+                  不需註冊、不需輸入任何資料，直接點擊下方按鈕即可體驗所有功能！
+                </p>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    const demoToken = `demo.guest.${Date.now()}`;
+                    const demoEmail = 'demo@modernreader.local';
+                    setSession({ token: demoToken, user: { email: demoEmail } });
+                    try {
+                      localStorage.setItem('mr_jwt', demoToken);
+                      localStorage.setItem('mr_email', demoEmail);
+                    } catch {}
+                    navigate('/app');
+                  }}
+                  className="w-full mt-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold rounded-lg shadow-md"
+                >
+                  🚀 立即開始試用（免登入）
+                </Button>
+                <div className="mt-3 pt-3 border-t border-emerald-200">
+                  <p className="text-xs text-emerald-600 mb-1">想要完整功能？</p>
+                  <button
+                    type="button"
+                    className="text-sm font-medium text-emerald-700 hover:text-emerald-900 underline"
+                    onClick={() => { 
+                      try { 
+                        localStorage.removeItem('mr_demo');
+                        localStorage.removeItem('mr_demo_forced');
+                        localStorage.setItem('mr_online_requested', '1');
+                      } catch {}
+                      window.location.reload();
+                    }}
+                  >
+                    切換到線上版（需註冊）→
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
+        )}
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
-              密碼
-            </label>
-            <div className="relative">
-              <input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/50"
-                required
-                minLength={6}
-              />
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {!isDemo && (
+            <div className="p-3 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 text-sm">
+              <div className="flex items-center gap-2 mb-1">
+                <span>🔒</span>
+                <span className="font-semibold">線上版</span>
+              </div>
+              <p className="text-xs">需註冊帳號、通過人機驗證並由伺服器檢查帳密。</p>
               <button
                 type="button"
-                onClick={() => setShowPassword((s) => !s)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 hover:text-gray-700"
-                aria-label={showPassword ? "Hide password" : "Show password"}
+                className="mt-2 text-xs font-medium text-blue-600 hover:text-blue-800 underline"
+                onClick={() => { 
+                  try { 
+                    localStorage.setItem('mr_demo', '1');
+                    localStorage.setItem('mr_demo_forced', '1');
+                  } catch {}
+                  window.location.reload();
+                }}
               >
-                {showPassword ? "隱藏" : "顯示"}
+                ← 改用試用模式（免註冊免登入）
               </button>
             </div>
-            <div className="mt-3 flex items-center justify-between">
-              <label className="inline-flex items-center gap-2 text-sm text-gray-600">
+          )}
+          
+          {!isDemo && (
+            <>
+              <div>
+                <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Email
+                </label>
                 <input
-                  type="checkbox"
-                  checked={remember}
-                  onChange={(e) => setRemember(e.target.checked)}
-                  className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  autoComplete="email"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white text-gray-900 placeholder-gray-400"
+                  required
                 />
-                記住我
-              </label>
-              <span className="text-xs text-gray-400">至少 6 位字元</span>
-            </div>
-          </div>
+              </div>
 
-          <Button
-            type="submit"
-            className="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
-            disabled={loading || !email || password.length < 6}
-          >
-            {loading ? "登入中..." : "登入"}
-          </Button>
+              <div>
+                <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
+                  密碼
+                </label>
+                <div className="relative">
+                  <input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    autoComplete="current-password"
+                    className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white text-gray-900 placeholder-gray-400"
+                    required
+                    minLength={6}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((s) => !s)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 hover:text-gray-700"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? "隱藏" : "顯示"}
+                  </button>
+                </div>
+                <div className="mt-3 flex items-center justify-between">
+                  <label className="inline-flex items-center gap-2 text-sm text-gray-600">
+                    <input
+                      type="checkbox"
+                      checked={remember}
+                      onChange={(e) => setRemember(e.target.checked)}
+                      className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                    />
+                    記住我
+                  </label>
+                  <span className="text-xs text-gray-400">至少 6 位字元</span>
+                </div>
+              </div>
+
+              {!useTurnstile && (
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">我不是機器人</label>
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-1 rounded bg-gray-100 border text-sm">
+                      {(captchaQuestion?.a ?? '?')} + {(captchaQuestion?.b ?? '?')} =
+                    </span>
+                    <input
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      value={captchaAnswer}
+                      onChange={(e) => { setCaptchaAnswer(e.target.value); const ok = Number(e.target.value) === ((captchaQuestion?.a||0)+(captchaQuestion?.b||0)); setCaptchaOk(ok); }}
+                      className="w-24 px-3 py-2 border rounded"
+                      placeholder="答案"
+                      aria-label="anti-bot answer"
+                      required
+                    />
+                    {captchaOk && <span className="text-emerald-600 text-sm">✓</span>}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">正式部署可換成 Cloudflare Turnstile/Recaptcha</p>
+                </div>
+              )}
+
+              {useTurnstile && (
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">我不是機器人</label>
+                  <div ref={widgetRef} className="cf-turnstile" data-sitekey={turnstileSiteKey}></div>
+                </div>
+              )}
+
+              <Button
+                type="submit"
+                className="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+                disabled={
+                  loading || !email || password.length < 6 ||
+                  (!useTurnstile && !captchaOk) ||
+                  (useTurnstile && !turnstileToken)
+                }
+              >
+                {loading ? "登入中..." : "登入"}
+              </Button>
+            </>
+          )}
         </form>
 
         {enableOAuth && (

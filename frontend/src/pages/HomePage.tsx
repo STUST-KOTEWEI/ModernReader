@@ -69,6 +69,14 @@ export const HomePage: React.FC = () => {
               <p className="text-2xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
                 {language === 'zh' ? '探索智能閱讀的未來 - AI 驅動的多模態學習平台' : language === 'ja' ? 'インテリジェント読書の未来を探る - AI駆動のマルチモーダル学習プラットフォーム' : 'Explore the Future of Intelligent Reading - AI-Powered Multimodal Learning Platform'}
               </p>
+              <div className="flex flex-wrap gap-4 justify-center">
+                <Button onClick={() => navigate('/prototype')}>
+                  {language === 'zh' ? '互動原型' : language === 'ja' ? 'プロトタイプを見る' : 'View Prototype'}
+                </Button>
+                <Button variant="secondary" onClick={() => navigate('/signup')}>
+                  {language === 'zh' ? '加入等候名單' : language === 'ja' ? 'ウェイトリストに参加' : 'Join Waitlist'}
+                </Button>
+              </div>
             </div>
 
             {/* Interactive Demo Carousel */}

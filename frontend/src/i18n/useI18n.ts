@@ -14,6 +14,10 @@ export const useI18n = create<I18nStore>((set, get) => ({
     try {
       const saved = localStorage.getItem(LANG_STORAGE_KEY) as Language | null;
       if (saved && (['en','zh','ja'] as string[]).includes(saved)) return saved as Language;
+      // Auto-detect device/browser language when no saved preference
+      const nav = (navigator?.language || navigator?.languages?.[0] || 'en').toLowerCase();
+      if (nav.startsWith('zh')) return 'zh';
+      if (nav.startsWith('ja')) return 'ja';
     } catch {}
     return 'en';
   })(),

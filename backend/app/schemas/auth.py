@@ -8,11 +8,15 @@ class SignupRequest(BaseModel):
     password: str
     role: str = "learner"
     language_goal: str | None = None
+    username: str | None = None
+    avatar_url: str | None = None
+    captcha_token: str | None = None
 
 
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
+    captcha_token: str | None = None
 
 
 class AuthResponse(BaseModel):
@@ -22,3 +26,5 @@ class AuthResponse(BaseModel):
     user_id: str | None = None
     role: str | None = None
     email: EmailStr | None = None
+    username: str | None = None
+    avatar_url: str | None = None
