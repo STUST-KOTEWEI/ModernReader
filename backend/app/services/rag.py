@@ -61,7 +61,7 @@ class RAGService:
             }
             
             # 執行嵌入
-            result = await self.vector_store.ingest_documents(
+            _ = await self.vector_store.ingest_documents(
                 texts=[request.content],
                 metadatas=[metadata],
                 ids=[request.document_id]
@@ -72,14 +72,12 @@ class RAGService:
             return RAGIngestResponse(
                 job_id=job_id,
                 status="completed",
-                message=f"✅ 已嵌入 {result.get('total_chunks', 0)} 個文檔片段"
             )
         
-        except Exception as e:
+        except Exception:
             return RAGIngestResponse(
                 job_id=str(uuid.uuid4()),
                 status="failed",
-                message=f"❌ 嵌入失敗: {str(e)}"
             )
 
     async def query(self, request: RAGQueryRequest) -> RAGQueryResponse:
@@ -96,11 +94,9 @@ class RAGService:
             search_results = await self.vector_store.semantic_search(
                 query=request.query,
                 top_k=request.top_k or 5,
-                filter_dict=(
-                    {"language": request.language}
-                    if request.language
-                    else None
-                )
+                filter_dict={
+                    "language": request.language
+                } if request.language else {}
             )
             
             if not search_results:
@@ -172,9 +168,10 @@ class RAGService:
         
         for book in books:
             # 組合書籍完整資訊
+            authors = ", ".join(book.authors) if getattr(book, "authors", None) else "未知"
             full_text = f"""
 標題: {book.title}
-作者: {book.author or '未知'}
+作者: {authors}
 語言: {book.language or '未指定'}
 摘要: {book.summary or '無摘要'}
             """.strip()
@@ -183,7 +180,7 @@ class RAGService:
             metadatas.append({
                 "document_id": str(book.id),
                 "title": book.title,
-                "author": book.author,
+                "authors": getattr(book, "authors", []),
                 "language": book.language,
                 "content_type": "book_catalog"
             })

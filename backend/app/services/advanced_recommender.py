@@ -337,7 +337,8 @@ class MultiObjectiveRecommender:
         if explanation.get("related_to"):
             confidence += 0.1
 
-        return max(0.0, min(1.0, confidence))
+        # Cast to built-in float to avoid numpy.floating type issues
+        return max(0.0, min(1.0, float(confidence)))
 
     def counterfactual_explain(
         self,

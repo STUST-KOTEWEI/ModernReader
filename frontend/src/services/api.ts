@@ -1,6 +1,15 @@
 import axios from "axios";
 
+// Use relative baseURL so it works on custom domains (e.g., https://modernreader.com)
 const client = axios.create({ baseURL: "/api/v1" });
+
+// Core AI API
+export const aiClient = {
+  async analyzeEmotion(payload: { text: string }) {
+    const response = await client.post("/ai/emotion/analyze", payload);
+    return response.data as { top_emotion: string; emotions: Record<string, number> };
+  },
+};
 
 export const authClient = {
   async login(payload: { email: string; password: string }) {
@@ -43,6 +52,10 @@ export const catalogClient = {
   async search(payload: { q?: string; language?: string; source?: string }) {
     const response = await client.get("/catalog/search", { params: payload });
     return response.data;
+  },
+  async importSample() {
+    const response = await client.post("/catalog/import-sample");
+    return response.data as { status: string; inserted?: number; existing?: number };
   }
 };
 
@@ -65,6 +78,11 @@ export const epaperClient = {
 export const ragClient = {
   async ingest(payload: { content: string; metadata?: Record<string, unknown>; collection_name?: string }) {
     const response = await client.post("/rag/ingest", payload);
+    return response.data;
+  },
+  async ingestCatalog() {
+    // Extended endpoint to ingest sample/DB catalog into vector store or knowledge base
+    const response = await client.post("/rag/ingest-catalog");
     return response.data;
   },
   async query(payload: { query: string; collection_name?: string; top_k?: number; language?: string }) {
@@ -158,6 +176,38 @@ export const audioClient = {
   }
 };
 
+// User Settings API
+export const userClient = {
+  async getSettings(token?: string) {
+    const auth = token || (typeof localStorage !== 'undefined' ? localStorage.getItem('mr_jwt') || '' : '');
+    const response = await client.get('/users/me/settings', {
+      headers: auth ? { Authorization: `Bearer ${auth}` } : undefined,
+    });
+    return response.data as {
+      default_language?: string | null;
+      tts_voice?: string | null;
+      romanization_scheme?: string | null;
+      autoplay_tts: boolean;
+      learning_opt_in: boolean;
+      preferences?: Record<string, any> | null;
+    };
+  },
+  async updateSettings(payload: Partial<{
+    default_language: string | null;
+    tts_voice: string | null;
+    romanization_scheme: string | null;
+    autoplay_tts: boolean;
+    learning_opt_in: boolean;
+    preferences: Record<string, any> | null;
+  }>, token?: string) {
+    const auth = token || (typeof localStorage !== 'undefined' ? localStorage.getItem('mr_jwt') || '' : '');
+    const response = await client.put('/users/me/settings', payload, {
+      headers: auth ? { Authorization: `Bearer ${auth}` } : undefined,
+    });
+    return response.data;
+  }
+};
+
 // Indigenous Language API (Handwriting + Pronunciation Training)
 export const indigenousClient = {
   async recognizeHandwriting(formData: FormData) {
@@ -189,6 +239,18 @@ export const indigenousClient = {
   async listLanguages() {
     const response = await client.get("/indigenous/languages");
     return response.data;
+  },
+  async createLanguage(payload: {
+    code: string;
+    name: string;
+    region?: string;
+    family?: string;
+    script?: string;
+    aliases?: string[];
+    metadata?: Record<string, unknown>;
+  }) {
+    const response = await client.post("/indigenous/languages", payload);
+    return response.data as { status: string; language: { code: string; name: string } };
   }
 };
 

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { indigenousClient } from '../services/api';
+import { useEffect, useState } from 'react';
+import { indigenousClient, audioClient, ragClient } from '../services/api';
 import { useI18n } from '../i18n/useI18n';
 
 interface Language {
@@ -36,6 +36,8 @@ export default function IndigenousLanguagePage() {
   const [handwritingFile, setHandwritingFile] = useState<File | null>(null);
   const [recognitionResult, setRecognitionResult] = useState<RecognitionResult | null>(null);
   const [recognitionLoading, setRecognitionLoading] = useState(false);
+  const [romanizationInput, setRomanizationInput] = useState("");
+  const [speaking, setSpeaking] = useState(false);
   
   // Pronunciation training state
   const [audioFile, setAudioFile] = useState<File | null>(null);
@@ -45,9 +47,76 @@ export default function IndigenousLanguagePage() {
   const [pronunciationLoading, setPronunciationLoading] = useState(false);
 
   // Load languages on mount
-  useState(() => {
+  useEffect(() => {
     indigenousClient.listLanguages().then(setLanguages).catch(console.error);
-  });
+  }, []);
+
+  // Add custom language state
+  const [showAdd, setShowAdd] = useState(false);
+  const [newCode, setNewCode] = useState("");
+  const [newName, setNewName] = useState("");
+  const [newRegion, setNewRegion] = useState("");
+  const [newFamily, setNewFamily] = useState("");
+  const [newScript, setNewScript] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const handleAddLanguage = async () => {
+    if (!newCode || !newName) return;
+    try {
+      setSaving(true);
+      await indigenousClient.createLanguage({
+        code: newCode.trim(),
+        name: newName.trim(),
+        region: newRegion || undefined,
+        family: newFamily || undefined,
+        script: newScript || undefined,
+      });
+      const list: Language[] = await indigenousClient.listLanguages();
+      setLanguages(list);
+      setSelectedLanguage(newCode.trim());
+      // reset form
+      setNewCode("");
+      setNewName("");
+      setNewRegion("");
+      setNewFamily("");
+      setNewScript("");
+      setShowAdd(false);
+    } catch (err: any) {
+      alert(err?.response?.data?.detail || "Failed to add language");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleConfirmAndSpeak = async () => {
+    if (!recognitionResult) return;
+    const text = romanizationInput.trim() || recognitionResult.romanized_text || recognitionResult.recognized_text;
+    if (!text) return;
+    try {
+      setSpeaking(true);
+      // 1) 合成語音並播放（讓學習者立即聽到）
+      const blob = await audioClient.synthesize({ text, language: selectedLanguage });
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      await audio.play();
+
+      // 2) 將結果送入 RAG 作為學習樣本（讓 LLM/RAG 知道並學習）
+      const content = `handwriting_sample\nlanguage=${selectedLanguage}\nrecognized=${recognitionResult.recognized_text}\nromanization=${text}`;
+      await ragClient.ingest({
+        content,
+        metadata: {
+          source: "user_handwriting_training",
+          language: selectedLanguage,
+          timestamp: new Date().toISOString(),
+        }
+      });
+    } catch (e) {
+      console.error(e);
+      alert(t('error'));
+    } finally {
+      setSpeaking(false);
+    }
+  };
 
   const handleHandwritingRecognition = async () => {
     if (!handwritingFile) return;
@@ -95,37 +164,113 @@ export default function IndigenousLanguagePage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
-            🏔️ Taiwan Indigenous Languages
+            🏔️ {t('indigenousTitle')}
           </h1>
           <p className="text-gray-600 dark:text-gray-300 text-lg">
-            16 Indigenous Languages • Handwriting Recognition • Pronunciation Training
+            {t('indigenousSubtitle')}
           </p>
         </div>
 
-        {/* Language Selector */}
+        {/* Language Selector + Add Custom */}
         <div className="bg-white dark:bg-gray-800 rounded-xl p-6 mb-6 shadow-lg">
-          <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
-            Select Language / 選擇語言
+          <label htmlFor="language-select" className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
+            {t('selectLanguage')}
           </label>
           <select
+            id="language-select"
             value={selectedLanguage}
             onChange={(e) => setSelectedLanguage(e.target.value)}
             className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           >
-            <option value="ami">Amis 阿美語</option>
-            <option value="tay">Atayal 泰雅語</option>
-            <option value="pwn">Paiwan 排灣語</option>
-            <option value="bnn">Bunun 布農語</option>
-            <option value="pyu">Puyuma 卑南語</option>
-            <option value="dru">Rukai 魯凱語</option>
-            <option value="tsu">Tsou 鄒語</option>
-            <option value="xsy">Saisiyat 賽夏語</option>
-            <option value="tao">Yami (Tao) 雅美語</option>
-            <option value="ssf">Thao 邵語</option>
-            <option value="ckv">Kavalan 噶瑪蘭語</option>
-            <option value="trv">Truku 太魯閣語</option>
-            <option value="szy">Sakizaya 撒奇萊雅語</option>
+            {languages.length > 0 ? (
+              languages.map((lang) => (
+                <option key={lang.code} value={lang.code}>{lang.name}</option>
+              ))
+            ) : (
+              <>
+                <option value="ami">Amis 阿美語</option>
+                <option value="tay">Atayal 泰雅語</option>
+                <option value="pwn">Paiwan 排灣語</option>
+                <option value="bnn">Bunun 布農語</option>
+                <option value="pyu">Puyuma 卑南語</option>
+                <option value="dru">Rukai 魯凱語</option>
+                <option value="tsu">Tsou 鄒語</option>
+                <option value="xsy">Saisiyat 賽夏語</option>
+                <option value="tao">Yami (Tao) 雅美語</option>
+                <option value="ssf">Thao 邵語</option>
+                <option value="ckv">Kavalan 噶瑪蘭語</option>
+                <option value="trv">Truku 太魯閣語</option>
+                <option value="szy">Sakizaya 撒奇萊雅語</option>
+              </>
+            )}
           </select>
+          <div className="mt-4">
+            <button
+              onClick={() => setShowAdd(!showAdd)}
+              className="text-sm text-amber-700 hover:text-amber-800 dark:text-amber-400"
+            >
+              {showAdd ? '－ 隱藏新增語言' : '＋ 新增自訂語言'}
+            </button>
+          </div>
+
+          {showAdd && (
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-semibold mb-1 text-gray-600 dark:text-gray-300">語言代碼 (必填)</label>
+                <input
+                  value={newCode}
+                  onChange={(e) => setNewCode(e.target.value)}
+                  placeholder="如: njo, yua, nav"
+                  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold mb-1 text-gray-600 dark:text-gray-300">語言名稱 (必填)</label>
+                <input
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  placeholder="如: Ngawo, Yucatec Maya"
+                  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold mb-1 text-gray-600 dark:text-gray-300">地區</label>
+                <input
+                  value={newRegion}
+                  onChange={(e) => setNewRegion(e.target.value)}
+                  placeholder="如: Mexico, Pacific, East Asia"
+                  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold mb-1 text-gray-600 dark:text-gray-300">語系</label>
+                <input
+                  value={newFamily}
+                  onChange={(e) => setNewFamily(e.target.value)}
+                  placeholder="如: Austronesian, Mayan"
+                  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-xs font-semibold mb-1 text-gray-600 dark:text-gray-300">文字</label>
+                <input
+                  value={newScript}
+                  onChange={(e) => setNewScript(e.target.value)}
+                  placeholder="如: Latin, Syllabary"
+                  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded"
+                />
+              </div>
+              <div className="md:col-span-2 flex justify-end">
+                <button
+                  onClick={handleAddLanguage}
+                  disabled={!newCode || !newName || saving}
+                  className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded disabled:opacity-50"
+                >
+                  {saving ? '儲存中…' : '新增語言'}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Tab Navigation */}
@@ -138,7 +283,7 @@ export default function IndigenousLanguagePage() {
                 : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-amber-100'
             }`}
           >
-            ✍️ Handwriting Recognition
+            ✍️ {t('handwritingRecognition')}
           </button>
           <button
             onClick={() => setActiveTab('pronunciation')}
@@ -148,7 +293,7 @@ export default function IndigenousLanguagePage() {
                 : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-amber-100'
             }`}
           >
-            🎤 Pronunciation Training
+            🎤 {t('pronunciationTraining')}
           </button>
         </div>
 
@@ -156,7 +301,7 @@ export default function IndigenousLanguagePage() {
         {activeTab === 'handwriting' && (
           <div className="bg-white dark:bg-gray-800 rounded-xl p-8 shadow-lg">
             <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">
-              Handwritten Text Recognition
+              {t('handwritingRecognition')}
             </h2>
             
             <div className="mb-6">
@@ -167,6 +312,7 @@ export default function IndigenousLanguagePage() {
                 type="file"
                 accept="image/*"
                 onChange={(e) => setHandwritingFile(e.target.files?.[0] || null)}
+                aria-label="Upload Handwritten Image"
                 className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg"
               />
             </div>
@@ -196,6 +342,31 @@ export default function IndigenousLanguagePage() {
                   </h3>
                   <p className="text-xl font-mono text-gray-900 dark:text-white">
                     {recognitionResult.romanized_text}
+                  </p>
+                </div>
+
+                {/* 使用者輸入拼音/羅馬字並完成＋發音 */}
+                <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                  <h3 className="font-semibold text-amber-800 dark:text-amber-300 mb-2">
+                    ✍️ 輸入拼音/羅馬字（可修正）
+                  </h3>
+                  <div className="flex gap-3 items-center">
+                    <input
+                      value={romanizationInput}
+                      onChange={(e) => setRomanizationInput(e.target.value)}
+                      placeholder="例如: Nga'ay ho"
+                      className="flex-1 p-2 border border-amber-300 dark:border-amber-700 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                    />
+                    <button
+                      onClick={handleConfirmAndSpeak}
+                      className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded disabled:opacity-50"
+                      disabled={speaking}
+                    >
+                      {speaking ? '🔊 播放中…' : '✅ 完成並發音'}
+                    </button>
+                  </div>
+                  <p className="mt-2 text-xs text-amber-800/80 dark:text-amber-300/80">
+                    完成後會：1) 朗讀此拼音，2) 將此筆記錄送入學習庫（RAG），幫助 AI 更了解此語言。
                   </p>
                 </div>
 
@@ -240,7 +411,7 @@ export default function IndigenousLanguagePage() {
         {activeTab === 'pronunciation' && (
           <div className="bg-white dark:bg-gray-800 rounded-xl p-8 shadow-lg">
             <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">
-              Pronunciation Assessment
+              {t('pronunciationTraining')}
             </h2>
             
             <div className="space-y-6 mb-6">
@@ -252,6 +423,7 @@ export default function IndigenousLanguagePage() {
                   type="file"
                   accept="audio/*"
                   onChange={(e) => setAudioFile(e.target.files?.[0] || null)}
+                  aria-label="Upload Audio Recording"
                   className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg"
                 />
               </div>
@@ -277,6 +449,7 @@ export default function IndigenousLanguagePage() {
                   type="text"
                   value={speakerId}
                   onChange={(e) => setSpeakerId(e.target.value)}
+                  aria-label="Speaker ID"
                   className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
               </div>
@@ -365,28 +538,28 @@ export default function IndigenousLanguagePage() {
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
             <div className="text-4xl mb-4">✍️</div>
             <h3 className="font-bold text-lg mb-2 text-gray-800 dark:text-white">
-              Handwriting Recognition
+              {t('featureHandwritingTitle')}
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-300">
-              Convert handwritten indigenous text to digital format with automatic romanization
+              {t('featureHandwritingDesc')}
             </p>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
             <div className="text-4xl mb-4">🎤</div>
             <h3 className="font-bold text-lg mb-2 text-gray-800 dark:text-white">
-              Pronunciation Training
+              {t('featurePronunciationTitle')}
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-300">
-              Get real-time feedback on your pronunciation with AI-powered assessment
+              {t('featurePronunciationDesc')}
             </p>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
             <div className="text-4xl mb-4">🤖</div>
             <h3 className="font-bold text-lg mb-2 text-gray-800 dark:text-white">
-              LLM Training Data
+              {t('featureLLMDataTitle')}
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-300">
-              Your recordings help train better AI models for indigenous language preservation
+              {t('featureLLMDataDesc')}
             </p>
           </div>
         </div>

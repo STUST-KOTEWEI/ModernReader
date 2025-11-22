@@ -2,6 +2,7 @@
 AI 相關的 API 路由（LLM + RAG）
 """
 from fastapi import APIRouter, Depends, HTTPException
+from typing import Any
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
@@ -28,7 +29,7 @@ class UnderstandRequest(BaseModel):
         None, description="輸入文本", max_length=10000
     )
     image_url: str | None = Field(None, description="圖片 URL（可選）")
-    context: dict | None = Field(None, description="額外上下文")
+    context: dict[str, Any] | None = Field(None, description="額外上下文")
 
 
 class UnderstandResponse(BaseModel):
@@ -46,7 +47,7 @@ class AdaptiveContentRequest(BaseModel):
     cognitive_load: float = Field(
         0.5, description="認知負荷 (0-1)", ge=0.0, le=1.0
     )
-    cultural_context: dict | None = Field(
+    cultural_context: dict[str, Any] | None = Field(
         None, description="文化上下文（語言、背景等）"
     )
 
@@ -55,6 +56,24 @@ class AdaptiveContentResponse(BaseModel):
     """認知負荷自適應內容生成回應"""
 
     content: str = Field(description="生成的內容")
+
+
+# ===== Emotion Detection（Text-based） =====
+
+
+class EmotionAnalyzeRequest(BaseModel):
+    """情緒分析請求（基於文本）"""
+
+    text: str = Field(description="輸入文本", max_length=10000)
+
+
+class EmotionAnalyzeResponse(BaseModel):
+    """情緒分析回應"""
+
+    top_emotion: str = Field(description="最可能的情緒標籤")
+    emotions: dict[str, float] = Field(
+        description="各情緒的機率分佈（總和為 1）"
+    )
 
 
 @router.post("/understand", response_model=UnderstandResponse)
@@ -70,17 +89,18 @@ async def understand_content(request: UnderstandRequest):
     engine = get_ai_engine()
 
     try:
+        # 現階段 MultimodalInput 僅支援 image bytes；
+        # 若提供 image_url，可由前端或後端擴充下載後再傳入。
         result = await engine.understand(
             MultimodalInput(
                 text=request.text,
-                image_url=request.image_url,
                 context=request.context,
             )
         )
         return UnderstandResponse(
             content=result.content,
             provider=result.provider.value,
-            tokens_used=result.tokens_used,
+            tokens_used=result.tokens_used or 0,
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -105,6 +125,23 @@ async def generate_adaptive(request: AdaptiveContentRequest):
             cultural_context=request.cultural_context,
         )
         return AdaptiveContentResponse(content=content)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/emotion/analyze", response_model=EmotionAnalyzeResponse)
+async def analyze_emotion_text(request: EmotionAnalyzeRequest):
+    """
+    簡易的文本情緒偵測端點（無外部依賴）
+
+    - 使用輕量字典和表情符號啟發式
+    - 回傳每個情緒的相對機率以及 top_emotion
+    """
+    try:
+        from app.services.emotion import analyze_text_emotions
+
+        probs, top = analyze_text_emotions(request.text)
+        return EmotionAnalyzeResponse(top_emotion=top, emotions=probs)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

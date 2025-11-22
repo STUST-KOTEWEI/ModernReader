@@ -10,6 +10,9 @@ export const AudioPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<BlobPart[]>([]);
+  const [isRecording, setIsRecording] = useState(false);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -29,16 +32,62 @@ export const AudioPage: React.FC = () => {
     }
   };
 
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mr = new MediaRecorder(stream);
+      chunksRef.current = [];
+      mr.ondataavailable = (ev) => {
+        if (ev.data && ev.data.size > 0) chunksRef.current.push(ev.data);
+      };
+      mr.onstop = async () => {
+        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        const form = new FormData();
+        form.append('file', blob, 'recording.webm');
+        setLoading(true);
+        try {
+          const resp = await audioClient.transcribe(form);
+          setTranscription(resp.text || '');
+        } catch (err) {
+          setTranscription('Error: Unable to transcribe audio');
+        } finally {
+          setLoading(false);
+        }
+      };
+      mediaRecorderRef.current = mr;
+      mr.start();
+      setIsRecording(true);
+    } catch (e) {
+      alert(t('micAccessDenied'));
+    }
+  };
+
+  const stopRecording = () => {
+    const mr = mediaRecorderRef.current;
+    if (mr && mr.state !== 'inactive') {
+      mr.stop();
+      setIsRecording(false);
+    }
+  };
+
   const handleTextToSpeech = async () => {
     if (!ttsText.trim()) return;
 
     setLoading(true);
     try {
-      const audioBlob = await audioClient.synthesize({ text: ttsText, language: 'zh' });
+      const raw = await audioClient.synthesize({ text: ttsText, language: 'zh' });
+      const audioBlob = (raw && (raw as Blob).type) ? (raw as Blob) : new Blob([raw], { type: 'audio/mpeg' });
       const audioUrl = URL.createObjectURL(audioBlob);
       if (audioRef.current) {
+        audioRef.current.pause();
         audioRef.current.src = audioUrl;
-        audioRef.current.play();
+        audioRef.current.load();
+        try {
+          await audioRef.current.play();
+        } catch (e) {
+          console.error('Autoplay blocked or playback error', e);
+          // 使用者互動後再播
+        }
       }
     } catch (err) {
       console.error('TTS failed', err);
@@ -49,7 +98,7 @@ export const AudioPage: React.FC = () => {
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
-      <h1 className="text-3xl font-bold">Audio Features (STT/TTS)</h1>
+      <h1 className="text-3xl font-bold">{t('audioFeatures')}</h1>
 
       {/* Speech-to-Text */}
       <Card title={t('uploadAudio')}>
@@ -59,12 +108,21 @@ export const AudioPage: React.FC = () => {
             type="file"
             accept="audio/*"
             onChange={handleFileUpload}
+            aria-label={t('uploadAudio')}
             className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
           />
+          <div className="flex items-center gap-3">
+            {!isRecording ? (
+              <Button onClick={startRecording} disabled={loading}>{t('recordAudio')}</Button>
+            ) : (
+              <Button onClick={stopRecording} disabled={loading}>{t('stopRecording')}</Button>
+            )}
+            {isRecording && <span className="text-red-600 text-sm">{t('recording')}</span>}
+          </div>
           
           {transcription && (
             <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded">
-              <h3 className="font-semibold mb-2">Transcription:</h3>
+              <h3 className="font-semibold mb-2">{t('transcription')}:</h3>
               <p>{transcription}</p>
             </div>
           )}
@@ -77,7 +135,7 @@ export const AudioPage: React.FC = () => {
           <textarea
             value={ttsText}
             onChange={(e) => setTtsText(e.target.value)}
-            placeholder="Enter text to convert to speech..."
+            placeholder={t('enterText')}
             className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-indigo-500"
             rows={4}
           />

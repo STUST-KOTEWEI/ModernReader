@@ -18,17 +18,15 @@
 10. 漏洞掃描與監控
 """
 
-from fastapi import Request, HTTPException, status, Depends
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi import Request, HTTPException, status
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 from typing import Optional, Dict, Any, Callable
 import time
 import hashlib
-import hmac
 import secrets
 import re
-from datetime import datetime, timedelta
+from datetime import datetime
 from collections import defaultdict
 import logging
 import json
@@ -129,8 +127,17 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         )
         
         # 移除版本資訊 (隱藏技術棧)
-        response.headers.pop("Server", None)
-        response.headers.pop("X-Powered-By", None)
+        if "Server" in response.headers:
+            try:
+                del response.headers["Server"]
+            except Exception:
+                # 某些 Header 實作不可變，忽略移除失敗
+                pass
+        if "X-Powered-By" in response.headers:
+            try:
+                del response.headers["X-Powered-By"]
+            except Exception:
+                pass
         
         return response
 
@@ -329,7 +336,7 @@ class AuditLogger:
         action: str,
         resource: str,
         result: str,
-        details: Dict[str, Any] = None,
+        details: Optional[Dict[str, Any]] = None,
         request: Optional[Request] = None
     ):
         """記錄安全事件"""

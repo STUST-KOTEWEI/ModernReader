@@ -10,7 +10,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useI18n } from '../i18n/useI18n';
 import {
   Send,
   Mic,
@@ -46,7 +46,7 @@ interface LanguageOption {
 }
 
 export default function IndigenousChatbotPage() {
-  const { t } = useTranslation();
+  const { t } = useI18n();
 
   // State
   const [selectedLanguage, setSelectedLanguage] = useState<string>('mi');
@@ -161,7 +161,7 @@ export default function IndigenousChatbotPage() {
     // TODO: Implement actual voice recording
     setTimeout(() => {
       setIsRecording(false);
-      setInputMessage('Hello, how are you?');
+      setInputMessage(t('helloSample'));
     }, 2000);
   };
 
@@ -202,10 +202,10 @@ export default function IndigenousChatbotPage() {
             <Globe className="w-8 h-8 text-blue-600" />
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
-                {t('Indigenous Language AI Chatbot')}
+                {t('indigenousChatTitle')}
               </h1>
               <p className="text-sm text-gray-600">
-                {statistics ? `${statistics.total_languages} languages • ${(statistics.total_speakers / 1000000).toFixed(1)}M speakers` : 'Loading...'}
+                {statistics ? `${statistics.total_languages} languages • ${(statistics.total_speakers / 1000000).toFixed(1)}M speakers` : t('loading')}
               </p>
             </div>
           </div>
@@ -227,7 +227,7 @@ export default function IndigenousChatbotPage() {
             {/* Settings Button */}
             <button
               className="p-2 hover:bg-gray-100 rounded-lg"
-              title="Settings"
+              title={t('settings')}
             >
               <Settings className="w-5 h-5 text-gray-600" />
             </button>
@@ -264,24 +264,23 @@ export default function IndigenousChatbotPage() {
             <div className="text-center max-w-md">
               <Brain className="w-16 h-16 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Start a conversation
+                {t('startConversationTitle')}
               </h3>
               <p className="text-sm text-gray-600 mb-4">
-                Chat with AI in {selectedLangInfo?.name || 'indigenous language'}. 
-                Get translations, pronunciation, and cultural context.
+                {t('startConversationHint')}
               </p>
               <div className="grid grid-cols-3 gap-2 text-xs">
                 <div className="p-2 bg-blue-50 rounded">
                   <CheckCircle className="w-4 h-4 text-blue-600 mx-auto mb-1" />
-                  <p className="text-gray-700">Translation</p>
+                  <p className="text-gray-700">{t('translation')}</p>
                 </div>
                 <div className="p-2 bg-green-50 rounded">
                   <Volume2 className="w-4 h-4 text-green-600 mx-auto mb-1" />
-                  <p className="text-gray-700">Pronunciation</p>
+                  <p className="text-gray-700">{t('pronunciationLabel')}</p>
                 </div>
                 <div className="p-2 bg-purple-50 rounded">
                   <BookOpen className="w-4 h-4 text-purple-600 mx-auto mb-1" />
-                  <p className="text-gray-700">Cultural Context</p>
+                  <p className="text-gray-700">{t('culturalContext')}</p>
                 </div>
               </div>
             </div>
@@ -318,7 +317,7 @@ export default function IndigenousChatbotPage() {
                 {/* Translation */}
                 {msg.translation && (
                   <div className="mt-2 pt-2 border-t border-gray-200">
-                    <p className="text-xs text-gray-600 mb-1">Translation:</p>
+                    <p className="text-xs text-gray-600 mb-1">{t('translation')}:</p>
                     <p className="text-sm text-gray-700">{msg.translation}</p>
                   </div>
                 )}
@@ -326,7 +325,7 @@ export default function IndigenousChatbotPage() {
                 {/* Pronunciation */}
                 {msg.pronunciation && (
                   <div className="mt-2 pt-2 border-t border-gray-200">
-                    <p className="text-xs text-gray-600 mb-1">Pronunciation:</p>
+                    <p className="text-xs text-gray-600 mb-1">{t('pronunciationLabel')}:</p>
                     <p className="text-sm font-mono text-gray-700">{msg.pronunciation}</p>
                   </div>
                 )}
@@ -337,7 +336,7 @@ export default function IndigenousChatbotPage() {
                     <div className="flex items-start gap-2">
                       <BookOpen className="w-4 h-4 text-purple-600 mt-0.5" />
                       <div>
-                        <p className="text-xs text-gray-600 mb-1">Cultural Context:</p>
+                        <p className="text-xs text-gray-600 mb-1">{t('culturalContext')}:</p>
                         <p className="text-sm text-gray-700">{msg.culturalContext}</p>
                       </div>
                     </div>
@@ -416,7 +415,7 @@ export default function IndigenousChatbotPage() {
                 ? 'bg-red-600 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
-            title="Voice input"
+            title={t('voiceInput')}
           >
             <Mic className={`w-5 h-5 ${isRecording ? 'animate-pulse' : ''}`} />
           </button>
@@ -428,7 +427,7 @@ export default function IndigenousChatbotPage() {
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder={`Type a message in English or ${selectedLangInfo?.name}...`}
+            placeholder={t('typeMessagePlaceholder')}
             className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             disabled={isLoading}
           />
@@ -444,7 +443,7 @@ export default function IndigenousChatbotPage() {
             ) : (
               <Send className="w-5 h-5" />
             )}
-            Send
+            {t('send')}
           </button>
         </div>
 
@@ -452,7 +451,7 @@ export default function IndigenousChatbotPage() {
         {isLoading && (
           <div className="mt-2 flex items-center gap-2 text-sm text-gray-600">
             <Loader className="w-4 h-4 animate-spin" />
-            AI is thinking...
+            {t('aiThinking')}
           </div>
         )}
       </div>

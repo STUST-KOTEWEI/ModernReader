@@ -12,6 +12,8 @@ services:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
       - DATABASE_URL=sqlite:///./modernreader.db
+      - CORS_ALLOW_ORIGINS=https://modernreader.com,https://www.modernreader.com
+      - TRUSTED_HOSTS=modernreader.com,www.modernreader.com,api.modernreader.com
     volumes:
       - ./backend/chroma_db:/app/chroma_db
       - ./backend/vectors:/app/vectors

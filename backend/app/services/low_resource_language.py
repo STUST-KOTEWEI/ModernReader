@@ -337,7 +337,8 @@ class LowResourceLanguageEngine:
         )
 
         self.lora_model = get_peft_model(self.model, lora_config)
-        self.lora_model.print_trainable_parameters()
+        if self.lora_model is not None:
+            self.lora_model.print_trainable_parameters()
         logger.info("LoRA setup complete")
 
     async def collect_annotation(

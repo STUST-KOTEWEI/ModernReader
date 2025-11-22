@@ -1,20 +1,23 @@
 """API endpoints for indigenous language processing."""
-from fastapi import APIRouter, Depends, File, Form, UploadFile
-from typing import Optional
+from fastapi import APIRouter, Depends, File, Form, UploadFile, HTTPException
+from sqlalchemy.orm import Session
 
 from app.schemas.indigenous import (
     HandwritingRecognitionResponse,
     PronunciationTrainingRequest,
     PronunciationTrainingResponse,
-    PronunciationAssessmentRequest,
     PronunciationAssessmentResponse,
     LanguageInfoResponse,
+    CustomLanguageCreateRequest,
+    LanguageListItem,
 )
 from app.services.indigenous_handwriting import (
     IndigenousHandwritingEngine,
     PronunciationTrainingEngine,
     IndigenousLanguage,
 )
+from app.db.database import get_db
+from app.models.indigenous_language import IndigenousLanguageProfile
 
 router = APIRouter()
 
@@ -43,7 +46,7 @@ async def recognize_handwriting(
     """
     Recognize handwritten indigenous language text and optionally romanize.
 
-    Supports 16 Taiwan indigenous languages including:
+    Supports indigenous languages (built-in examples include):
     - Amis (ami), Atayal (tay), Paiwan (pwn), Bunun (bnn)
     - Puyuma (pyu), Rukai (dru), Tsou (tsu), Saisiyat (xsy)
     - Yami/Tao (tao), Thao (ssf), Kavalan (ckv), Truku (trv)
@@ -115,7 +118,10 @@ async def train_pronunciation(
     )
 
     return PronunciationTrainingResponse(
-        job_id=f"train_{request.speaker_id}_{int(result.metadata['duration_sec'] * 1000)}",
+        job_id=(
+            f"train_{request.speaker_id}_"
+            f"{int(result.metadata['duration_sec'] * 1000)}"
+        ),
         audio_url=result.audio_url,
         language=result.language.value,
         quality_score=result.audio_quality_score,
@@ -149,7 +155,9 @@ async def assess_pronunciation(
     lang_enum = IndigenousLanguage(language)
 
     result = engine.assess_pronunciation(
-        audio_data=audio_data, reference_text=reference_text, language=lang_enum
+        audio_data=audio_data,
+        reference_text=reference_text,
+        language=lang_enum,
     )
 
     return PronunciationAssessmentResponse(
@@ -199,14 +207,77 @@ async def get_language_info(
 
 @router.get(
     "/languages",
-    response_model=list[dict],
-    summary="List all supported indigenous languages",
+    response_model=list[LanguageListItem],
+    summary="List supported indigenous languages (builtin + custom)",
 )
-async def list_languages() -> list[dict]:
+async def list_languages(db: Session = Depends(get_db)):
+    """Return builtin languages plus custom registry entries.
+
+    - builtin: sourced from IndigenousLanguage enum
+    - custom: stored in DB (global, user-added)
     """
-    List all 16 Taiwan indigenous languages supported.
-    """
-    return [
-        {"code": lang.value, "name": lang.name}
+    builtin = [
+        LanguageListItem(code=lang.value, name=lang.name, source="builtin")
         for lang in IndigenousLanguage
     ]
+    customs = [
+        LanguageListItem(
+            code=rec.code,
+            name=rec.name,
+            region=rec.region,
+            family=rec.family,
+            script=rec.script,
+            source="custom",
+        )
+        for rec in db.query(IndigenousLanguageProfile).all()
+    ]
+    # Deduplicate by code, prefer custom entry
+    by_code = {item.code: item for item in builtin}
+    for c in customs:
+        by_code[c.code] = c
+    return list(by_code.values())
+
+
+@router.post(
+    "/languages",
+    summary="Create a custom indigenous language",
+)
+async def create_language(
+    request: CustomLanguageCreateRequest,
+    db: Session = Depends(get_db),
+):
+    # Check exists
+    existing = (
+        db.query(IndigenousLanguageProfile)
+        .filter(IndigenousLanguageProfile.code == request.code)
+        .one_or_none()
+    )
+    if existing:
+        raise HTTPException(
+            status_code=400,
+            detail="Language code already exists",
+        )
+
+    rec = IndigenousLanguageProfile(
+        code=request.code,
+        name=request.name,
+        region=request.region,
+        family=request.family,
+        script=request.script,
+        aliases=request.aliases,
+        metadata=request.metadata,
+        is_custom=True,
+    )
+    db.add(rec)
+    db.commit()
+    return {
+        "status": "ok",
+        "language": {
+            "code": rec.code,
+            "name": rec.name,
+            "region": rec.region,
+            "family": rec.family,
+            "script": rec.script,
+            "source": "custom",
+        },
+    }

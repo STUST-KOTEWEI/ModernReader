@@ -8,7 +8,7 @@ RAG API 端點擴展
 - 語義搜尋
 """
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from typing import List, Dict, Any
 
@@ -110,11 +110,7 @@ async def semantic_search(
     results = await service.vector_store.semantic_search(
         query=request.query,
         top_k=request.top_k,
-        filter_dict=(
-            {"language": request.language}
-            if request.language
-            else None
-        ),
+        filter_dict={"language": request.language} if request.language else {},
         score_threshold=request.score_threshold
     )
     

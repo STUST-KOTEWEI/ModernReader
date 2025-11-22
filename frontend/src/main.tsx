@@ -15,6 +15,9 @@ import { RecommendationsPage } from "./pages/RecommendationsPage";
 import { AudioPage } from "./pages/AudioPage";
 import IndigenousLanguagePage from "./pages/IndigenousLanguagePage";
 import IndigenousChatbotPage from "./pages/IndigenousChatbotPage";
+import PodcastPage from "./pages/PodcastPage";
+import DevicesPage from "./pages/DevicesPage";
+import SettingsPage from "./pages/SettingsPage";
 import "./styles/global.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
@@ -32,8 +35,11 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           <Route path="ai-demo" element={<AIAssistantDemoPage />} />
           <Route path="recommendations" element={<RecommendationsPage />} />
           <Route path="audio" element={<AudioPage />} />
+          <Route path="podcast" element={<PodcastPage />} />
+          <Route path="devices" element={<DevicesPage />} />
           <Route path="indigenous" element={<IndigenousLanguagePage />} />
           <Route path="indigenous-chat" element={<IndigenousChatbotPage />} />
+          <Route path="settings" element={<SettingsPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

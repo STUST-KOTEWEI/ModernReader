@@ -97,8 +97,8 @@ class ProductionVectorStoreFAISS:
     async def ingest_documents(
         self,
         texts: List[str],
-        metadatas: List[Dict] = None,
-        ids: List[str] = None
+        metadatas: Optional[List[Dict[str, Any]]] = None,
+        ids: Optional[List[str]] = None
     ) -> Dict[str, Any]:
         """
         文檔攝取與嵌入
@@ -172,7 +172,7 @@ class ProductionVectorStoreFAISS:
         self,
         query: str,
         top_k: int = 5,
-        filter_dict: Dict = None,
+        filter_dict: Optional[Dict[str, Any]] = None,
         score_threshold: float = 0.0
     ) -> List[Dict[str, Any]]:
         """
@@ -220,7 +220,7 @@ class ProductionVectorStoreFAISS:
         self,
         query: str,
         top_k: int = 5,
-        keywords: List[str] = None,
+        keywords: Optional[List[str]] = None,
         alpha: float = 0.7  # 向量搜尋權重 (0-1)
     ) -> List[Dict[str, Any]]:
         """

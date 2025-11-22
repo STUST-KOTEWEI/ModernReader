@@ -34,17 +34,21 @@ router = APIRouter()
 class AssessLoadRequest(BaseModel):
     """認知負荷評估請求"""
     user_id: str = Field(..., description="用戶 ID")
-    reading_speed: float = Field(..., ge=0, description="閱讀速度 (字/分鐘)")
-    error_rate: float = Field(..., ge=0, le=1, description="錯誤率 (0-1)")
-    pause_frequency: float = Field(..., ge=0, description="暫停頻率 (次/分鐘)")
+    reading_speed: Optional[float] = Field(
+        None, ge=0, description="閱讀速度 (字/分鐘)"
+    )
+    error_rate: Optional[float] = Field(
+        None, ge=0, le=1, description="錯誤率 (0-1)"
+    )
+    pause_frequency: Optional[float] = Field(
+        None, ge=0, description="暫停頻率 (次/分鐘)"
+    )
     heart_rate_variability: Optional[float] = Field(
-        None,
-        description="心率變異性 (HRV from Apple Watch)"
+        None, description="心率變異性 (HRV from Apple Watch)"
     )
     session_duration: float = Field(0, ge=0, description="會話時長 (分鐘)")
-    content_difficulty: Dict[str, float] = Field(
-        ...,
-        description="內容難度指標"
+    content_difficulty: Optional[Dict[str, float]] = Field(
+        None, description="內容難度指標"
     )
 
 
@@ -129,25 +133,20 @@ async def assess_cognitive_load(
     try:
         # 構建認知指標
         metrics = CognitiveMetrics(
-            reading_speed=request.reading_speed,
-            error_rate=request.error_rate,
-            pause_frequency=request.pause_frequency,
+            reading_speed=request.reading_speed or 200.0,
+            error_rate=request.error_rate or 0.05,
+            pause_frequency=request.pause_frequency or 1.0,
             heart_rate_variability=request.heart_rate_variability,
-            session_duration=request.session_duration
+            session_duration=request.session_duration or 0.0,
         )
         
         # 構建內容難度
+        cd = request.content_difficulty or {}
         difficulty = ContentDifficulty(
-            lexical_complexity=request.content_difficulty.get(
-                "lexical", 0.5
-            ),
-            syntactic_complexity=request.content_difficulty.get(
-                "syntactic", 0.5
-            ),
-            concept_density=request.content_difficulty.get("concept", 0.5),
-            cultural_distance=request.content_difficulty.get(
-                "cultural", 0.5
-            )
+            lexical_complexity=cd.get("lexical", 0.5),
+            syntactic_complexity=cd.get("syntactic", 0.5),
+            concept_density=cd.get("concept", 0.5),
+            cultural_distance=cd.get("cultural", 0.5),
         )
         
         # 評估負荷

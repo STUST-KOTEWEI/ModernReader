@@ -35,7 +35,14 @@ export const EpaperPage = () => {
   const handlePublish = async () => {
     setLoading(true);
     try {
-      const response = await epaperClient.publish({ title, device_group: deviceGroup, cards });
+      const normalized = cards.map((c) => ({
+        heading: c.heading,
+        body: c.body,
+        highlights: c.highlights,
+        // API expects undefined, not null
+        metadata: c.metadata || undefined,
+      }));
+      const response = await epaperClient.publish({ title, device_group: deviceGroup, cards: normalized });
       setLog((prev) => [
         `已發佈 Job ${response.job_id}（${response.card_count} 張卡片）`,
         ...prev

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+import builtins
 from dataclasses import dataclass
 from typing import Any
 
@@ -201,7 +202,7 @@ class KnowledgeGraph:
             return {}
 
         # Find all cultural_context relations
-        context = {
+        context: dict[str, Any] = {
             "cultures": [],
             "languages": [],
             "traditions": [],
@@ -237,7 +238,7 @@ class KnowledgeGraph:
         Returns:
             Dictionary with explanation components
         """
-        explanation = {
+        explanation: dict[str, Any] = {
             "content_id": content_id,
             "reasons": [],
             "related_to": [],
@@ -290,18 +291,18 @@ class KnowledgeGraph:
         if explanation["related_to"]:
             explanation["reasons"].append(
                 f"Related to {len(explanation['related_to'])} items "
-                f"you've read"
+                "you've read"
             )
 
         if explanation["cultural_relevance"]:
             explanation["reasons"].append(
-                f"Relevant to {', '.join(explanation['cultural_relevance'])}"
-                f" culture"
+                "Relevant to "
+                + ", ".join(explanation["cultural_relevance"]) + " culture"
             )
 
         if explanation["difficulty_match"] in ["perfect", "good"]:
             explanation["reasons"].append(
-                f"Difficulty level matches your current proficiency"
+                "Difficulty level matches your current proficiency"
             )
 
         return explanation
@@ -323,13 +324,18 @@ class KnowledgeGraph:
             "num_edges": self.graph.number_of_edges(),
             "node_types": self._count_node_types(),
             "relation_types": self._count_relation_types(),
-            "average_degree": (
-                sum(dict(self.graph.degree()).values())
-                / self.graph.number_of_nodes()
-                if self.graph.number_of_nodes() > 0
-                else 0
-            ),
+            "average_degree": (self._average_degree()),
         }
+
+    def _average_degree(self) -> float:
+        """Compute average degree without relying on built-in sum (avoids shadowing)."""
+        n = self.graph.number_of_nodes()
+        if n == 0:
+            return 0.0
+        total = 0
+        for v in dict(self.graph.degree()).values():
+            total += int(v)
+        return total / n
 
     def _count_node_types(self) -> dict[str, int]:
         """Count nodes by type."""

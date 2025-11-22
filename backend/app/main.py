@@ -33,14 +33,25 @@ def create_app() -> FastAPI:
     app.add_middleware(SecurityMiddleware)
     
     # CORS 設定 (生產環境應限制來源)
+    default_origins = [
+        "http://localhost:5173",  # Vite dev server
+        "http://localhost:5176",
+        "http://localhost:3000",
+        "https://tend-email-stat-supplements.trycloudflare.com",
+        "https://modernreader.com",
+        "https://www.modernreader.com",
+    ]
+    extra_origins: list[str] = []
+    if settings.CORS_ALLOW_ORIGINS:
+        extra_origins = [
+            o.strip()
+            for o in settings.CORS_ALLOW_ORIGINS.split(",")
+            if o.strip()
+        ]
+    allow_origins = list(dict.fromkeys(default_origins + extra_origins))
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[
-            "http://localhost:5176",
-            "http://localhost:3000",
-            "https://tend-email-stat-supplements.trycloudflare.com",
-            # 生產環境加入真實域名
-        ],
+        allow_origins=allow_origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -48,14 +59,25 @@ def create_app() -> FastAPI:
     )
     
     # 信任主機保護 (防 Host Header Injection)
+    default_hosts = [
+        "localhost",
+        "127.0.0.1",
+        "*.trycloudflare.com",
+        "modernreader.com",
+        "www.modernreader.com",
+        "api.modernreader.com",
+    ]
+    extra_hosts: list[str] = []
+    if settings.TRUSTED_HOSTS:
+        extra_hosts = [
+            h.strip()
+            for h in settings.TRUSTED_HOSTS.split(",")
+            if h.strip()
+        ]
+    allowed_hosts = list(dict.fromkeys(default_hosts + extra_hosts))
     app.add_middleware(
         TrustedHostMiddleware,
-        allowed_hosts=[
-            "localhost",
-            "127.0.0.1",
-            "*.trycloudflare.com",
-            # 生產環境加入真實域名
-        ]
+        allowed_hosts=allowed_hosts,
     )
     
     # GZip 壓縮

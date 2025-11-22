@@ -1,12 +1,13 @@
 import { Link } from "react-router-dom";
 import { useI18n } from "../i18n/useI18n";
+import { LanguageSelect } from "./LanguageSelect";
 
 interface SidebarProps {
   user: { email: string } | null;
 }
 
 export const Sidebar = ({ user }: SidebarProps) => {
-  const { t, language, setLanguage } = useI18n();
+  const { t } = useI18n();
 
   return (
     <aside className="sidebar">
@@ -16,36 +17,20 @@ export const Sidebar = ({ user }: SidebarProps) => {
       </div>
 
       {/* Language Switcher */}
-      <div className="px-4 py-2 flex gap-1">
-        <button 
-          onClick={() => setLanguage('en')} 
-          className={`px-2 py-1 rounded text-xs ${language === 'en' ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700'}`}
-        >
-          EN
-        </button>
-        <button 
-          onClick={() => setLanguage('zh')} 
-          className={`px-2 py-1 rounded text-xs ${language === 'zh' ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700'}`}
-        >
-          中文
-        </button>
-        <button 
-          onClick={() => setLanguage('ja')} 
-          className={`px-2 py-1 rounded text-xs ${language === 'ja' ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700'}`}
-        >
-          日
-        </button>
+      <div className="px-4 py-2">
+        <LanguageSelect />
       </div>
 
       <nav className="sidebar-nav">
         <Link to="/app">{t('dashboard')}</Link>
         <Link to="/app/ai-demo">🧠 {t('aiAssistant')}</Link>
         <Link to="/app/recommendations">🎯 {t('recommendations')}</Link>
-        <Link to="/app/audio">🎤 Audio (STT/TTS)</Link>
-        <Link to="/app/indigenous">🏔️ Indigenous Languages</Link>
-        <Link to="/app/indigenous-chat">💬 Indigenous Chatbot</Link>
+        <Link to="/app/audio">🎤 {t('audioNav')}</Link>
+        <Link to="/app/indigenous">🏔️ {t('indigenousLanguagesNav')}</Link>
+        <Link to="/app/indigenous-chat">💬 {t('indigenousChatNav')}</Link>
         <Link to="/app/catalog">📚 {t('catalog')}</Link>
-        <Link to="/app/epaper">📱 E-Paper</Link>
+        <Link to="/app/epaper">📱 {t('epaperNav')}</Link>
+        <Link to="/app/settings">⚙️ {t('settings')}</Link>
       </nav>
 
       <div className="px-4 py-2 mt-auto">

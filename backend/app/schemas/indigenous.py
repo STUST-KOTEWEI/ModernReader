@@ -72,3 +72,28 @@ class LanguageInfoResponse(BaseModel):
     tone_markers: list[str]
     syllable_patterns: list[str]
     cultural_notes: dict[str, str]
+
+
+# ===== Language registry =====
+
+class CustomLanguageCreateRequest(BaseModel):
+    """Create a custom indigenous language profile."""
+
+    code: str = Field(
+        min_length=2, max_length=16, description="ISO code or internal code"
+    )
+    name: str = Field(min_length=2, max_length=128)
+    region: str | None = Field(default=None)
+    family: str | None = Field(default=None)
+    script: str | None = Field(default=None)
+    aliases: list[str] | None = Field(default=None)
+    metadata: dict[str, Any] | None = Field(default=None)
+
+
+class LanguageListItem(BaseModel):
+    code: str
+    name: str
+    region: str | None = None
+    family: str | None = None
+    script: str | None = None
+    source: str = Field(description="builtin|custom")

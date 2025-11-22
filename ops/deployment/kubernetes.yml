@@ -16,7 +16,8 @@ data:
   DATABASE_URL: "sqlite:///./modernreader.db"
   USE_MOCK_LLM: "false"
   USE_MOCK_EMBEDDINGS: "false"
-  ALLOWED_ORIGINS: "https://modernreader.app,https://www.modernreader.app"
+  CORS_ALLOW_ORIGINS: "https://modernreader.com,https://www.modernreader.com"
+  TRUSTED_HOSTS: "modernreader.com,www.modernreader.com,api.modernreader.com"
   LOG_LEVEL: "INFO"
 
 ---
@@ -120,11 +121,16 @@ spec:
             configMapKeyRef:
               name: backend-config
               key: USE_MOCK_LLM
-        - name: ALLOWED_ORIGINS
+        - name: CORS_ALLOW_ORIGINS
           valueFrom:
             configMapKeyRef:
               name: backend-config
-              key: ALLOWED_ORIGINS
+              key: CORS_ALLOW_ORIGINS
+        - name: TRUSTED_HOSTS
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: TRUSTED_HOSTS
         volumeMounts:
         - name: chroma-db
           mountPath: /app/chroma_db
@@ -260,12 +266,12 @@ spec:
   ingressClassName: nginx
   tls:
   - hosts:
-    - modernreader.app
-    - www.modernreader.app
-    - api.modernreader.app
+    - modernreader.com
+    - www.modernreader.com
+    - api.modernreader.com
     secretName: modernreader-tls
   rules:
-  - host: modernreader.app
+  - host: modernreader.com
     http:
       paths:
       - path: /
@@ -275,7 +281,7 @@ spec:
             name: frontend-service
             port:
               number: 80
-  - host: www.modernreader.app
+  - host: www.modernreader.com
     http:
       paths:
       - path: /
@@ -285,7 +291,7 @@ spec:
             name: frontend-service
             port:
               number: 80
-  - host: api.modernreader.app
+  - host: api.modernreader.com
     http:
       paths:
       - path: /

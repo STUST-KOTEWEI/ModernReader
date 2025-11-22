@@ -11,6 +11,7 @@ from app.api.v1 import (
     epaper,
     indigenous,
     indigenous_chat,
+    users,
     rag,
     rag_extended,
     recommend,
@@ -52,6 +53,7 @@ def register(app: FastAPI) -> None:
         senses.router, prefix="/v1/senses", tags=["senses"]
     )
     router.include_router(ai.router, prefix="/v1/ai", tags=["ai"])
+    router.include_router(users.router, prefix="/v1/users", tags=["users"])
     router.include_router(
         indigenous.router,
         prefix="/v1/indigenous",

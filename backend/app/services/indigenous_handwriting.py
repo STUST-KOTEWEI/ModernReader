@@ -7,13 +7,13 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Optional
 
-import numpy as np
+# (Removed unused numpy import)
 
 logger = logging.getLogger(__name__)
 
 
 class IndigenousLanguage(Enum):
-    """Supported Taiwan indigenous languages."""
+    """Built-in indigenous language examples."""
 
     AMIS = "ami"  # 阿美語
     ATAYAL = "tay"  # 泰雅語
@@ -82,7 +82,7 @@ class IndigenousHandwritingEngine:
     Features:
     - Handwritten text recognition (HTR)
     - Automatic romanization
-    - Multi-language support (16 Taiwan indigenous languages)
+    - Multi-language support (built-in indigenous languages)
     - Character-level bounding boxes
     - Confidence scoring
     - Alternative reading suggestions
@@ -115,7 +115,10 @@ class IndigenousHandwritingEngine:
             tone_markers=[],  # Amis doesn't use tone markers in romanization
             syllable_patterns=["CV", "CVC", "V", "VC"],
             cultural_notes={
-                "glottal_stop": "The apostrophe (') represents a glottal stop, important for meaning distinction"
+                "glottal_stop": (
+                    "The apostrophe (') represents a glottal stop, important "
+                    "for meaning distinction"
+                )
             },
         ),
         IndigenousLanguage.ATAYAL: RomanizationRule(
@@ -177,7 +180,11 @@ class IndigenousHandwritingEngine:
         ),
     }
 
-    def __init__(self, model_path: Optional[str] = None, use_mock: bool = True):
+    def __init__(
+        self,
+        model_path: Optional[str] = None,
+        use_mock: bool = True,
+    ):
         """
         Initialize handwriting recognition engine.
 
@@ -226,7 +233,9 @@ class IndigenousHandwritingEngine:
                 else recognized
             )
 
-            processing_time = (datetime.now() - start_time).total_seconds() * 1000
+            processing_time = (
+                (datetime.now() - start_time).total_seconds() * 1000
+            )
 
             return HandwritingRecognitionResult(
                 original_image_url="mock://image.png",
@@ -239,7 +248,14 @@ class IndigenousHandwritingEngine:
                     (recognized.replace("a", "e"), 0.75),
                 ],
                 character_boxes=[
-                    {"char": c, "x": i * 20, "y": 0, "w": 20, "h": 30, "conf": 0.9}
+                    {
+                        "char": c,
+                        "x": i * 20,
+                        "y": 0,
+                        "w": 20,
+                        "h": 30,
+                        "conf": 0.9,
+                    }
                     for i, c in enumerate(recognized)
                 ],
                 processed_at=datetime.now(),
@@ -283,7 +299,8 @@ class IndigenousHandwritingEngine:
         rules = self.ROMANIZATION_RULES.get(language)
         if not rules:
             logger.warning(
-                f"No romanization rules for {language.value}, returning original"
+                "No romanization rules for %s, returning original",
+                language.value,
             )
             return text
 
@@ -308,7 +325,7 @@ class IndigenousHandwritingEngine:
         if not rules:
             return (False, ["Language not supported"])
 
-        errors = []
+        errors: list[str] = []
         words = text.lower().split()
 
         for word in words:
@@ -321,14 +338,18 @@ class IndigenousHandwritingEngine:
             )
             for char in word:
                 if char not in valid_chars and char not in ["'", " ", "-"]:
-                    errors.append(f"Invalid character '{char}' in word '{word}'")
+                    errors.append(
+                        f"Invalid character '{char}' in word '{word}'"
+                    )
 
             # Check syllable patterns (basic validation)
             # TODO: Implement more sophisticated pattern matching
 
         return (len(errors) == 0, errors)
 
-    def get_language_info(self, language: IndigenousLanguage) -> dict[str, Any]:
+    def get_language_info(
+        self, language: IndigenousLanguage
+    ) -> dict[str, Any]:
         """
         Get linguistic information about a language.
 
@@ -400,7 +421,12 @@ class PronunciationTrainingEngine:
                 dialect=dialect or "standard",
                 audio_quality_score=0.88,
                 phoneme_timestamps=[
-                    {"phoneme": p, "start": i * 0.1, "end": (i + 1) * 0.1, "conf": 0.9}
+                    {
+                        "phoneme": p,
+                        "start": i * 0.1,
+                        "end": (i + 1) * 0.1,
+                        "conf": 0.9,
+                    }
                     for i, p in enumerate(transcript[:10])
                 ],
                 metadata={
@@ -462,7 +488,10 @@ class PronunciationTrainingEngine:
         raise NotImplementedError("Model training not yet implemented")
 
     def assess_pronunciation(
-        self, audio_data: bytes, reference_text: str, language: IndigenousLanguage
+        self,
+        audio_data: bytes,
+        reference_text: str,
+        language: IndigenousLanguage,
     ) -> dict[str, Any]:
         """
         Assess pronunciation quality against reference.
@@ -482,8 +511,18 @@ class PronunciationTrainingEngine:
                 "pronunciation": 0.82,
                 "completeness": 0.90,
                 "phoneme_scores": [
-                    {"phoneme": "ng", "score": 0.75, "feedback": "Try to pronounce from the back of the throat"},
-                    {"phoneme": "'", "score": 0.65, "feedback": "Glottal stop needs to be more distinct"},
+                    {
+                        "phoneme": "ng",
+                        "score": 0.75,
+                        "feedback": (
+                            "Try to pronounce from the back of the throat"
+                        ),
+                    },
+                    {
+                        "phoneme": "'",
+                        "score": 0.65,
+                        "feedback": "Glottal stop needs to be more distinct",
+                    },
                 ],
                 "suggestions": [
                     "Practice the glottal stop (') sound",
@@ -497,4 +536,6 @@ class PronunciationTrainingEngine:
         # 3. Identify mispronunciations
         # 4. Generate feedback
 
-        raise NotImplementedError("Pronunciation assessment not yet implemented")
+        raise NotImplementedError(
+            "Pronunciation assessment not yet implemented"
+        )

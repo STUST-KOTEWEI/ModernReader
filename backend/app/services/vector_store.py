@@ -7,6 +7,7 @@ import uuid
 from datetime import datetime
 
 from langchain_openai import OpenAIEmbeddings
+from pydantic import SecretStr
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
 from langchain_core.documents import Document
@@ -20,7 +21,7 @@ class ProductionVectorStore:
     def __init__(self, collection_name: str = "modernreader_docs"):
         self.embeddings = OpenAIEmbeddings(
             model="text-embedding-3-large",  # 最新最強的 embedding 模型
-            openai_api_key=settings.OPENAI_API_KEY,
+            api_key=SecretStr(settings.OPENAI_API_KEY) if settings.OPENAI_API_KEY else None,
         )
         self.text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=1000,  # 每個 chunk 約 1000 字符
@@ -80,6 +81,7 @@ class ProductionVectorStore:
             for chunk, meta in zip(all_chunks, all_metadatas)
         ]
 
+        assert self.vector_store is not None
         self.vector_store.add_documents(documents)
 
         return {
@@ -110,6 +112,7 @@ class ProductionVectorStore:
             await self.initialize()
 
         # ChromaDB 的相似度搜尋（with score）
+        assert self.vector_store is not None
         results = self.vector_store.similarity_search_with_score(
             query, k=top_k, filter=filter_dict
         )
@@ -170,8 +173,8 @@ class ProductionVectorStore:
         """刪除文檔（根據元數據過濾）"""
         if not self.vector_store:
             await self.initialize()
-
         # ChromaDB 的刪除操作
+        assert self.vector_store is not None
         self.vector_store.delete(filter=filter_dict)
 
         return {"status": "deleted", "filter": filter_dict}

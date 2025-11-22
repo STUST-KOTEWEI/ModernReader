@@ -83,6 +83,7 @@ class WorldClassAIEngine:
                     temperature=self.config.temperature,
                     max_tokens_to_sample=self.config.max_tokens,
                     timeout=self.config.timeout,
+                    stop=None,
                 )
                 logger.info("Anthropic client initialized")
             except Exception as e:

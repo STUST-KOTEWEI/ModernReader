@@ -439,6 +439,64 @@ class SpacedRepetitionScheduler:
         self.schedules[key] = schedule
         return schedule
 
+    def calculate_next_review(
+        self,
+        content_id: str,
+        user_id: str,
+        quality_score: int,
+        current_repetition: int,
+        current_easiness: float,
+        content_difficulty: float = 0.5,
+    ) -> ReviewSchedule:
+        """
+        API-friendly wrapper to compute next review schedule.
+
+        This method aligns with the expected interface used by the
+        REST layer, seeding the internal schedule state with the
+        provided repetition number and easiness factor before
+        delegating to the core SM-2 update logic.
+
+        Args:
+            content_id: Content identifier
+            user_id: User identifier
+            quality_score: Recall quality (0-5)
+            current_repetition: Current repetition count prior to this review
+            current_easiness: Current EF prior to this review (1.3-2.5)
+            content_difficulty: Optional difficulty scalar (0-1)
+
+        Returns:
+            Updated ReviewSchedule after applying this review
+        """
+        key = (user_id, content_id)
+        now = datetime.now()
+
+        # Seed or update internal state to reflect the provided current values
+        existing = self.schedules.get(key)
+        if existing is None:
+            self.schedules[key] = ReviewSchedule(
+                content_id=content_id,
+                user_id=user_id,
+                repetition_number=current_repetition,
+                easiness_factor=current_easiness,
+                interval_days=1,
+                next_review=now,
+                last_reviewed=None,
+                quality_score=None,
+            )
+        else:
+            existing.repetition_number = current_repetition
+            existing.easiness_factor = current_easiness
+            existing.last_reviewed = now
+            self.schedules[key] = existing
+
+        # Reuse core logic to compute next schedule
+        return self.schedule_review(
+            content_id=content_id,
+            user_id=user_id,
+            quality=quality_score,
+            content_difficulty=content_difficulty,
+        )
+
     def get_due_reviews(
         self,
         user_id: str,
@@ -546,3 +604,104 @@ def get_scheduler() -> SpacedRepetitionScheduler:
     if _scheduler is None:
         _scheduler = SpacedRepetitionScheduler()
     return _scheduler
+
+
+class ContentAdaptationEngine:
+    """
+    High-level content adaptation engine that orchestrates
+    cognitive load estimation and content transformation.
+
+    Exposes an async method `adapt_to_load` as used by the API layer.
+    """
+
+    def __init__(self) -> None:
+        self._adapter = get_content_adapter()
+        self._estimator = get_load_estimator()
+
+    async def adapt_to_load(
+        self,
+        content: str,
+        current_load: float,
+        target_load: float,
+        user_level: str = "intermediate",
+    ) -> AdaptedContent:
+        """
+        Adapt the provided content to move cognitive load toward a target.
+
+        Args:
+            content: Original text content
+            current_load: Observed cognitive load (0-1)
+            target_load: Desired target load (0-1)
+            user_level: User proficiency hint (beginner/intermediate/advanced)
+
+        Returns:
+            AdaptedContent describing changes and difficulty deltas
+        """
+        # Estimate content difficulty with lightweight heuristics
+        difficulty = self._estimate_content_difficulty(content, user_level)
+
+        # Delegate actual transformation to ContentAdapter
+        result = self._adapter.adapt_content(
+            text=content,
+            current_load=current_load,
+            target_load=target_load,
+            difficulty=difficulty,
+        )
+        return result
+
+    def _estimate_content_difficulty(
+        self, text: str, user_level: str
+    ) -> ContentDifficulty:
+        """
+        Simple heuristic difficulty estimator.
+
+        Uses sentence length, word length, and rudimentary density
+        proxies, then adjusts by the user's declared level.
+        """
+        words = [w for w in text.replace("\n", " ").split(" ") if w]
+        sentences = [s for s in text.split(".") if s.strip()]
+
+        avg_word_len = (
+            sum(len(w.strip(" ,;:!?")) for w in words) / max(len(words), 1)
+            if words
+            else 1.0
+        )
+        avg_sent_len = (
+            sum(len(s.split()) for s in sentences) / max(len(sentences), 1)
+            if sentences
+            else 10.0
+        )
+
+        # Normalize to 0-1 ranges with rough caps
+        lexical_complexity = min(avg_word_len / 8.0, 1.0)
+        syntactic_complexity = min(avg_sent_len / 25.0, 1.0)
+        # Use punctuation ratio and paragraph breaks as a proxy for
+        # concept density
+        punctuation = sum(text.count(p) for p in [",", ";", ":"])
+        concept_density = min(
+            (punctuation / max(len(sentences), 1)) / 4.0, 1.0
+        )
+        cultural_distance = 0.4  # default; derive from locale/NER
+
+        # Adjust by user level: beginners perceive higher difficulty
+        level_adjust = {
+            "beginner": 0.15,
+            "intermediate": 0.0,
+            "advanced": -0.1,
+        }.get(user_level.lower(), 0.0)
+
+        cd = ContentDifficulty(
+            lexical_complexity=max(
+                0.0, min(1.0, lexical_complexity + level_adjust)
+            ),
+            syntactic_complexity=max(
+                0.0, min(1.0, syntactic_complexity + level_adjust)
+            ),
+            concept_density=max(
+                0.0, min(1.0, concept_density + level_adjust / 2)
+            ),
+            cultural_distance=max(
+                0.0, min(1.0, cultural_distance + level_adjust / 3)
+            ),
+        )
+        return cd
