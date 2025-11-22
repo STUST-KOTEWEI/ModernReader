@@ -16,6 +16,30 @@ export default function SweetReader({ title, author, content }: SweetReaderProps
     const [hapticState, setHapticState] = useState({ temp: 0, vibe: 0, texture: false });
     const [isPlaying, setIsPlaying] = useState(false);
     const [language, setLanguage] = useState("English");
+    const [messages, setMessages] = useState([
+        { role: 'ai', content: 'This story reminds us of the importance of listening to the wind. What do you think the wind represents?' }
+    ]);
+    const [inputValue, setInputValue] = useState("");
+    const [isTyping, setIsTyping] = useState(false);
+
+    const handleSendMessage = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!inputValue.trim()) return;
+
+        const newMsg = { role: 'user', content: inputValue };
+        setMessages(prev => [...prev, newMsg]);
+        setInputValue("");
+        setIsTyping(true);
+
+        // Simulate AI response
+        setTimeout(() => {
+            setIsTyping(false);
+            setMessages(prev => [...prev, {
+                role: 'ai',
+                content: "That is a profound observation. In many indigenous cultures, the wind is seen as a messenger carrying the spirits of our ancestors. It connects the past with the present."
+            }]);
+        }, 2000);
+    };
 
     return (
         <div className="h-screen flex flex-col lg:flex-row overflow-hidden bg-[#fdfbf7]">
@@ -193,13 +217,18 @@ export default function SweetReader({ title, author, content }: SweetReaderProps
                     <div className="bg-white p-4 rounded-xl shadow-sm border border-[#e5e0d8] mb-4">
                         <div className="flex items-center justify-between mb-3">
                             <h3 className="font-medium text-sm flex items-center gap-2">
-                                <Globe size={16} /> Language
+                                <Globe size={16} /> Omnilingual
                             </h3>
                             <span className="text-[10px] font-bold bg-[#e5e0d8] text-[#666] px-2 py-0.5 rounded-full">1600+</span>
                         </div>
                         <select
                             value={language}
-                            onChange={(e) => setLanguage(e.target.value)}
+                            onChange={(e) => {
+                                setLanguage(e.target.value);
+                                // Simulate translation delay
+                                const originalContent = content;
+                                // In a real app, this would call the Omnilingual API
+                            }}
                             className="w-full px-3 py-2 rounded-lg border border-[#e5e0d8] text-sm bg-[#fdfbf7] focus:outline-none focus:border-[#1a1a1a]"
                         >
                             <option>English</option>
@@ -208,9 +237,16 @@ export default function SweetReader({ title, author, content }: SweetReaderProps
                             <option>Atayal</option>
                             <option>Amis</option>
                             <option>Bunun</option>
+                            <option>Japanese</option>
+                            <option>French</option>
                         </select>
+                        {language !== "English" && (
+                            <div className="mt-2 text-xs text-green-600 flex items-center gap-1 animate-pulse">
+                                <div className="w-1.5 h-1.5 bg-green-600 rounded-full" />
+                                Translated via Meta Omnilingual
+                            </div>
+                        )}
                     </div>
-
                     {/* Podcast Generator */}
                     <div className="bg-white p-4 rounded-xl shadow-sm border border-[#e5e0d8] mb-4">
                         <div className="flex items-center justify-between mb-3">
@@ -231,7 +267,7 @@ export default function SweetReader({ title, author, content }: SweetReaderProps
                                 onClick={() => setIsPlaying(!isPlaying)}
                                 className="w-full bg-[#1a1a1a] text-white py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-black transition-colors"
                             >
-                                {isPlaying ? <Pause size={16} /> : <Play size={16} />}
+                                {isPlaying ? <Pause size={16} /> : "Generate & Play"}
                                 <span className="text-sm font-medium">{isPlaying ? "Pause" : "Generate & Play"}</span>
                             </button>
                         </div>
@@ -266,22 +302,47 @@ export default function SweetReader({ title, author, content }: SweetReaderProps
                 </div>
 
                 {/* Chat / Notes */}
-                <div className="flex-1 p-6">
-                    <h2 className="font-serif font-bold text-lg mb-4">Discussion</h2>
-                    <div className="h-64 bg-white rounded-xl border border-[#e5e0d8] p-4 mb-4 overflow-y-auto text-sm text-[#666]">
-                        <p className="mb-2"><strong className="text-[#1a1a1a]">AI Elder:</strong> This story reminds us of the importance of listening to the wind. What do you think the wind represents?</p>
-                        <p className="pl-4 border-l-2 border-[#e5e0d8]">It represents the voices of our ancestors.</p>
+                <div className="flex-1 p-6 flex flex-col min-h-0">
+                    <h2 className="font-serif font-bold text-lg mb-4 flex items-center gap-2">
+                        <div className={`w-2 h-2 rounded-full ${isTyping ? 'bg-green-500 animate-pulse' : 'bg-[#e5e0d8]'}`} />
+                        Discussion
+                    </h2>
+
+                    <div className="flex-1 bg-white rounded-xl border border-[#e5e0d8] p-4 mb-4 overflow-y-auto text-sm space-y-4">
+                        {messages.map((msg, i) => (
+                            <div key={i} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
+                                <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold ${msg.role === 'ai' ? 'bg-[#1a1a1a] text-white' : 'bg-[#e5e0d8] text-[#666]'}`}>
+                                    {msg.role === 'ai' ? 'AI' : 'ME'}
+                                </div>
+                                <div className={`max-w-[80%] p-3 rounded-2xl ${msg.role === 'ai' ? 'bg-[#fdfbf7] border border-[#e5e0d8] text-[#1a1a1a]' : 'bg-[#1a1a1a] text-white'}`}>
+                                    {msg.content}
+                                </div>
+                            </div>
+                        ))}
+                        {isTyping && (
+                            <div className="flex gap-3">
+                                <div className="w-8 h-8 rounded-full bg-[#1a1a1a] text-white flex items-center justify-center text-xs font-bold">AI</div>
+                                <div className="bg-[#fdfbf7] border border-[#e5e0d8] p-3 rounded-2xl flex gap-1 items-center">
+                                    <span className="w-1.5 h-1.5 bg-[#666] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                    <span className="w-1.5 h-1.5 bg-[#666] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                    <span className="w-1.5 h-1.5 bg-[#666] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                                </div>
+                            </div>
+                        )}
                     </div>
-                    <div className="flex gap-2">
+
+                    <form onSubmit={handleSendMessage} className="flex gap-2">
                         <input
                             type="text"
-                            placeholder="Type your thoughts..."
+                            value={inputValue}
+                            onChange={(e) => setInputValue(e.target.value)}
+                            placeholder="Ask the Elder about this story..."
                             className="flex-1 px-3 py-2 rounded-lg border border-[#e5e0d8] text-sm focus:outline-none focus:border-[#1a1a1a]"
                         />
-                        <button className="p-2 bg-[#1a1a1a] text-white rounded-lg">
+                        <button type="submit" className="p-2 bg-[#1a1a1a] text-white rounded-lg hover:bg-black transition-colors">
                             <Share2 size={18} />
                         </button>
-                    </div>
+                    </form>
                 </div>
             </div>
         </div>
