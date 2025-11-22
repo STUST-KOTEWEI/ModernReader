@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense, lazy } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Pause, Thermometer, Waves, Fingerprint, Share2, MessageCircle, BookOpen, Globe, Facebook, Twitter, Linkedin, PenTool, Sparkles, Play, Lock, Heart } from "lucide-react";
+import { Pause, Thermometer, Waves, Fingerprint, Share2, MessageCircle, BookOpen, Globe, Twitter, PenTool, Sparkles, Play, Lock, Heart } from "lucide-react";
 import Image from "next/image";
 import clsx from "clsx";
 import { PERSONAS, PersonaType } from "@/lib/personas";
@@ -338,12 +338,41 @@ export default function SweetReader({ title, author, content }: SweetReaderProps
                                     <h2 className="font-serif font-bold text-2xl mb-2">Share the Wisdom</h2>
                                     <p className="text-[#666] mb-8">Pass this story to the next generation.</p>
 
-                                    <div className="grid grid-cols-3 gap-4 mb-8">
-                                        <SocialButton icon={<Facebook />} label="Facebook" />
-                                        <SocialButton icon={<Twitter />} label="Twitter" />
-                                        <SocialButton icon={<Linkedin />} label="LinkedIn" />
+                                    <div className="grid grid-cols-3 gap-4 mb-6">
+                                        <button
+                                            onClick={() => {
+                                                const text = encodeURIComponent(`Reading "${title}" on ModernReader!`);
+                                                const url = encodeURIComponent(window.location.href);
+                                                window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+                                            }}
+                                            className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border border-[#e5e0d8] hover:bg-[#fdfbf7] hover:border-[#1a1a1a] transition-all group"
+                                        >
+                                            <div className="text-[#666] group-hover:text-[#1a1a1a] transition-colors"><Twitter size={24} /></div>
+                                            <span className="text-xs font-medium text-[#666] group-hover:text-[#1a1a1a]">Twitter</span>
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                const text = encodeURIComponent(`Reading "${title}" on ModernReader!`);
+                                                const url = encodeURIComponent(window.location.href);
+                                                window.open(`https://social-plugins.line.me/lineit/share?url=${url}&text=${text}`, '_blank');
+                                            }}
+                                            className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border border-[#e5e0d8] hover:bg-[#fdfbf7] hover:border-[#1a1a1a] transition-all group"
+                                        >
+                                            <div className="text-[#666] group-hover:text-[#1a1a1a] transition-colors"><MessageCircle size={24} /></div>
+                                            <span className="text-xs font-medium text-[#666] group-hover:text-[#1a1a1a]">LINE</span>
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                // Instagram doesn't have direct web sharing, so copy link
+                                                navigator.clipboard.writeText(window.location.href);
+                                                alert('Link copied! Share it on Instagram Stories or Posts.');
+                                            }}
+                                            className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border border-[#e5e0d8] hover:bg-[#fdfbf7] hover:border-[#1a1a1a] transition-all group"
+                                        >
+                                            <div className="text-[#666] group-hover:text-[#1a1a1a] transition-colors"><Heart size={24} /></div>
+                                            <span className="text-xs font-medium text-[#666] group-hover:text-[#1a1a1a]">Instagram</span>
+                                        </button>
                                     </div>
-
                                     <div className="bg-[#fdfbf7] p-4 rounded-xl border border-[#e5e0d8] flex items-center justify-between text-sm text-[#666]">
                                         <span className="truncate">modernreader.com/s/paiwan-legend</span>
                                         <button className="font-bold text-[#1a1a1a] hover:underline">Copy</button>
@@ -610,7 +639,7 @@ export default function SweetReader({ title, author, content }: SweetReaderProps
                     </form>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
 
@@ -627,13 +656,4 @@ function ModeToggle({ active, onClick, icon, label }: { active: boolean; onClick
             <span>{label}</span>
         </button>
     );
-}
-
-function SocialButton({ icon, label }: { icon: React.ReactNode; label: string }) {
-    return (
-        <button className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border border-[#e5e0d8] hover:bg-[#fdfbf7] hover:border-[#1a1a1a] transition-all group">
-            <div className="text-[#666] group-hover:text-[#1a1a1a] transition-colors">{icon}</div>
-            <span className="text-xs font-medium text-[#666] group-hover:text-[#1a1a1a]">{label}</span>
-        </button>
-    )
 }
