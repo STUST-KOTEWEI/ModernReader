@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Bell, Moon, Type, Volume2, Shield, Smartphone, LogOut } from "lucide-react";
-import { motion } from "framer-motion";
+import { Type, Volume2, Shield, Smartphone, LogOut } from "lucide-react";
 
 export default function SettingsPage() {
     return (

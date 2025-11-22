@@ -1,9 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense, lazy } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, Pause, Thermometer, Waves, Fingerprint, Share2, MessageCircle, BookOpen, Globe, Facebook, Twitter, Linkedin } from "lucide-react";
+import { Pause, Thermometer, Waves, Fingerprint, Share2, MessageCircle, BookOpen, Globe, Facebook, Twitter, Linkedin, PenTool, Sparkles, Play, Lock, Heart } from "lucide-react";
+import Image from "next/image";
 import clsx from "clsx";
+import { PERSONAS, PersonaType } from "@/lib/personas";
+
+// Dynamically import 3D avatar to avoid SSR issues
+const EmotionalAvatar = lazy(() => import("@/components/3d/EmotionalAvatar"));
+
+type Emotion = 'joy' | 'sadness' | 'anger' | 'fear' | 'surprise' | 'neutral';
 
 interface SweetReaderProps {
     title: string;
@@ -16,33 +23,197 @@ export default function SweetReader({ title, author, content }: SweetReaderProps
     const [hapticState, setHapticState] = useState({ temp: 0, vibe: 0, texture: false });
     const [isPlaying, setIsPlaying] = useState(false);
     const [language, setLanguage] = useState("English");
+    const [selectedPersona, setSelectedPersona] = useState<PersonaType>("Elder");
+    const [currentEmotion, setCurrentEmotion] = useState<Emotion>("neutral");
     const [messages, setMessages] = useState([
         { role: 'ai', content: 'This story reminds us of the importance of listening to the wind. What do you think the wind represents?' }
     ]);
     const [inputValue, setInputValue] = useState("");
     const [isTyping, setIsTyping] = useState(false);
 
-    const handleSendMessage = (e: React.FormEvent) => {
+    // New Features State
+    const [isHandwriting, setIsHandwriting] = useState(false);
+    const [showLanguageSearch, setShowLanguageSearch] = useState(false);
+    const [languageSearchQuery, setLanguageSearchQuery] = useState("");
+    const [isGeneratingStory, setIsGeneratingStory] = useState(false);
+    const [generatedStory, setGeneratedStory] = useState("");
+    const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+    const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+    const [isTranslating, setIsTranslating] = useState(false);
+
+    const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!inputValue.trim()) return;
 
         const newMsg = { role: 'user', content: inputValue };
         setMessages(prev => [...prev, newMsg]);
+        const userMessage = inputValue;
         setInputValue("");
         setIsTyping(true);
 
-        // Simulate AI response
-        setTimeout(() => {
+        try {
+            // Step 1: Detect emotion from user message
+            const emotionResponse = await fetch('/api/ai/detect-emotion', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: userMessage })
+            });
+            const emotionData = await emotionResponse.json();
+            const detectedEmotion = emotionData.emotion || 'neutral';
+            setCurrentEmotion(detectedEmotion);
+
+            // Step 2: Get AI response with emotion awareness
+            // Try Hugging Face first (free), fallback to OpenAI
+            let response = await fetch('/api/ai/chat-hf', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: userMessage,
+                    history: messages,
+                    persona: selectedPersona,
+                    userEmotion: detectedEmotion
+                })
+            });
+
+            // If HF fails or not configured, try OpenAI
+            if (!response.ok) {
+                response = await fetch('/api/ai/chat-persona', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: userMessage,
+                        history: messages,
+                        persona: selectedPersona,
+                        userEmotion: detectedEmotion
+                    })
+                });
+            }
+
+            const data = await response.json();
             setIsTyping(false);
             setMessages(prev => [...prev, {
                 role: 'ai',
-                content: "That is a profound observation. In many indigenous cultures, the wind is seen as a messenger carrying the spirits of our ancestors. It connects the past with the present."
+                content: data.response || "I cannot respond at this time."
             }]);
-        }, 2000);
+        } catch (error) {
+            console.error('Chat error:', error);
+            setIsTyping(false);
+            setMessages(prev => [...prev, {
+                role: 'ai',
+                content: "Sorry, I'm having trouble connecting. Please try again."
+            }]);
+        }
     };
 
+    const handleGenerateStory = async () => {
+        setIsGeneratingStory(true);
+        try {
+            const response = await fetch('/api/ai/generate-story', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ style: 'Elder' })
+            });
+
+            const data = await response.json();
+            const story = data.story || "Story generation failed.";
+            setGeneratedStory(story);
+            setIsPlaying(true);
+
+            // Auto-generate image for the story
+            handleGenerateImage(story);
+        } catch (error) {
+            console.error('Story generation error:', error);
+            setGeneratedStory("Failed to generate story. Please try again.");
+        } finally {
+            setIsGeneratingStory(false);
+        }
+    };
+
+    const handleGenerateImage = async (prompt: string) => {
+        setIsGeneratingImage(true);
+        try {
+            const response = await fetch('/api/ai/generate-image', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    prompt: `Illustration for this story: ${prompt.substring(0, 200)}`,
+                    style: 'indigenous folklore art'
+                })
+            });
+
+            const data = await response.json();
+            setGeneratedImage(data.imageUrl);
+        } catch (error) {
+            console.error('Image generation error:', error);
+        } finally {
+            setIsGeneratingImage(false);
+        }
+    };
+
+    const handleTranslate = async (targetLang: string) => {
+        if (!content) return;
+
+        setIsTranslating(true);
+        try {
+            const response = await fetch('/api/translate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    text: content.substring(0, 500), // Translate first 500 chars
+                    targetLanguage: targetLang,
+                    sourceLanguage: 'auto'
+                })
+            });
+
+            const data = await response.json();
+            // In a real app, you'd update the content state
+            // For now, just show it worked
+            alert(`Translated to ${targetLang}!\n\n${data.translatedText.substring(0, 200)}...`);
+        } catch (error) {
+            console.error('Translation error:', error);
+        } finally {
+            setIsTranslating(false);
+        }
+    };
+
+    // DRM Verification State
+    const [isVerifying, setIsVerifying] = useState(true);
+
+    useEffect(() => {
+        // Simulate DRM License Check
+        const timer = setTimeout(() => {
+            setIsVerifying(false);
+        }, 2000);
+        return () => clearTimeout(timer);
+    }, []);
+
     return (
-        <div className="h-screen flex flex-col lg:flex-row overflow-hidden bg-[#fdfbf7]">
+        <div className="h-screen flex flex-col lg:flex-row overflow-hidden bg-[#fdfbf7] relative">
+
+            {/* DRM Verification Overlay */}
+            <AnimatePresence>
+                {isVerifying && (
+                    <motion.div
+                        initial={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute inset-0 z-50 bg-[#fdfbf7] flex flex-col items-center justify-center"
+                    >
+                        <div className="w-16 h-16 bg-[#1a1a1a] rounded-2xl flex items-center justify-center text-white mb-6 animate-pulse">
+                            <Lock size={32} />
+                        </div>
+                        <h2 className="font-serif font-bold text-xl text-[#1a1a1a] mb-2">Verifying License</h2>
+                        <p className="text-[#666] text-sm font-mono">Checking DRM signature...</p>
+                        <div className="mt-8 w-48 h-1 bg-[#e5e0d8] rounded-full overflow-hidden">
+                            <motion.div
+                                className="h-full bg-[#1a1a1a]"
+                                initial={{ width: "0%" }}
+                                animate={{ width: "100%" }}
+                                transition={{ duration: 1.5, ease: "easeInOut" }}
+                            />
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Left Panel: Content & AI Avatar */}
             <div className="flex-1 flex flex-col relative border-r border-[#e5e0d8]">
@@ -68,7 +239,10 @@ export default function SweetReader({ title, author, content }: SweetReaderProps
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -20 }}
-                                className="max-w-3xl mx-auto font-serif text-lg lg:text-xl leading-relaxed text-[#1a1a1a]"
+                                className={clsx(
+                                    "max-w-3xl mx-auto text-lg lg:text-xl leading-relaxed text-[#1a1a1a]",
+                                    isHandwriting ? "font-cursive italic" : "font-serif"
+                                )}
                             >
                                 {content.split('\n').map((para, i) => (
                                     <p key={i} className="mb-6 first-letter:text-5xl first-letter:font-bold first-letter:mr-2 first-letter:float-left">
@@ -83,41 +257,33 @@ export default function SweetReader({ title, author, content }: SweetReaderProps
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.95 }}
-                                className="h-full flex items-center justify-center"
+                                className="h-full flex flex-col items-center justify-center p-8"
                             >
-                                <div className="w-full max-w-2xl aspect-video bg-[#1a1a1a] rounded-2xl shadow-2xl overflow-hidden relative group">
-                                    {/* AI Avatar Visualization */}
-                                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-black/80 to-black">
-                                        <div className="text-center relative z-10">
-                                            {/* Audio Wave Animation */}
-                                            <div className="flex items-center justify-center gap-1 mb-8 h-16">
-                                                {[...Array(5)].map((_, i) => (
-                                                    <motion.div
-                                                        key={i}
-                                                        animate={{ height: [20, 60, 20] }}
-                                                        transition={{ repeat: Infinity, duration: 1, delay: i * 0.1 }}
-                                                        className="w-2 bg-white/80 rounded-full"
-                                                    />
-                                                ))}
-                                            </div>
-                                            <div className="w-32 h-32 mx-auto bg-gradient-to-tr from-orange-500 to-purple-600 rounded-full mb-4 p-1">
-                                                <div className="w-full h-full bg-black rounded-full flex items-center justify-center overflow-hidden">
-                                                    <img src="https://api.dicebear.com/7.x/micah/svg?seed=Elder" alt="AI Avatar" className="w-full h-full object-cover opacity-80" />
-                                                </div>
-                                            </div>
-                                            <p className="text-[#fdfbf7] font-medium text-lg">Elder Speaking ({language})</p>
+                                {/* 3D Emotional Avatar */}
+                                <div className="w-full max-w-md aspect-square bg-gradient-to-b from-[#1a1a1a] to-black rounded-2xl shadow-2xl overflow-hidden relative mb-6">
+                                    <Suspense fallback={
+                                        <div className="w-full h-full flex items-center justify-center">
+                                            <div className="text-white/50">Loading 3D Avatar...</div>
                                         </div>
+                                    }>
+                                        <EmotionalAvatar emotion={currentEmotion} isActive={isTyping} />
+                                    </Suspense>
+                                </div>
 
-                                        {/* Background Effects */}
-                                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20 animate-pulse"></div>
+                                {/* Emotion & Persona Info */}
+                                <div className="text-center space-y-4">
+                                    <div className="flex items-center justify-center gap-3">
+                                        <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
+                                            <Heart size={16} className="text-red-400" />
+                                            <span className="text-white/90 text-sm font-medium capitalize">{currentEmotion}</span>
+                                        </div>
+                                        <div className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
+                                            <span className="text-white/90 text-sm font-medium">{PERSONAS[selectedPersona].name}</span>
+                                        </div>
                                     </div>
-
-                                    {/* Subtitles */}
-                                    <div className="absolute bottom-12 left-0 right-0 text-center px-8">
-                                        <p className="text-white/90 text-xl font-medium font-serif leading-relaxed drop-shadow-md">
-                                            &quot;Long ago, before the mountains touched the sky...&quot;
-                                        </p>
-                                    </div>
+                                    <p className="text-white/60 text-sm max-w-md">
+                                        The AI avatar responds to your emotional state, changing color and form based on detected emotions.
+                                    </p>
                                 </div>
                             </motion.div>
                         )}
@@ -213,33 +379,51 @@ export default function SweetReader({ title, author, content }: SweetReaderProps
                 <div className="p-6 border-b border-[#e5e0d8]">
                     <h2 className="font-serif font-bold text-lg mb-4">Sweet Tools</h2>
 
-                    {/* Language Selector */}
-                    <div className="bg-white p-4 rounded-xl shadow-sm border border-[#e5e0d8] mb-4">
+                    {/* Advanced Language Selector */}
+                    <div className="bg-white p-4 rounded-xl shadow-sm border border-[#e5e0d8] mb-4 relative">
                         <div className="flex items-center justify-between mb-3">
                             <h3 className="font-medium text-sm flex items-center gap-2">
                                 <Globe size={16} /> Omnilingual
                             </h3>
                             <span className="text-[10px] font-bold bg-[#e5e0d8] text-[#666] px-2 py-0.5 rounded-full">1600+</span>
                         </div>
-                        <select
-                            value={language}
-                            onChange={(e) => {
-                                setLanguage(e.target.value);
-                                // Simulate translation delay
-                                const originalContent = content;
-                                // In a real app, this would call the Omnilingual API
-                            }}
-                            className="w-full px-3 py-2 rounded-lg border border-[#e5e0d8] text-sm bg-[#fdfbf7] focus:outline-none focus:border-[#1a1a1a]"
-                        >
-                            <option>English</option>
-                            <option>Mandarin (Traditional)</option>
-                            <option>Paiwan</option>
-                            <option>Atayal</option>
-                            <option>Amis</option>
-                            <option>Bunun</option>
-                            <option>Japanese</option>
-                            <option>French</option>
-                        </select>
+
+                        {!showLanguageSearch ? (
+                            <button
+                                onClick={() => setShowLanguageSearch(true)}
+                                className="w-full px-3 py-2 rounded-lg border border-[#e5e0d8] text-sm bg-[#fdfbf7] text-left flex justify-between items-center hover:border-[#1a1a1a] transition-colors"
+                            >
+                                {language}
+                                <span className="text-xs text-[#999]">Change</span>
+                            </button>
+                        ) : (
+                            <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                                <input
+                                    autoFocus
+                                    type="text"
+                                    placeholder="Search 1600+ languages..."
+                                    className="w-full px-3 py-2 rounded-lg border border-[#1a1a1a] text-sm focus:outline-none"
+                                    value={languageSearchQuery}
+                                    onChange={(e) => setLanguageSearchQuery(e.target.value)}
+                                    onBlur={() => {
+                                        if (!languageSearchQuery) setShowLanguageSearch(false);
+                                    }}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && languageSearchQuery) {
+                                            setLanguage(languageSearchQuery);
+                                            handleTranslate(languageSearchQuery);
+                                            setShowLanguageSearch(false);
+                                            setLanguageSearchQuery("");
+                                        }
+                                    }}
+                                />
+                                <div className="text-xs text-[#666]">
+                                    Press Enter to translate to &quot;{languageSearchQuery || '...'}&quot;
+                                    {isTranslating && <span className="ml-2 animate-pulse">Translating...</span>}
+                                </div>
+                            </div>
+                        )}
+
                         {language !== "English" && (
                             <div className="mt-2 text-xs text-green-600 flex items-center gap-1 animate-pulse">
                                 <div className="w-1.5 h-1.5 bg-green-600 rounded-full" />
@@ -247,30 +431,95 @@ export default function SweetReader({ title, author, content }: SweetReaderProps
                             </div>
                         )}
                     </div>
-                    {/* Podcast Generator */}
+
+                    {/* Handwriting Toggle */}
+                    <div className="bg-white p-4 rounded-xl shadow-sm border border-[#e5e0d8] mb-4 flex items-center justify-between">
+                        <h3 className="font-medium text-sm flex items-center gap-2">
+                            <PenTool size={16} /> Handwriting
+                        </h3>
+                        <button
+                            onClick={() => setIsHandwriting(!isHandwriting)}
+                            className={clsx(
+                                "w-12 h-6 rounded-full p-1 transition-colors duration-300",
+                                isHandwriting ? "bg-[#1a1a1a]" : "bg-[#e5e0d8]"
+                            )}
+                        >
+                            <div className={clsx(
+                                "w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300",
+                                isHandwriting ? "translate-x-6" : "translate-x-0"
+                            )} />
+                        </button>
+                    </div>
+
+                    {/* Story Generator */}
                     <div className="bg-white p-4 rounded-xl shadow-sm border border-[#e5e0d8] mb-4">
                         <div className="flex items-center justify-between mb-3">
                             <h3 className="font-medium text-sm flex items-center gap-2">
-                                <Mic size={16} /> Podcast Gen
+                                <Sparkles size={16} /> Story Gen
                             </h3>
                             <span className="text-[10px] font-bold bg-black text-white px-2 py-0.5 rounded-full">AI</span>
                         </div>
-                        <div className="space-y-2">
-                            <div className="flex gap-2">
-                                {['Elder', 'Youth', 'Academic'].map((style) => (
-                                    <button key={style} className="flex-1 text-xs py-1.5 border border-[#e5e0d8] rounded-lg hover:bg-[#fdfbf7] transition-colors">
-                                        {style}
-                                    </button>
-                                ))}
+
+                        {generatedStory ? (
+                            <div className="space-y-3">
+                                {/* Generated Image */}
+                                {generatedImage && (
+                                    <div className="relative w-full aspect-square rounded-lg overflow-hidden border border-[#e5e0d8]">
+                                        <Image
+                                            src={generatedImage}
+                                            alt="Generated story illustration"
+                                            fill
+                                            className="object-cover"
+                                            unoptimized
+                                        />
+                                        {isGeneratingImage && (
+                                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                                                <div className="text-white text-xs">Generating image...</div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                <div className="p-3 bg-[#fdfbf7] rounded-lg text-xs text-[#666] italic border border-[#e5e0d8]">
+                                    &quot;{generatedStory}&quot;
+                                </div>
+                                <button
+                                    onClick={() => setIsPlaying(!isPlaying)}
+                                    className="w-full bg-[#1a1a1a] text-white py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-black transition-colors"
+                                >
+                                    {isPlaying ? <Pause size={16} /> : <Play size={16} />}
+                                    <span className="text-sm font-medium">{isPlaying ? "Pause Audio" : "Play TTS"}</span>
+                                </button>
+                                <button
+                                    onClick={() => { setGeneratedStory(""); setIsPlaying(false); setGeneratedImage(null); }}
+                                    className="w-full text-xs text-[#666] hover:text-[#1a1a1a]"
+                                >
+                                    Generate New
+                                </button>
                             </div>
-                            <button
-                                onClick={() => setIsPlaying(!isPlaying)}
-                                className="w-full bg-[#1a1a1a] text-white py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-black transition-colors"
-                            >
-                                {isPlaying ? <Pause size={16} /> : "Generate & Play"}
-                                <span className="text-sm font-medium">{isPlaying ? "Pause" : "Generate & Play"}</span>
-                            </button>
-                        </div>
+                        ) : (
+                            <div className="space-y-2">
+                                <div className="flex gap-2">
+                                    {['Elder', 'Youth', 'Myth'].map((style) => (
+                                        <button key={style} className="flex-1 text-xs py-1.5 border border-[#e5e0d8] rounded-lg hover:bg-[#fdfbf7] transition-colors">
+                                            {style}
+                                        </button>
+                                    ))}
+                                </div>
+                                <button
+                                    onClick={handleGenerateStory}
+                                    disabled={isGeneratingStory}
+                                    className="w-full bg-[#1a1a1a] text-white py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-black transition-colors disabled:opacity-50"
+                                >
+                                    {isGeneratingStory ? (
+                                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    ) : (
+                                        <Sparkles size={16} />
+                                    )}
+                                    <span className="text-sm font-medium">{isGeneratingStory ? "Dreaming..." : "Generate Story"}</span>
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     {/* Haptic Controls Simulation */}
@@ -303,6 +552,22 @@ export default function SweetReader({ title, author, content }: SweetReaderProps
 
                 {/* Chat / Notes */}
                 <div className="flex-1 p-6 flex flex-col min-h-0">
+                    {/* Persona Selector */}
+                    <div className="mb-4">
+                        <label className="text-xs font-bold text-[#666] uppercase tracking-wider mb-2 block">AI Persona</label>
+                        <select
+                            value={selectedPersona}
+                            onChange={(e) => setSelectedPersona(e.target.value as PersonaType)}
+                            className="w-full px-3 py-2 rounded-lg border border-[#e5e0d8] text-sm focus:outline-none focus:border-[#1a1a1a] bg-white"
+                        >
+                            {Object.entries(PERSONAS).map(([key, persona]) => (
+                                <option key={key} value={key}>
+                                    {persona.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
                     <h2 className="font-serif font-bold text-lg mb-4 flex items-center gap-2">
                         <div className={`w-2 h-2 rounded-full ${isTyping ? 'bg-green-500 animate-pulse' : 'bg-[#e5e0d8]'}`} />
                         Discussion
@@ -371,25 +636,4 @@ function SocialButton({ icon, label }: { icon: React.ReactNode; label: string })
             <span className="text-xs font-medium text-[#666] group-hover:text-[#1a1a1a]">{label}</span>
         </button>
     )
-}
-
-function Mic({ size }: { size: number }) {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width={size}
-            height={size}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
-            <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-            <line x1="12" y1="19" x2="12" y2="23" />
-            <line x1="8" y1="23" x2="16" y2="23" />
-        </svg>
-    );
 }

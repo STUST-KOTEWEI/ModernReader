@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Clock, Star, Search, User, TrendingUp, Globe, Activity } from "lucide-react";
+import { Search, User, TrendingUp, Globe, Activity } from "lucide-react";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 
@@ -13,28 +13,155 @@ interface Book {
   subject: string[];
 }
 
-const CATEGORIES = ["All", "Folklore", "History", "Music", "Adventure", "Language"];
+const CATEGORIES = ["All", "Fiction", "Non-Fiction", "Science", "Business", "Self-Help"];
+
+// Fallback books when Open Library API is unavailable
+function getFallbackBooks(): Book[] {
+  return [
+    {
+      key: "/works/OL1",
+      title: "Atomic Habits",
+      authors: [{ name: "James Clear" }],
+      cover_id: 8909499,
+      subject: ["Self-help", "Productivity"]
+    },
+    {
+      key: "/works/OL2",
+      title: "The Psychology of Money",
+      authors: [{ name: "Morgan Housel" }],
+      cover_id: 10504608,
+      subject: ["Finance", "Psychology"]
+    },
+    {
+      key: "/works/OL3",
+      title: "Sapiens",
+      authors: [{ name: "Yuval Noah Harari" }],
+      cover_id: 8398490,
+      subject: ["History", "Anthropology"]
+    },
+    {
+      key: "/works/OL4",
+      title: "The Midnight Library",
+      authors: [{ name: "Matt Haig" }],
+      cover_id: 10677408,
+      subject: ["Fiction", "Philosophy"]
+    },
+    {
+      key: "/works/OL5",
+      title: "Educated",
+      authors: [{ name: "Tara Westover" }],
+      cover_id: 8738320,
+      subject: ["Memoir", "Education"]
+    },
+    {
+      key: "/works/OL6",
+      title: "The Alchemist",
+      authors: [{ name: "Paulo Coelho" }],
+      cover_id: 28370,
+      subject: ["Fiction", "Philosophy"]
+    },
+    {
+      key: "/works/OL7",
+      title: "Thinking, Fast and Slow",
+      authors: [{ name: "Daniel Kahneman" }],
+      cover_id: 7140891,
+      subject: ["Psychology", "Economics"]
+    },
+    {
+      key: "/works/OL8",
+      title: "The 7 Habits of Highly Effective People",
+      authors: [{ name: "Stephen Covey" }],
+      cover_id: 421210,
+      subject: ["Self-help", "Business"]
+    },
+    {
+      key: "/works/OL9",
+      title: "1984",
+      authors: [{ name: "George Orwell" }],
+      cover_id: 7984916,
+      subject: ["Fiction", "Dystopian"]
+    },
+    {
+      key: "/works/OL10",
+      title: "The Power of Now",
+      authors: [{ name: "Eckhart Tolle" }],
+      cover_id: 6708356,
+      subject: ["Spirituality", "Mindfulness"]
+    },
+    {
+      key: "/works/OL11",
+      title: "Dune",
+      authors: [{ name: "Frank Herbert" }],
+      cover_id: 8687063,
+      subject: ["Science Fiction", "Adventure"]
+    },
+    {
+      key: "/works/OL12",
+      title: "The Lean Startup",
+      authors: [{ name: "Eric Ries" }],
+      cover_id: 7286187,
+      subject: ["Business", "Entrepreneurship"]
+    }
+  ];
+}
+
 
 export default function LibraryPage() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
 
   useEffect(() => {
     async function fetchBooks() {
+      setLoading(true);
       try {
-        const res = await fetch('https://openlibrary.org/subjects/indigenous_peoples.json?limit=12');
+        // Fetch popular/trending books from Open Library with pagination
+        const limit = 24; // More books per page
+        const offset = (page - 1) * limit;
+        const res = await fetch(`https://openlibrary.org/subjects/bestseller.json?limit=${limit}&offset=${offset}`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+          },
+        });
+
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+
         const data = await res.json();
-        setBooks(data.works || []);
+
+        if (data.works && data.works.length > 0) {
+          // Remove duplicates by key using Set for better performance
+          setBooks(prev => {
+            const existingKeys = new Set(prev.map(b => b.key));
+            const newBooks = data.works.filter((book: Book) => !existingKeys.has(book.key));
+            return [...prev, ...newBooks];
+          });
+          setHasMore(data.works.length === limit);
+        } else {
+          setHasMore(false);
+          if (books.length === 0) {
+            setBooks(getFallbackBooks());
+          }
+        }
       } catch (error) {
-        console.error("Failed to fetch books", error);
+        console.error('Failed to fetch from Open Library:', error);
+        if (books.length === 0) {
+          setBooks(getFallbackBooks());
+        }
+        setHasMore(false);
       } finally {
         setLoading(false);
       }
     }
+
     fetchBooks();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page]);
 
   const filteredBooks = books.filter(book =>
     book.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -44,8 +171,8 @@ export default function LibraryPage() {
     <div className="p-8 lg:p-12">
       <header className="mb-12 flex flex-col lg:flex-row lg:items-end justify-between gap-6">
         <div>
-          <h1 className="font-serif font-bold text-4xl text-[#1a1a1a] mb-2">Global Indigenous Library</h1>
-          <p className="text-[#666]">Connected to Open Library & ModernReader Network.</p>
+          <h1 className="font-serif font-bold text-4xl text-[#1a1a1a] mb-2">ModernReader Library</h1>
+          <p className="text-[#666]">Connected to Open Library & Global Reading Network.</p>
         </div>
 
         {/* Live Activity Ticker */}
@@ -57,7 +184,7 @@ export default function LibraryPage() {
             </span>
             Live
           </div>
-          <span className="text-[#666]">User <span className="font-bold text-[#1a1a1a]">Kaleb</span> just finished "Braiding Sweetgrass"</span>
+          <span className="text-[#666]">User <span className="font-bold text-[#1a1a1a]">Alex</span> just finished &quot;Atomic Habits&quot;</span>
         </div>
       </header>
 
@@ -79,8 +206,8 @@ export default function LibraryPage() {
               key={cat}
               onClick={() => setActiveCategory(cat)}
               className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${activeCategory === cat
-                  ? "bg-[#1a1a1a] text-white shadow-md"
-                  : "bg-white border border-[#e5e0d8] text-[#666] hover:bg-[#fdfbf7] hover:border-[#1a1a1a]"
+                ? "bg-[#1a1a1a] text-white shadow-md"
+                : "bg-white border border-[#e5e0d8] text-[#666] hover:bg-[#fdfbf7] hover:border-[#1a1a1a]"
                 }`}
             >
               {cat}
@@ -110,8 +237,8 @@ export default function LibraryPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {filteredBooks.map((book) => (
-            <Link key={book.key} href="/reader" className="group">
+          {filteredBooks.map((book, index) => (
+            <Link key={`${book.key}-${index}`} href={`/books${book.key}`} className="group">
               <div className="bg-white rounded-2xl p-4 shadow-sm border border-[#e5e0d8] transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1 h-full flex flex-col">
                 {/* Cover */}
                 <div className="aspect-[2/3] rounded-xl mb-4 bg-[#f0ebe4] relative overflow-hidden">
@@ -140,12 +267,24 @@ export default function LibraryPage() {
 
                 {/* Footer */}
                 <div className="pt-4 border-t border-[#f0ebe4] flex items-center justify-between text-[10px] font-medium text-[#999] uppercase tracking-wider">
-                  <span className="flex items-center gap-1"><Star size={10} className="text-orange-400 fill-orange-400" /> 4.8</span>
                   <span className="bg-[#f0ebe4] px-2 py-1 rounded-full text-[#666]">Read Now</span>
+                  <span className="text-[#666]">{book.subject?.[0] || 'Book'}</span>
                 </div>
               </div>
             </Link>
           ))}
+        </div>
+      )}
+
+      {/* Load More Button */}
+      {!loading && hasMore && books.length > 0 && (
+        <div className="text-center mt-12">
+          <button
+            onClick={() => setPage(p => p + 1)}
+            className="px-8 py-3 bg-[#1a1a1a] text-white rounded-xl hover:bg-black transition-colors font-medium"
+          >
+            Load More Books
+          </button>
         </div>
       )}
     </div>
