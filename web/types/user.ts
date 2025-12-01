@@ -60,6 +60,24 @@ export type ReadingGoalType =
     | 'Language Learning'
     | 'Relaxation';
 
+export interface LibraryHolding {
+    libraryId: string;
+    libraryName: string;
+    country: string;
+    callNumber: string;
+    location: string;
+    access: LibraryAccessType;
+    note?: string;
+    url?: string;
+}
+
+export type LibraryAccessType = 'Digital' | 'Physical' | 'Hybrid' | 'Any';
+
+export interface LibraryFilter {
+    libraries?: string[];
+    access?: LibraryAccessType;
+}
+
 export interface BookRecommendation {
     book: {
         key: string;
@@ -71,6 +89,7 @@ export interface BookRecommendation {
     };
     reasoning: string; // AI explanation for why this book is recommended
     matchScore: number; // 0-100
+    libraryHolding?: LibraryHolding; // Which library holds it and where to find it
 }
 
 export interface RecommendationRequest {
@@ -82,6 +101,8 @@ export interface RecommendationRequest {
     interests: string[];
     readingGoals: string[];
     limit?: number;
+    libraries?: string[];
+    access?: LibraryAccessType;
 }
 
 export interface RecommendationResponse {

@@ -1,0 +1,50 @@
+{
+  "systemRequirements": {
+    "minimum": {
+      "storage": "128GB local + cloud storage recommended",
+      "ram": "4GB",
+      "gpu": "Integrated graphics (Intel HD 4000+)",
+      "cpu": "Dual-core 2.0GHz",
+      "os": ["Windows 10+", "macOS 11+", "Linux (Ubuntu 20.04+)"]
+    },
+    "recommended": {
+      "storage": "256GB local + 2TB cloud (Google Drive, Dropbox, etc.)",
+      "ram": "8GB",
+      "gpu": "Apple M3 or equivalent",
+      "cpu": "Apple M3 or Intel i5 10th gen+",
+      "os": ["macOS 13+ (Ventura)", "Windows 11", "Linux (Ubuntu 22.04+)"]
+    },
+    "optimizedFor": {
+      "device": "MacBook Air M3",
+      "ram": "8GB",
+      "localStorage": "256GB SSD",
+      "cloudStorage": "2TB Google Drive",
+      "processor": "Apple M3 8-core CPU",
+      "graphics": "Apple M3 8-core GPU"
+    },
+    "resourceLimits": {
+      "maxRamUsage": "5GB",
+      "maxLocalStorage": "50GB",
+      "maxCloudStorage": "2TB",
+      "maxGpuUtilization": "75%",
+      "maxCpuUtilization": "70%",
+      "targetGpuUtilization": "50-65%",
+      "targetCpuUtilization": "40-60%"
+    },
+    "performance": {
+      "enableAdaptivePerformance": true,
+      "autoScaleResources": true,
+      "prioritizeUserExperience": true,
+      "backgroundProcessThrottling": true,
+      "intelligentCloudSync": true,
+      "powerEfficiencyMode": true
+    },
+    "storage": {
+      "localCacheSize": "5GB",
+      "cloudSyncEnabled": true,
+      "autoOffloadToCloud": true,
+      "offloadThreshold": "80%",
+      "compressionEnabled": true
+    }
+  }
+}

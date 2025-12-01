@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense, lazy } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Pause, Thermometer, Waves, Fingerprint, Share2, MessageCircle, BookOpen, Globe, Twitter, PenTool, Sparkles, Play, Lock, Heart } from "lucide-react";
+import { Pause, Thermometer, Waves, Fingerprint, Share2, MessageCircle, BookOpen, Globe, Twitter, PenTool, Sparkles, Play, Lock, Heart, Minimize2, Maximize2 } from "lucide-react"; // Import Minimize2, Maximize2
 import Image from "next/image";
 import clsx from "clsx";
 import { PERSONAS, PersonaType } from "@/lib/personas";
@@ -30,6 +30,7 @@ export default function SweetReader({ title, author, content }: SweetReaderProps
     ]);
     const [inputValue, setInputValue] = useState("");
     const [isTyping, setIsTyping] = useState(false);
+    const [isImmersive, setIsImmersive] = useState(false); // New state for immersive mode
 
     // New Features State
     const [isHandwriting, setIsHandwriting] = useState(false);
@@ -40,6 +41,8 @@ export default function SweetReader({ title, author, content }: SweetReaderProps
     const [generatedImage, setGeneratedImage] = useState<string | null>(null);
     const [isGeneratingImage, setIsGeneratingImage] = useState(false);
     const [isTranslating, setIsTranslating] = useState(false);
+    const [tactileFeedbackText, setTactileFeedbackText] = useState<string | null>(null); // New state
+    const [showTactileFeedback, setShowTactileFeedback] = useState(false); // New state
 
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -176,6 +179,37 @@ export default function SweetReader({ title, author, content }: SweetReaderProps
         }
     };
 
+    const handleSimulateTactileFeedback = async () => {
+        const sampleText = "The wind gently whispers through the rough leaves of the ancient tree."; // Sample text
+        try {
+            const response = await fetch('/api/v1/senses/command', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    session_id: "demo_session", // Placeholder
+                    modality: "tactile_feedback",
+                    payload: {},
+                    text_snippet: sampleText
+                })
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setTactileFeedbackText(data.feedback_description);
+                setShowTactileFeedback(true);
+                setTimeout(() => setShowTactileFeedback(false), 5000); // Hide after 5 seconds
+            } else {
+                setTactileFeedbackText("Failed to get feedback.");
+                setShowTactileFeedback(true);
+                setTimeout(() => setShowTactileFeedback(false), 5000);
+            }
+        } catch (error) {
+            console.error('Tactile feedback error:', error);
+            setTactileFeedbackText("Error simulating feedback.");
+            setShowTactileFeedback(true);
+            setTimeout(() => setShowTactileFeedback(false), 5000);
+        }
+    };
+
     // DRM Verification State
     const [isVerifying, setIsVerifying] = useState(true);
 
@@ -216,9 +250,9 @@ export default function SweetReader({ title, author, content }: SweetReaderProps
             </AnimatePresence>
 
             {/* Left Panel: Content & AI Avatar */}
-            <div className="flex-1 flex flex-col relative border-r border-[#e5e0d8]">
+            <div className={clsx("flex-1 flex flex-col relative border-r border-[#e5e0d8]", isImmersive && "w-full")}>
                 {/* Header */}
-                <header className="h-16 flex items-center justify-between px-8 border-b border-[#e5e0d8] bg-[#fdfbf7]/80 backdrop-blur-sm z-10">
+                <header className={clsx("h-16 flex items-center justify-between px-8 border-b border-[#e5e0d8] bg-[#fdfbf7]/80 backdrop-blur-sm z-10 transition-all duration-300", isImmersive && "opacity-0 -translate-y-full pointer-events-none")}>
                     <div>
                         <h1 className="font-serif font-bold text-xl text-[#1a1a1a]">{title}</h1>
                         <p className="text-xs text-[#666] uppercase tracking-wider">{author}</p>
@@ -230,6 +264,16 @@ export default function SweetReader({ title, author, content }: SweetReaderProps
                         <ModeToggle active={activeMode === "tell"} onClick={() => setActiveMode("tell")} icon={<Share2 size={18} />} label="Tell" />
                     </div>
                 </header>
+                {/* Immersive Mode Toggle (always visible) */}
+                <button
+                    onClick={() => setIsImmersive(!isImmersive)}
+                    className={clsx(
+                        "absolute top-4 right-4 z-20 p-2 rounded-full bg-[#1a1a1a] text-white shadow-lg transition-all duration-300",
+                        isImmersive ? "bg-red-500" : ""
+                    )}
+                >
+                    {isImmersive ? <Maximize2 size={20} /> : <Minimize2 size={20} />}
+                </button>
 
                 {/* Main Reading Area */}
                 <div className="flex-1 overflow-y-auto p-8 lg:p-16 scroll-smooth relative">
@@ -293,7 +337,7 @@ export default function SweetReader({ title, author, content }: SweetReaderProps
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
-                                className="h-full flex flex-col items-center justify-center"
+                                className="h-full flex flex-col items-center justify-center p-8"
                             >
                                 <div className="relative w-64 h-96 bg-white rounded-3xl border-4 border-[#e5e0d8] shadow-xl overflow-hidden flex items-center justify-center">
                                     {/* Haptic Visualization Layer */}
@@ -314,6 +358,12 @@ export default function SweetReader({ title, author, content }: SweetReaderProps
                                             Temp: {hapticState.temp}°C <br />
                                             Vibe: {hapticState.vibe}Hz
                                         </p>
+                                        <button 
+                                            onClick={handleSimulateTactileFeedback} 
+                                            className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg text-sm"
+                                        >
+                                            Simulate Tactile Feedback
+                                        </button>
                                     </div>
                                 </div>
                                 <p className="mt-8 text-[#666] text-sm max-w-md text-center">
@@ -321,6 +371,16 @@ export default function SweetReader({ title, author, content }: SweetReaderProps
                                     <br />
                                     <span className="text-xs opacity-50">(Hardware Simulation Active)</span>
                                 </p>
+                                {showTactileFeedback && tactileFeedbackText && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -20 }}
+                                        className="absolute bottom-8 bg-black/70 text-white text-sm px-4 py-2 rounded-lg"
+                                    >
+                                        {tactileFeedbackText}
+                                    </motion.div>
+                                )}
                             </motion.div>
                         )}
 
@@ -367,7 +427,7 @@ export default function SweetReader({ title, author, content }: SweetReaderProps
                                                 navigator.clipboard.writeText(window.location.href);
                                                 alert('Link copied! Share it on Instagram Stories or Posts.');
                                             }}
-                                            className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border border-[#e5e0d8] hover:bg-[#fdfbf7] hover:border-[#1a1a1a] transition-all group"
+                                            className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border border-[#e5e0d8] hover:bg-[#fdfbf7] hover:hover:border-[#1a1a1a] transition-all group"
                                         >
                                             <div className="text-[#666] group-hover:text-[#1a1a1a] transition-colors"><Heart size={24} /></div>
                                             <span className="text-xs font-medium text-[#666] group-hover:text-[#1a1a1a]">Instagram</span>
@@ -386,7 +446,8 @@ export default function SweetReader({ title, author, content }: SweetReaderProps
                 {/* Haptic Status Bar (Experience Mode) */}
                 <div className={clsx(
                     "h-16 border-t border-[#e5e0d8] flex items-center px-8 gap-6 transition-all duration-300 absolute bottom-0 left-0 right-0 bg-[#fdfbf7]",
-                    activeMode === "experience" ? "translate-y-0" : "translate-y-full opacity-0"
+                    activeMode === "experience" ? "translate-y-0" : "translate-y-full opacity-0",
+                    isImmersive && "hidden" // Hide in immersive mode
                 )}>
                     <div className="flex items-center gap-3">
                         <Thermometer size={20} className={hapticState.temp > 0 ? "text-orange-500" : "text-[#999]"} />
@@ -404,7 +465,7 @@ export default function SweetReader({ title, author, content }: SweetReaderProps
             </div>
 
             {/* Right Panel: Tools & Podcast (Enjoy/Tell) */}
-            <div className="w-full lg:w-96 bg-[#f7f5f0] border-l border-[#e5e0d8] flex flex-col">
+            <div className={clsx("w-full lg:w-96 bg-[#f7f5f0] border-l border-[#e5e0d8] flex flex-col transition-all duration-300", isImmersive && "hidden")}>
                 <div className="p-6 border-b border-[#e5e0d8]">
                     <h2 className="font-serif font-bold text-lg mb-4">Sweet Tools</h2>
 

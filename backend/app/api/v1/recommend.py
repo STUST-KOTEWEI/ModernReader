@@ -123,17 +123,38 @@ async def knowledge_graph_stats() -> dict[str, Any]:
     return kg.get_statistics()
 
 
+from app.models.catalog import Book
+
 @router.get("/knowledge-graph/path/{start_id}/{end_id}")
-async def find_learning_path(start_id: str, end_id: str) -> dict[str, Any]:
+async def find_learning_path(
+    start_id: str,
+    end_id: str,
+    db: Session = Depends(get_db)
+) -> dict[str, Any]:
     """Find optimal learning path between two content items."""
     kg = get_knowledge_graph()
-    path = kg.find_learning_path(start_id, end_id)
+    path_ids = kg.find_learning_path(start_id, end_id)
     
+    if not path_ids:
+        return {
+            "start": start_id,
+            "end": end_id,
+            "path": [],
+            "length": 0,
+        }
+
+    # Fetch book details from the database
+    books_in_path = db.query(Book).filter(Book.id.in_(path_ids)).all()
+    books_map = {str(book.id): book for book in books_in_path}
+
+    # Reconstruct path with full book objects, maintaining order
+    ordered_path = [books_map[book_id] for book_id in path_ids if book_id in books_map]
+
     return {
         "start": start_id,
         "end": end_id,
-        "path": path,
-        "length": len(path) - 1 if len(path) > 1 else 0,
+        "path": ordered_path,
+        "length": len(ordered_path) - 1 if len(ordered_path) > 1 else 0,
     }
 
 

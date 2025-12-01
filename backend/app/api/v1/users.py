@@ -137,6 +137,7 @@ async def get_my_profile(
         avatar_url=user.avatar_url,
         role=user.role.value,
         language_goal=user.language_goal,
+        cultural_preferences=user.cultural_preferences, # Include cultural preferences
         created_at=user.created_at.isoformat(),
     )
 
@@ -165,6 +166,8 @@ async def update_my_profile(
         user.avatar_url = request.avatar_url
     if request.language_goal is not None:
         user.language_goal = request.language_goal
+    if request.cultural_preferences is not None: # Update cultural preferences
+        user.cultural_preferences = request.cultural_preferences
 
     db.commit()
     db.refresh(user)
@@ -175,5 +178,6 @@ async def update_my_profile(
         avatar_url=user.avatar_url,
         role=user.role.value,
         language_goal=user.language_goal,
+        cultural_preferences=user.cultural_preferences, # Return updated cultural preferences
         created_at=user.created_at.isoformat(),
     )

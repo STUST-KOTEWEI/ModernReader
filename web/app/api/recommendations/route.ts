@@ -2,11 +2,32 @@ import { NextRequest, NextResponse } from 'next/server';
 import { openai, isOpenAIConfigured } from '@/lib/openai';
 import { generateText } from '@/lib/huggingface';
 import type { RecommendationRequest, RecommendationResponse, BookRecommendation } from '@/types/user';
+import { buildLibraryHolding } from '@/lib/librarySources';
+
+type LLMRecommendation = {
+    title: string;
+    author: string;
+    reasoning?: string;
+    matchScore?: number;
+};
+
+function normalizeRecArray(data: unknown): LLMRecommendation[] {
+    if (!Array.isArray(data)) return [];
+    return data
+        .filter((item): item is Record<string, unknown> => typeof item === 'object' && !!item && 'title' in item && 'author' in item)
+        .map((item) => {
+            const title = typeof item.title === 'string' ? item.title : 'Untitled';
+            const author = typeof item.author === 'string' ? item.author : 'Unknown Author';
+            const reasoning = typeof item.reasoning === 'string' ? item.reasoning : undefined;
+            const matchScore = typeof item.matchScore === 'number' ? item.matchScore : undefined;
+            return { title, author, reasoning, matchScore };
+        });
+}
 
 export async function POST(req: NextRequest) {
     try {
         const body: RecommendationRequest = await req.json();
-        const { occupation, gender, age, emotion, interests, readingGoals, limit = 12 } = body;
+        const { occupation, gender, age, emotion, interests, readingGoals, limit = 12, libraries, access } = body;
 
         // Build recommendation prompt
         const prompt = `You are an expert book recommendation AI. Based on the following user profile, recommend ${limit} books that would be perfect for them:
@@ -58,17 +79,22 @@ Return ONLY the JSON array, no other text.`;
                 });
 
                 const content = completion.choices[0]?.message?.content || '[]';
-                const parsed = JSON.parse(content);
+                const parsed = normalizeRecArray(JSON.parse(content));
 
-                recommendations = parsed.map((rec: any) => ({
+                recommendations = parsed.map((rec, index) => ({
                     book: {
                         key: `/works/${rec.title.replace(/\s+/g, '_')}`,
                         title: rec.title,
                         authors: [{ name: rec.author }],
                         subject: interests,
                     },
-                    reasoning: rec.reasoning,
-                    matchScore: rec.matchScore || 85
+                    reasoning: rec.reasoning ?? 'Tailored to your profile.',
+                    matchScore: rec.matchScore || 85,
+                    libraryHolding: buildLibraryHolding(
+                        rec.title || interests[0],
+                        index,
+                        { preferredLibraryIds: libraries, preferredAccess: access }
+                    )
                 }));
 
                 summary = `Based on your profile as a ${age}-year-old ${occupation} interested in ${interests.slice(0, 3).join(', ')}, we've curated these ${recommendations.length} books to help you achieve your goals.`;
@@ -84,23 +110,28 @@ Return ONLY the JSON array, no other text.`;
 
             if (!hfResult.isMock) {
                 try {
-                    const parsed = JSON.parse(hfResult.text);
-                    recommendations = parsed.map((rec: any) => ({
+                    const parsed = normalizeRecArray(JSON.parse(hfResult.text));
+                    recommendations = parsed.map((rec, index) => ({
                         book: {
                             key: `/works/${rec.title.replace(/\s+/g, '_')}`,
                             title: rec.title,
                             authors: [{ name: rec.author }],
                             subject: interests,
                         },
-                        reasoning: rec.reasoning,
-                        matchScore: rec.matchScore || 80
+                        reasoning: rec.reasoning ?? 'Tailored to your profile.',
+                        matchScore: rec.matchScore || 80,
+                        libraryHolding: buildLibraryHolding(
+                            rec.title || interests[0],
+                            index,
+                            { preferredLibraryIds: libraries, preferredAccess: access }
+                        )
                     }));
                 } catch {
                     // Use mock recommendations
-                    recommendations = getMockRecommendations(occupation, interests, limit);
+                    recommendations = getMockRecommendations(occupation, interests, limit, libraries, access);
                 }
             } else {
-                recommendations = getMockRecommendations(occupation, interests, limit);
+                recommendations = getMockRecommendations(occupation, interests, limit, libraries, access);
             }
 
             summary = `Personalized recommendations for ${occupation} based on your interests in ${interests.slice(0, 3).join(', ')}.`;
@@ -121,7 +152,13 @@ Return ONLY the JSON array, no other text.`;
     }
 }
 
-function getMockRecommendations(occupation: string, interests: string[], limit: number): BookRecommendation[] {
+function getMockRecommendations(
+    occupation: string,
+    interests: string[],
+    limit: number,
+    libraries?: string[],
+    access?: 'Digital' | 'Physical' | 'Hybrid' | 'Any'
+): BookRecommendation[] {
     const mockBooks = [
         { title: 'Atomic Habits', author: 'James Clear', isbn: '9780735211292', subject: 'Self-Help' },
         { title: 'Deep Work', author: 'Cal Newport', isbn: '9781455586691', subject: 'Productivity' },
@@ -146,7 +183,12 @@ function getMockRecommendations(occupation: string, interests: string[], limit: 
             cover_id: getCoverIdFromISBN(book.isbn), // Generate cover ID from ISBN
         },
         reasoning: `This book aligns with your interests in ${interests[0] || 'personal growth'} and is highly recommended for ${occupation}s.`,
-        matchScore: Math.floor(Math.random() * 20) + 75 // 75-95
+        matchScore: Math.floor(Math.random() * 20) + 75, // 75-95
+        libraryHolding: buildLibraryHolding(
+            book.subject,
+            index,
+            { preferredLibraryIds: libraries, preferredAccess: access }
+        )
     }));
 }
 

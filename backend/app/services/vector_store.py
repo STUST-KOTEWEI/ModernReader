@@ -57,12 +57,14 @@ class ProductionVectorStore:
         if not self.vector_store:
             await self.initialize()
 
-        all_chunks = []
-        all_metadatas = []
+        all_chunks: list[str] = []
+        all_metadatas: list[dict[str, Any]] = []
+        doc_chunk_counts: list[int] = []
 
         for text, metadata in zip(texts, metadatas):
             # 分割文檔
             chunks = self.text_splitter.split_text(text)
+            doc_chunk_counts.append(len(chunks))
 
             # 為每個 chunk 附加元數據
             for i, chunk in enumerate(chunks):
@@ -88,6 +90,7 @@ class ProductionVectorStore:
             "total_documents": len(texts),
             "total_chunks": len(all_chunks),
             "avg_chunks_per_doc": len(all_chunks) / len(texts),
+            "doc_chunk_counts": doc_chunk_counts,
             "status": "success",
         }
 

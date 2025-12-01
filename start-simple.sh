@@ -49,8 +49,8 @@ if [ ! -f "$PROJECT_ROOT/backend/.env" ]; then
     cp "$PROJECT_ROOT/backend/.env.example" "$PROJECT_ROOT/backend/.env" 2>/dev/null || true
 fi
 
-if [ ! -f "$PROJECT_ROOT/frontend/.env" ]; then
-    cp "$PROJECT_ROOT/frontend/.env.example" "$PROJECT_ROOT/frontend/.env" 2>/dev/null || true
+if [ ! -f "$PROJECT_ROOT/web/.env.local" ] && [ -f "$PROJECT_ROOT/web/.env.example" ]; then
+    cp "$PROJECT_ROOT/web/.env.example" "$PROJECT_ROOT/web/.env.local" 2>/dev/null || true
 fi
 
 echo ""
@@ -97,8 +97,8 @@ done
 echo ""
 
 # 2. 啟動前端
-echo -e "${BLUE}2️⃣  啟動前端 (http://localhost:5173)...${NC}"
-cd "$PROJECT_ROOT/frontend"
+echo -e "${BLUE}2️⃣  啟動前端 (http://localhost:3000)...${NC}"
+cd "$PROJECT_ROOT/web"
 
 # 檢查 node_modules
 if [ ! -d "node_modules" ]; then
@@ -107,7 +107,7 @@ if [ ! -d "node_modules" ]; then
 fi
 
 # 啟動前端
-echo "  🚀 啟動 Vite 開發服務器..."
+echo "  🚀 啟動 Next.js 開發服務器..."
 npm run dev > /tmp/modernreader-frontend.log 2>&1 &
 FRONTEND_PID=$!
 echo "  ✓ 前端 PID: $FRONTEND_PID"
@@ -117,7 +117,7 @@ cd "$PROJECT_ROOT"
 # 等待前端
 echo "  ⏳ 等待前端啟動..."
 for i in {1..15}; do
-    if curl -s http://localhost:5173 > /dev/null 2>&1; then
+    if curl -s http://localhost:3000 > /dev/null 2>&1; then
         echo -e "  ${GREEN}✅ 前端啟動成功!${NC}"
         break
     fi
@@ -133,7 +133,7 @@ echo -e "${GREEN}✨ ModernReader 開發環境已啟動!${NC}"
 echo "════════════════════════════════════════"
 echo ""
 echo -e "${BLUE}📱 訪問地址:${NC}"
-echo "  🌐 前端 UI:    http://localhost:5173"
+echo "  🌐 前端 UI:    http://localhost:3000"
 echo "  📚 API 文檔:   http://localhost:8001/docs"
 echo "  ❤️  健康檢查:  http://localhost:8001/health"
 echo ""

@@ -1,100 +1,57 @@
+# ModernReader .gitignore
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+*.log
+
+# Next.js
+.next/
+out/
+build/
+dist/
+
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-*.log
-
-# Virtual Environment
+.venv/
 venv/
-env/
 ENV/
-.venv
-
-# Poetry
-poetry.lock
-
-# IDEs
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.DS_Store
-
-# Environment variables
-.env
-.env.local
-.env.*.local
 
 # Database
 *.db
 *.sqlite
 *.sqlite3
-modernreader.db
 
-# Vector stores
-chroma_db/
-vectors/
-*.faiss
-*.pkl
+# Environment
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# Test databases
-test_chroma_db/
-test_vectors/
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 
-# Coverage reports
-htmlcov/
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-.hypothesis/
-.pytest_cache/
-
-# Node
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-# Build outputs
-dist/
-dist-ssr/
-*.local
-
-# Editor directories
-.vscode/*
-!.vscode/extensions.json
-.idea
+# OS
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+Thumbs.db
+
+# Backups
+*.tar.gz
+*.zip
+modernreader-backup-*.tar.gz
 
 # Logs
 logs/
@@ -102,56 +59,7 @@ logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
 
-# Temporary files
-*.tmp
-*.temp
-.tmp/
-.temp/
-
-# OS specific
-.DS_Store
-Thumbs.db
-desktop.ini
-
-# Secrets and credentials
-*.key
-*.pem
-*.crt
-*.p12
-secrets/
-credentials/
-
-# Backup files
-*.bak
-*.backup
-*~
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# Ngrok (removed as per cleanup)
-ngrok
-ngrok.exe
-ngrok.zip
-
-# Kubernetes secrets (local only)
-ops/deployment/secrets/
-*.kubeconfig
-
-# Docker volumes
-.docker/
-
-# Local development
-.local/
-local/
-scratch/
-
-# Apple client build artifacts
-clients/apple/.build/
-
-
-#Ignore vscode AI rules
-.github/instructions/codacy.instructions.md
+# Misc
+.vercel
+.turbo

@@ -17,7 +17,7 @@ pkill -f "localhost.run" 2>/dev/null
 nohup ssh -o ServerAliveInterval=60 \
           -o ServerAliveCountMax=3 \
           -o StrictHostKeyChecking=no \
-          -R 80:localhost:5173 localhost.run \
+          -R 80:localhost:3000 localhost.run \
           </dev/null >/tmp/tunnel.log 2>&1 &
 
 TUNNEL_PID=$!

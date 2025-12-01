@@ -13,17 +13,27 @@ interface ProgrammableMatterProps {
 function ParticleField({ emotion, intensity }: ProgrammableMatterProps) {
     const pointsRef = useRef<THREE.Points>(null);
 
+    // Deterministic pseudo-random generator to keep render pure
+    const seededRandom = (seed: number) => {
+        let state = seed;
+        return () => {
+            state = (1664525 * state + 1013904223) % 4294967296;
+            return state / 4294967296;
+        };
+    };
+
     // Generate particle positions
     const particles = useMemo(() => {
         const count = 2000;
         const positions = new Float32Array(count * 3);
+        const rand = seededRandom(42);
 
         for (let i = 0; i < count; i++) {
             const i3 = i * 3;
             // Create sphere distribution
             const radius = 2;
-            const theta = Math.random() * Math.PI * 2;
-            const phi = Math.acos(2 * Math.random() - 1);
+            const theta = rand() * Math.PI * 2;
+            const phi = Math.acos(2 * rand() - 1);
 
             positions[i3] = radius * Math.sin(phi) * Math.cos(theta);
             positions[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
@@ -56,7 +66,6 @@ function ParticleField({ emotion, intensity }: ProgrammableMatterProps) {
             const i3 = i;
             const x = positions[i3];
             const y = positions[i3 + 1];
-            const z = positions[i3 + 2];
 
             // Wave effect based on intensity
             const wave = Math.sin(time + x * 0.5) * intensity * 0.1;

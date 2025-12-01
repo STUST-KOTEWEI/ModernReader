@@ -112,6 +112,7 @@ class UnderstandResponse(BaseModel):
     content: str = Field(description="理解結果")
     provider: str = Field(description="使用的 LLM provider")
     tokens_used: int = Field(description="使用的 token 數量")
+    audio_base64: str | None = Field(None, description="語音回應的 Base64 編碼內容（如果請求）")
 
 
 class AdaptiveContentRequest(BaseModel):
@@ -191,8 +192,10 @@ class EmotionAnalyzeResponse(BaseModel):
     )
 
 
+from app.services.speech import get_speech_service
+
 @router.post("/understand", response_model=UnderstandResponse)
-async def understand_content(request: UnderstandRequest):
+async def understand_content(request: UnderstandRequest, return_audio: bool = False):
     """
     多模態理解端點
 
@@ -200,6 +203,7 @@ async def understand_content(request: UnderstandRequest):
     - 純文本理解
     - 文本 + 圖片理解（需提供 image_url）
     - 上下文感知（可傳入 cognitive_load, language 等）
+    - 可選回傳語音回應
     """
     engine = get_ai_engine()
 
@@ -261,10 +265,23 @@ async def understand_content(request: UnderstandRequest):
             system_prompt=system_prompt,
             provider_priority=priority_override,
         )
+        
+        audio_response_base64 = None
+        if return_audio and result.content:
+            try:
+                speech_service = get_speech_service()
+                audio_bytes = await speech_service.synthesize_speech(result.content)
+                audio_response_base64 = base64.b64encode(audio_bytes).decode('utf-8')
+            except RuntimeError as err:
+                logger.warning("Audio synthesis unavailable: %s", err)
+            except Exception as err:
+                logger.error("Audio synthesis failed: %s", err)
+
         return UnderstandResponse(
             content=result.content,
             provider=result.provider.value,
             tokens_used=result.tokens_used or 0,
+            audio_base64=audio_response_base64
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

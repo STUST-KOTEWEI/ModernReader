@@ -9,6 +9,7 @@ class UserProfileResponse(BaseModel):
     avatar_url: str | None = None
     role: str
     language_goal: str | None = None
+    cultural_preferences: list[str] = [] # Added cultural_preferences
     created_at: str
 
 
@@ -16,3 +17,4 @@ class UpdateProfileRequest(BaseModel):
     username: str | None = None
     avatar_url: str | None = None
     language_goal: str | None = None
+    cultural_preferences: list[str] | None = None # Added cultural_preferences

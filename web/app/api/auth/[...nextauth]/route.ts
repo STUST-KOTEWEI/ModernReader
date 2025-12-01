@@ -21,15 +21,15 @@ const handler = NextAuth({
                 // Rate limiting check (5 attempts per minute per username)
                 const identifier = credentials?.username || 'anonymous';
                 const rateLimitResult = rateLimit(identifier, 5, 60000);
-
                 if (!rateLimitResult.success) {
-                    throw new Error(`Too many attempts. Try again in ${Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000)} seconds.`);
+                    // Return null to indicate failed auth without throwing a 500
+                    return null;
                 }
 
                 // CAPTCHA verification (simple math check)
                 const expectedAnswer = credentials?.captcha;
                 if (!expectedAnswer || expectedAnswer !== "correct") {
-                    throw new Error("CAPTCHA verification failed");
+                    return null;
                 }
 
                 // Mock Google Login
@@ -47,7 +47,7 @@ const handler = NextAuth({
                     return { id: "1", name: "Kaleb (Demo)", email: "kaleb@modernreader.com", image: "https://api.dicebear.com/7.x/micah/svg?seed=Kaleb" };
                 }
 
-                throw new Error("Invalid credentials");
+                return null;
             }
         })
     ],

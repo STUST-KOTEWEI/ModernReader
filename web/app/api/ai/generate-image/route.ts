@@ -27,7 +27,8 @@ export async function POST(req: NextRequest) {
             quality: "standard",
         });
 
-        const imageUrl = response.data[0]?.url;
+        const imageResult = Array.isArray(response.data) ? response.data[0] : undefined;
+        const imageUrl = imageResult?.url;
 
         if (!imageUrl) {
             throw new Error('No image URL returned');
@@ -35,7 +36,7 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json({
             imageUrl,
-            revisedPrompt: response.data[0]?.revised_prompt,
+            revisedPrompt: imageResult?.revised_prompt,
             isMock: false
         });
     } catch (error) {

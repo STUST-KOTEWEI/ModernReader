@@ -1,0 +1,14 @@
+name = "modernreader-proxy"
+main = "src/index.ts"
+compatibility_date = "2024-11-27"
+
+# Add your routes in Cloudflare UI or here, e.g.:
+# routes = [
+#   "moden-reader.4b4g0077.workers.dev/*",
+#   "app.modernreader.com/*"
+# ]
+
+# Non-secret vars can go here. For secrets (API_BASE), use `wrangler secret put API_BASE`.
+[vars]
+# CORS_ALLOWED_ORIGINS is comma-separated; if empty, code falls back to a default list.
+CORS_ALLOWED_ORIGINS = ""

@@ -1,26 +1,54 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --mr-ink: #0f172a;
+  --mr-graphite: #111322;
+  --mr-rose: #e64458;
+  --mr-amber: #f3b57c;
+  --mr-mint: #3cbfa7;
+  --mr-sand: #f7f2ea;
+  --mr-foam: #ffffff;
+  --mr-border: #e6dfd5;
+  --mr-shadow-soft: 0 24px 80px rgba(15, 23, 42, 0.08);
+  --mr-shadow-strong: 0 30px 120px rgba(15, 23, 42, 0.14);
+  --font-sans: var(--font-space-grotesk);
+  --font-serif: var(--font-playfair);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-background: var(--mr-sand);
+  --color-foreground: var(--mr-ink);
+  --font-sans: var(--font-space-grotesk);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  
+  --color-mr-ink: var(--mr-ink);
+  --color-mr-graphite: var(--mr-graphite);
+  --color-mr-rose: var(--mr-rose);
+  --color-mr-amber: var(--mr-amber);
+  --color-mr-mint: var(--mr-mint);
+  --color-mr-sand: var(--mr-sand);
+  --color-mr-foam: var(--mr-foam);
+  --color-mr-border: var(--mr-border);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(230, 68, 88, 0.08), transparent 22%),
+    radial-gradient(circle at 80% 0%, rgba(60, 191, 167, 0.08), transparent 25%),
+    var(--mr-sand);
+  color: var(--mr-ink);
+  font-family: var(--font-space-grotesk), "Space Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  letter-spacing: -0.01em;
+}
+
+h1,
+h2,
+h3,
+.font-serif {
+  font-family: var(--font-playfair), "Playfair Display", Georgia, serif;
+}
+
+::selection {
+  background: rgba(230, 68, 88, 0.18);
+  color: var(--mr-ink);
 }

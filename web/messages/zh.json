@@ -1,0 +1,31 @@
+{
+    "HomePage": {
+        "title": "點亮知識的長尾。",
+        "subtitle": "一個即時串接 Open Library 的活體閱覽室。深入探索即時書叢、作者軌跡，以及受原住民智慧啟發的 SweetReader 閱讀體驗，不再感到「資源匱乏」。",
+        "modernAtlas": "現代圖譜",
+        "liveCatalogue": "即時目錄 · 已載入 {count} 部作品",
+        "personalFlow": "個人心流",
+        "openReader": "開啟閱讀器",
+        "listenIn": "聆聽",
+        "stats": {
+            "languages": "收錄語言",
+            "dailyReads": "每日閱讀",
+            "scholars": "活躍學者",
+            "newWorks": "今日新作"
+        },
+        "searchPlaceholder": "搜尋全球閱讀網絡...",
+        "loadMore": "載入更多書籍",
+        "globalSources": "全球來源",
+        "plugInto": "串接開放與機構典藏",
+        "askPdf": "詢問 PDF (Beta)"
+    },
+    "Navigation": {
+        "library": "圖書館",
+        "forYou": "為您推薦",
+        "chat": "聊天",
+        "podcasts": "Podcast",
+        "settings": "設定",
+        "signIn": "登入",
+        "signOut": "登出"
+    }
+}

@@ -1,10 +1,10 @@
 # ModernReader Platform
 
-> 新世代智能閱讀系統 - AI × 多模態互動 × 族語保存
+> 新世代智能閱讀系統 - AI × 多模態互動 × 全物種通用
 
 ## 🎯 專案概述
 
-ModernReader 是一個結合 AI、多模態互動和文化保存的現代閱讀平台，提供：
+ModernReader 是一個結合 AI、多模態互動和通用設計的現代閱讀平台，提供：
 
 - 🤖 **AI 個性化推薦** - 基於使用者興趣和閱讀目標
 - 🎙️ **Podcast 自動生成** - 8 種聲音風格 + 1600+ 種語言
@@ -157,9 +157,18 @@ GOOGLE_CLIENT_SECRET=your_client_secret
 ### Frontend (Web)
 - **Framework**: Next.js 16 (App Router + Turbopack)
 - **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **UI**: Lucide Icons, Framer Motion
-- **Auth**: NextAuth.js
+- **Styling**: Tailwind CSS, clsx, tailwind-merge
+- **UI**: Lucide Icons, Framer Motion, Radix UI (Primitives)
+- **Auth**: NextAuth.js (with Middleware protection)
+- **Testing**: Jest, React Testing Library
+
+### Testing
+
+Run the test suite:
+
+```bash
+npm test
+```
 
 ### Backend
 - **Framework**: FastAPI (Python)

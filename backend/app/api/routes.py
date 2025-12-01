@@ -15,12 +15,16 @@ from app.api.v1 import (
     indigenous_chat,
     prototype,
     users,
+    docs,
+    books,
     rag,
     rag_extended,
     recommend,
     recommender,
     senses,
     sessions,
+    chat, # Import the new chat router
+    gamification, # Import the new gamification router
 )
 
 
@@ -63,6 +67,7 @@ def register(app: FastAPI) -> None:
     )
     router.include_router(ai.router, prefix="/v1/ai", tags=["ai"])
     router.include_router(users.router, prefix="/v1/users", tags=["users"])
+    router.include_router(books.router, prefix="/v1", tags=["books"])
     router.include_router(
         indigenous.router,
         prefix="/v1/indigenous",
@@ -74,10 +79,17 @@ def register(app: FastAPI) -> None:
         tags=["indigenous-chat"]
     )
     router.include_router(
+        docs.router,
+        prefix="/v1",
+        tags=["docs"]
+    )
+    router.include_router(
         prototype.router,
         prefix="/v1/prototype",
         tags=["prototype"],
     )
+    router.include_router(chat.router, prefix="/v1", tags=["chat"])
+    router.include_router(gamification.router, prefix="/v1/gamification", tags=["gamification"]) # Add the new gamification router
     app.include_router(router)
     # Crowdsourcing router has its own prefix, register directly
     app.include_router(crowdsourcing.router)

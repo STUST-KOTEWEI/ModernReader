@@ -28,15 +28,15 @@ else
 fi
 
 # 2. 啟動前端
-echo -e "${BLUE}🎨 啟動前端 (port 5173)...${NC}"
-cd /Users/kedewei/modernreader/frontend
-pkill -f "vite" 2>/dev/null || true
+echo -e "${BLUE}🎨 啟動前端 (port 3000)...${NC}"
+cd /Users/kedewei/modernreader/web
+pkill -f "next dev" 2>/dev/null || true
 nohup npm run dev > /tmp/mr-frontend.log 2>&1 &
 FRONTEND_PID=$!
 sleep 3
 
 # 檢查前端是否啟動
-if curl -s http://localhost:5173 > /dev/null; then
+if curl -s http://localhost:3000 > /dev/null; then
     echo -e "${GREEN}✓ 前端啟動成功 (PID: $FRONTEND_PID)${NC}"
 else
     echo -e "${YELLOW}⚠ 前端可能還在啟動中...${NC}"
@@ -45,7 +45,7 @@ fi
 # 3. 啟動 localhost.run tunnel (已認證，使用固定域名)
 echo -e "${BLUE}🌐 啟動 localhost.run tunnel...${NC}"
 pkill -f "localhost.run" 2>/dev/null || true
-nohup ssh -o ServerAliveInterval=60 -o ExitOnForwardFailure=yes -o StrictHostKeyChecking=no -R 80:localhost:5173 localhost.run > /tmp/tunnel.log 2>&1 &
+nohup ssh -o ServerAliveInterval=60 -o ExitOnForwardFailure=yes -o StrictHostKeyChecking=no -R 80:localhost:3000 localhost.run > /tmp/tunnel.log 2>&1 &
 TUNNEL_PID=$!
 sleep 10
 
@@ -64,10 +64,11 @@ if [ -n "$TUNNEL_URL" ]; then
     echo ""
     echo -e "${YELLOW}⚠️  重要：請更新以下設定${NC}"
     echo -e "   1. backend/.env 的 OAUTH_REDIRECT_URL"
-    echo -e "   2. frontend/.env.local 的 VITE_OAUTH_BASE_URL"
+    echo -e "   2. web/.env.local 的 NEXTAUTH_URL（或對應前端 Base URL）"
     echo -e "   3. Google Console 的 Authorized redirect URIs"
     echo ""
-    echo -e "   Callback URL: ${TUNNEL_URL}/api/v1/auth/oauth/google/callback"
+    echo -e "   Callback URL (後端): ${TUNNEL_URL}/api/v1/auth/oauth/google/callback"
+    echo -e "   Callback URL (前端): ${TUNNEL_URL}/api/auth/callback/google"
 else
     echo -e "${YELLOW}⚠ Tunnel URL 尚未就緒，請稍後查看: tail -f /tmp/tunnel.log${NC}"
 fi
@@ -79,7 +80,7 @@ echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━
 echo ""
 echo "📊 服務狀態:"
 echo "  • 後端:   http://localhost:8001 (PID: $BACKEND_PID)"
-echo "  • 前端:   http://localhost:5173 (PID: $FRONTEND_PID)"
+echo "  • 前端:   http://localhost:3000 (PID: $FRONTEND_PID)"
 echo "  • Tunnel: $TUNNEL_URL (PID: $TUNNEL_PID)"
 echo ""
 echo "📝 日誌檔案:"

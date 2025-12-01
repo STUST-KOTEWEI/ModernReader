@@ -2,7 +2,7 @@
 
 # Cloudflare Named Tunnel helper for ModernReader
 # This script creates (if needed), configures, and runs a Cloudflare Named Tunnel
-# to expose your local frontend (5173) and backend (8001) on permanent HTTPS hostnames.
+# to expose your local frontend (3000) and backend (8001) on permanent HTTPS hostnames.
 
 set -euo pipefail
 
@@ -16,7 +16,7 @@ set -euo pipefail
 : "${API_HOST:=}"
 
 # Local services to expose
-: "${LOCAL_APP_URL:=http://localhost:5173}"
+: "${LOCAL_APP_URL:=http://localhost:3000}"
 : "${LOCAL_API_URL:=http://localhost:8001}"
 
 # Where to write a project-local config (we pass this to cloudflared with --config)

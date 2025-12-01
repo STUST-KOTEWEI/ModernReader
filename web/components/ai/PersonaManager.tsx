@@ -147,7 +147,7 @@ export default function PersonaManager({ isOpen, onClose, onSelectPersona, curre
                                             className="w-full px-4 py-2 rounded-lg border border-[#e5e0d8] focus:border-[#1a1a1a] focus:ring-0 resize-none"
                                         />
                                         <p className="text-xs text-[#999] mt-1">
-                                            Tip: Start with "You are..." and describe the AI's role, tone, and expertise
+                                            Tip: Start with &quot;You are...&quot; and describe the AI&apos;s role, tone, and expertise
                                         </p>
                                     </div>
 

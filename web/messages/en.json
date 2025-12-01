@@ -1,0 +1,31 @@
+{
+    "HomePage": {
+        "title": "Light up the long tail of knowledge.",
+        "subtitle": "A living reading room that pulls from Open Library in real-time. Dip into live clusters, author trails, and indigenous-inspired SweetReader sessions without feeling “resource empty.”",
+        "modernAtlas": "Modern Atlas",
+        "liveCatalogue": "Live catalogue · {count} works loaded",
+        "personalFlow": "Personal Flow",
+        "openReader": "Open Reader",
+        "listenIn": "Listen In",
+        "stats": {
+            "languages": "Languages indexed",
+            "dailyReads": "Daily reads",
+            "scholars": "Active scholars",
+            "newWorks": "New works today"
+        },
+        "searchPlaceholder": "Search the global reading mesh...",
+        "loadMore": "Load More Books",
+        "globalSources": "Global sources",
+        "plugInto": "Plug into open and institutional stacks",
+        "askPdf": "Ask your PDF (beta)"
+    },
+    "Navigation": {
+        "library": "Library",
+        "forYou": "For You",
+        "chat": "Chat",
+        "podcasts": "Podcasts",
+        "settings": "Settings",
+        "signIn": "Sign In",
+        "signOut": "Sign Out"
+    }
+}

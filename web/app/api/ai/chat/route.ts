@@ -1,15 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { openai, isOpenAIConfigured } from '@/lib/openai';
+import { getPersona } from '@/lib/personas';
 
 export async function POST(req: NextRequest) {
     try {
-        const { message, history } = await req.json();
+        const { message, history, personaId } = await req.json();
+        const persona = getPersona(personaId || 'universal_guide');
 
-        // If OpenAI is not configured, return mock response
+        // If OpenAI is not configured, return enhanced mock response
         if (!isOpenAIConfigured()) {
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, 800));
+
+            let mockResponse = "";
+            if (persona.id === 'nature_spirit') {
+                mockResponse = "The wind whispers secrets of the old world. Can you hear them? The trees remember what was written long before ink touched paper.";
+            } else if (persona.id === 'playful_companion') {
+                mockResponse = "Wow! That's so interesting! 🌟 Tell me more! I love learning new things! 🐾";
+            } else {
+                mockResponse = "I hear you. Knowledge is a river that flows through all of us. Let us explore this thought together.";
+            }
+
             return NextResponse.json({
-                response: "That is a profound observation. In many indigenous cultures, the wind is seen as a messenger carrying the spirits of our ancestors. It connects the past with the present.",
+                response: mockResponse,
                 isMock: true
             });
         }
@@ -18,7 +30,7 @@ export async function POST(req: NextRequest) {
         const messages = [
             {
                 role: "system" as const,
-                content: "You are a wise Tribal Elder sharing indigenous wisdom and folklore. Speak with warmth, depth, and cultural knowledge. Keep responses concise (2-3 sentences)."
+                content: persona.systemPrompt
             },
             ...(history || []).map((msg: { role: string; content: string }) => ({
                 role: msg.role === 'user' ? 'user' as const : 'assistant' as const,
