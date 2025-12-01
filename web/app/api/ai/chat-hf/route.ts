@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateText } from '@/lib/huggingface';
-import { getPersonaPrompt, PersonaType } from '@/lib/personas';
+import { getPersona } from '@/lib/personas';
 
 export async function POST(req: NextRequest) {
     try {
-        const { message, history, persona = 'Elder', userEmotion = 'neutral' } = await req.json();
+        const { message, history, persona = 'universal_guide', userEmotion = 'neutral' } = await req.json();
 
         // Get persona-specific system prompt
-        const basePrompt = getPersonaPrompt(persona as PersonaType);
+        const personaObj = getPersona(persona);
+        const basePrompt = personaObj.systemPrompt;
         const emotionEnhancedPrompt = `${basePrompt}\n\nThe user is feeling ${userEmotion}. Respond with empathy.`;
 
         // Build conversation context

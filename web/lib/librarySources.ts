@@ -31,7 +31,7 @@ export const LIBRARY_SOURCES: LibrarySource[] = [
         country: "Taiwan",
         type: "national",
         access: "Hybrid",
-        location: "Taipei Main Library 5F • Humanities/Indigenous",
+        location: "Taipei Main Library 5F • Humanities/Cultural",
         callPrefix: "NCL",
         baseUrl: "https://www.ncl.edu.tw/",
     },

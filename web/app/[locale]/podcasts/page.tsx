@@ -1,7 +1,7 @@
 "use client";
 
 import { Play, Pause, Download, Volume2 } from 'lucide-react';
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useState, useRef } from "react";
 
 const SAMPLE_TEXT = "Once upon a time, in a valley where the mist never lifted, a young hunter named Kaleb discovered a glowing stone that would change his destiny forever.";

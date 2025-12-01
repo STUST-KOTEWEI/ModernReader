@@ -1,3 +1,5 @@
+"use client";
+
 import { Suspense, useState, FormEvent, useRef, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
@@ -27,7 +29,7 @@ function ThreeDChatPage() {
   // Initialize AudioContext if not already
   useEffect(() => {
     if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
     }
   }, []);
 
@@ -65,7 +67,7 @@ function ThreeDChatPage() {
 
     try {
       const system_prompt = `You are an AI assistant. Your current persona is '${persona}'. Please respond accordingly.`;
-      
+
       const response = await fetch('/api/v1/ai/understand?return_audio=true', { // Request audio
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -191,7 +193,7 @@ function ThreeDChatPage() {
           <OrbitControls />
         </Canvas>
       </Suspense>
-      
+
       {/* Chat UI */}
       <div className="absolute top-0 left-0 bottom-0 flex flex-col w-full md:w-1/3 p-4 bg-black/40 backdrop-blur-sm">
         {/* Persona Selector */}
@@ -209,7 +211,7 @@ function ThreeDChatPage() {
             ))}
           </div>
         </div>
-        
+
         {/* Message Display */}
         <div className="flex-1 overflow-y-auto pr-2 space-y-4">
           {messages.map((msg, index) => (
@@ -220,7 +222,7 @@ function ThreeDChatPage() {
             </div>
           ))}
         </div>
-        
+
         {/* Input Form */}
         <form onSubmit={handleSend} className="flex-shrink-0 mt-4">
           <div className="flex rounded-lg bg-gray-700 has-[input:disabled]:opacity-50">

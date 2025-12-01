@@ -75,20 +75,20 @@ function MorphingShape({ persona, isSpeaking = false }: MorphingShapeProps) {
     });
     // Set the target shape for the animation
     const targetShapeFunc = personasConfig[persona]?.shape || personasConfig.Default.shape;
-    
+
     // Create target positions
     const target = new Float32Array(sourcePositions.current.array.length);
     for (let i = 0; i < sourcePositions.current.count; i++) {
-        tempVector.fromBufferAttribute(sourcePositions.current, i);
-        targetShapeFunc(tempVector); // Apply shape func fully
-        target[i * 3] = tempVector.x;
-        target[i * 3 + 1] = tempVector.y;
-        target[i * 3 + 2] = tempVector.z;
+      tempVector.fromBufferAttribute(sourcePositions.current, i);
+      targetShapeFunc(tempVector); // Apply shape func fully
+      target[i * 3] = tempVector.x;
+      target[i * 3 + 1] = tempVector.y;
+      target[i * 3 + 2] = tempVector.z;
     }
-    
+
     if (meshRef.current) {
-        // This attribute will hold the target vertex positions
-        meshRef.current.geometry.setAttribute('target', new THREE.BufferAttribute(target, 3));
+      // This attribute will hold the target vertex positions
+      meshRef.current.geometry.setAttribute('target', new THREE.BufferAttribute(target, 3));
     }
 
   }, [persona, api]);
@@ -111,23 +111,23 @@ function MorphingShape({ persona, isSpeaking = false }: MorphingShapeProps) {
 
     const currentPositions = meshRef.current.geometry.attributes.position as THREE.Float32BufferAttribute;
     const targetPositions = meshRef.current.geometry.attributes.target as THREE.Float32BufferAttribute;
-    
+
     const f = factor.get();
 
     for (let i = 0; i < currentPositions.count; i++) {
       tempVector.fromBufferAttribute(sourcePositions.current, i).lerp(
-          tempVector.fromBufferAttribute(targetPositions, i),
-          f
+        tempVector.fromBufferAttribute(targetPositions, i),
+        f
       );
       currentPositions.setXYZ(i, tempVector.x, tempVector.y, tempVector.z);
     }
-    
+
     currentPositions.needsUpdate = true;
     meshRef.current.geometry.computeVertexNormals();
   });
 
   return (
-    <animated.mesh ref={meshRef} geometry={BASE_GEOMETRY} scale={scale}>
+    <animated.mesh ref={meshRef} geometry={BASE_GEOMETRY} scale={scale as any}>
       <animated.meshStandardMaterial color={color} />
     </animated.mesh>
   );

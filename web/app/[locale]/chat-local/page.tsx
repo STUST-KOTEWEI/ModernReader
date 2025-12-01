@@ -20,7 +20,7 @@ function LocalChatPage() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<DocumentChunk[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
     if (selectedFile && selectedFile.type === 'application/pdf') {
@@ -49,7 +49,7 @@ function LocalChatPage() {
           const text = await page.getTextContent();
           textContent += text.items.map(s => (s as any).str).join(' ');
         }
-        
+
         // 2. Chunk the text
         const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 512, chunkOverlap: 50 });
         const chunks = await textSplitter.splitText(textContent);
@@ -80,7 +80,7 @@ function LocalChatPage() {
       const queryEmbedding = await extractor(query, { pooling: 'mean', normalize: true });
 
       const similarities = documentChunks.map(chunk => {
-        const sim = cos_sim(queryEmbedding.data, chunk.embedding);
+        const sim = cos_sim(Array.from(queryEmbedding.data), chunk.embedding);
         return { ...chunk, similarity: sim };
       });
 
@@ -186,14 +186,14 @@ function LocalChatPage() {
 
 // Dummy TextSplitter to be replaced or implemented
 class RecursiveCharacterTextSplitter {
-    constructor(private options: { chunkSize: number, chunkOverlap: number }) {}
-    async splitText(text: string): Promise<string[]> {
-        const chunks: string[] = [];
-        for (let i = 0; i < text.length; i += this.options.chunkSize - this.options.chunkOverlap) {
-            chunks.push(text.substring(i, i + this.options.chunkSize));
-        }
-        return chunks;
+  constructor(private options: { chunkSize: number, chunkOverlap: number }) { }
+  async splitText(text: string): Promise<string[]> {
+    const chunks: string[] = [];
+    for (let i = 0; i < text.length; i += this.options.chunkSize - this.options.chunkOverlap) {
+      chunks.push(text.substring(i, i + this.options.chunkSize));
     }
+    return chunks;
+  }
 }
 
 export default LocalChatPage;

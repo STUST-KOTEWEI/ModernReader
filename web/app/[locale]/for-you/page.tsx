@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useState, useEffect, useCallback } from 'react';
 import { Sparkles, TrendingUp, Target, Loader2, Library, MapPin } from 'lucide-react';
-import Link from 'next/link';
+import { Link } from "@/i18n/navigation";
 import Image from 'next/image';
 import type { RecommendationResponse, BookRecommendation, EmotionType } from '@/types/user';
 import { buildLibraryHolding, LIBRARY_SOURCES } from '@/lib/librarySources';
@@ -11,9 +11,9 @@ import BookSearchInput from '@/components/learning/BookSearchInput';
 
 // This type should align with what BookSearchInput returns and what the page needs
 type BookSearchResult = {
-  id: string;
-  title: string;
-  authors: string[];
+    id: string;
+    title: string;
+    authors: string[];
 };
 
 type MetaResult = {
@@ -49,7 +49,7 @@ type OpenLibraryWork = {
     subjects?: string[];
 };
 
-import BookSearchInput from '@/components/learning/BookSearchInput'; // Import the component
+
 
 
 
@@ -75,115 +75,115 @@ function ForYouPage() {
 
     const [metaSql, setMetaSql] = useState('');
 
-        const [metaResults, setMetaResults] = useState<MetaResult[]>([]);
+    const [metaResults, setMetaResults] = useState<MetaResult[]>([]);
 
-        const [selectedBookForAnalysis, setSelectedBookForAnalysis] = useState<BookSearchResult | null>(null);
+    const [selectedBookForAnalysis, setSelectedBookForAnalysis] = useState<BookSearchResult | null>(null);
 
-        const [explanation, setExplanation] = useState<any | null>(null); // State for the explanation
+    const [explanation, setExplanation] = useState<any | null>(null); // State for the explanation
 
-        const [isAnalyzing, setIsAnalyzing] = useState(false); // Loading state for analysis
+    const [isAnalyzing, setIsAnalyzing] = useState(false); // Loading state for analysis
 
-    
 
-        const [userProfile, setUserProfile] = useState<{
 
-            occupation: string;
+    const [userProfile, setUserProfile] = useState<{
 
-            gender: string;
+        occupation: string;
 
-            age: number;
+        gender: string;
 
-            interests: string[];
+        age: number;
 
-            readingGoals: string[];
+        interests: string[];
 
-            emotion: EmotionType;
+        readingGoals: string[];
 
-        }>({
+        emotion: EmotionType;
 
-            occupation: 'Student',
+    }>({
 
-            gender: 'Prefer not to say',
+        occupation: 'Student',
 
-            age: 25,
+        gender: 'Prefer not to say',
 
-            interests: ['Technology', 'Self-Help'],
+        age: 25,
 
-            readingGoals: ['Professional Development'],
+        interests: ['Technology', 'Self-Help'],
 
-            emotion: 'neutral' as const
+        readingGoals: ['Professional Development'],
 
-        });
+        emotion: 'neutral' as const
 
-    
+    });
 
-        const handleAnalysis = async () => {
 
-            if (!selectedBookForAnalysis) return;
 
-    
+    const handleAnalysis = async () => {
 
-            setIsAnalyzing(true);
+        if (!selectedBookForAnalysis) return;
 
-            setExplanation(null);
 
-            try {
 
-                const response = await fetch('/api/v1/recommend/counterfactual', {
+        setIsAnalyzing(true);
 
-                    method: 'POST',
+        setExplanation(null);
 
-                    headers: { 'Content-Type': 'application/json' },
+        try {
 
-                    body: JSON.stringify({
+            const response = await fetch('/api/v1/recommend/counterfactual', {
 
-                        content_id: selectedBookForAnalysis.id,
+                method: 'POST',
 
-                        user_id: 'demo_user', // Using demo_user as seen in other calls
+                headers: { 'Content-Type': 'application/json' },
 
-                        user_context: userProfile,
+                body: JSON.stringify({
 
-                    }),
+                    content_id: selectedBookForAnalysis.id,
 
-                });
+                    user_id: 'demo_user', // Using demo_user as seen in other calls
 
-                if (response.ok) {
+                    user_context: userProfile,
 
-                    const data = await response.json();
+                }),
 
-                    setExplanation(data);
+            });
 
-                } else {
+            if (response.ok) {
 
-                    setExplanation({ error: 'Failed to get an explanation.' });
+                const data = await response.json();
 
-                }
+                setExplanation(data);
 
-            } catch (error) {
+            } else {
 
-                console.error('Counterfactual analysis failed:', error);
-
-                setExplanation({ error: 'An error occurred during analysis.' });
-
-            } finally {
-
-                setIsAnalyzing(false);
+                setExplanation({ error: 'Failed to get an explanation.' });
 
             }
 
-        };
+        } catch (error) {
 
-    
+            console.error('Counterfactual analysis failed:', error);
 
-        const toggleLibrary = (id: string) => {
+            setExplanation({ error: 'An error occurred during analysis.' });
 
-            setSelectedLibraries(prev =>
+        } finally {
 
-                prev.includes(id) ? prev.filter(l => l !== id) : [...prev, id]
+            setIsAnalyzing(false);
 
-            );
+        }
 
-        };
+    };
+
+
+
+    const toggleLibrary = (id: string) => {
+
+        setSelectedLibraries(prev =>
+
+            prev.includes(id) ? prev.filter(l => l !== id) : [...prev, id]
+
+        );
+
+    };
 
 
 
@@ -315,7 +315,7 @@ function ForYouPage() {
 
                 key: "/works/OL2W",
 
-                title: "Indigenous Voices",
+                title: "Cultural Voices",
 
                 cover_id: undefined,
 
@@ -639,49 +639,49 @@ function ForYouPage() {
 
             <div className="bg-gradient-to-r from-[#e64458]/10 via-white to-[#3cbfa7]/12 rounded-2xl p-6 mb-8 border border-[#e6dfd5] shadow-[var(--mr-shadow-soft)]">
 
-                    <div className="flex items-start gap-4">
+                <div className="flex items-start gap-4">
 
-                        <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm">
+                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm">
 
-                            <Target size={24} className="text-[#e64458]" />
+                        <Target size={24} className="text-[#e64458]" />
+
+                    </div>
+
+                    <div className="flex-1">
+
+                        <h3 className="font-semibold text-lg text-[#0f172a] mb-2">Your Reading Profile</h3>
+
+                        <div className="flex flex-wrap gap-2 text-sm">
+
+                            <span className="bg-white/80 px-3 py-1 rounded-full border border-[#e6dfd5] text-[#0f172a]">
+
+                                👔 {userProfile.occupation}
+
+                            </span>
+
+                            <span className="bg-white/80 px-3 py-1 rounded-full border border-[#e6dfd5] text-[#0f172a]">
+
+                                🎯 {userProfile.readingGoals[0]}
+
+                            </span>
+
+                            <span className="bg-[#e64458]/10 px-3 py-1 rounded-full border border-[#e6dfd5] text-[#e64458]">
+
+                                🧠 Mood: {userProfile.emotion}
+
+                            </span>
+
+                            {userProfile.interests.slice(0, 3).map(interest => (
+
+                                <span key={interest} className="bg-white/80 px-3 py-1 rounded-full border border-[#e6dfd5] text-[#0f172a]">
+
+                                    ❤️ {interest}
+
+                                </span>
+
+                            ))}
 
                         </div>
-
-                        <div className="flex-1">
-
-                            <h3 className="font-semibold text-lg text-[#0f172a] mb-2">Your Reading Profile</h3>
-
-                            <div className="flex flex-wrap gap-2 text-sm">
-
-                                <span className="bg-white/80 px-3 py-1 rounded-full border border-[#e6dfd5] text-[#0f172a]">
-
-                                    👔 {userProfile.occupation}
-
-                                </span>
-
-                                <span className="bg-white/80 px-3 py-1 rounded-full border border-[#e6dfd5] text-[#0f172a]">
-
-                                    🎯 {userProfile.readingGoals[0]}
-
-                                </span>
-
-                                <span className="bg-[#e64458]/10 px-3 py-1 rounded-full border border-[#e6dfd5] text-[#e64458]">
-
-                                    🧠 Mood: {userProfile.emotion}
-
-                                </span>
-
-                                {userProfile.interests.slice(0, 3).map(interest => (
-
-                                    <span key={interest} className="bg-white/80 px-3 py-1 rounded-full border border-[#e6dfd5] text-[#0f172a]">
-
-                                        ❤️ {interest}
-
-                                    </span>
-
-                                ))}
-
-                            </div>
 
                         <Link
 
@@ -779,15 +779,13 @@ function ForYouPage() {
 
                                 onClick={() => setAccessFilter(option)}
 
-                                className={`px-3 py-2 rounded-full text-xs font-semibold border transition-colors ${
+                                className={`px-3 py-2 rounded-full text-xs font-semibold border transition-colors ${accessFilter === option
 
-                                    accessFilter === option
+                                    ? 'bg-[#e64458] text-white border-[#e64458]'
 
-                                        ? 'bg-[#e64458] text-white border-[#e64458]'
+                                    : 'bg-[#fdfbf7] text-[#0f172a]/80 border-[#f0ebe4]'
 
-                                        : 'bg-[#fdfbf7] text-[#0f172a]/80 border-[#f0ebe4]'
-
-                                }`}
+                                    }`}
 
                             >
 
@@ -823,15 +821,13 @@ function ForYouPage() {
 
                                         onClick={() => toggleLibrary(source.id)}
 
-                                        className={`px-3 py-2 rounded-xl border text-xs flex items-center gap-2 transition-colors ${
+                                        className={`px-3 py-2 rounded-xl border text-xs flex items-center gap-2 transition-colors ${active
 
-                                            active
+                                            ? 'bg-[#e64458]/10 border-[#e64458] text-[#e64458]'
 
-                                                ? 'bg-[#e64458]/10 border-[#e64458] text-[#e64458]'
+                                            : 'bg-white border-[#f0ebe4] text-[#0f172a]/80'
 
-                                                : 'bg-white border-[#f0ebe4] text-[#0f172a]/80'
-
-                                        }`}
+                                            }`}
 
                                     >
 
@@ -1033,7 +1029,7 @@ function ForYouPage() {
 
                                                 </div>
 
-                 
+
 
                                                 <div className="flex items-center gap-2 text-[11px] text-[#0f172a]/70 mt-1">
 
@@ -1103,155 +1099,155 @@ function ForYouPage() {
 
 
 
-                                {selectedBookForAnalysis && (
+                {selectedBookForAnalysis && (
 
 
 
-                                    <div className="mt-6 max-w-md mx-auto text-center">
+                    <div className="mt-6 max-w-md mx-auto text-center">
 
 
 
-                                        <div className="bg-white p-4 rounded-lg border shadow-sm">
+                        <div className="bg-white p-4 rounded-lg border shadow-sm">
 
 
 
-                                            <p className="font-bold">{selectedBookForAnalysis.title}</p>
+                            <p className="font-bold">{selectedBookForAnalysis.title}</p>
 
 
 
-                                            <p className="text-sm text-gray-600">{selectedBookForAnalysis.authors.join(', ')}</p>
+                            <p className="text-sm text-gray-600">{selectedBookForAnalysis.authors.join(', ')}</p>
 
 
 
-                                        </div>
+                        </div>
 
 
 
-                                        <button 
+                        <button
 
 
 
-                                            onClick={handleAnalysis}
+                            onClick={handleAnalysis}
 
 
 
-                                            disabled={isAnalyzing}
+                            disabled={isAnalyzing}
 
 
 
-                                            className="mt-4 bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition-colors disabled:bg-gray-400"
+                            className="mt-4 bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition-colors disabled:bg-gray-400"
 
 
 
-                                        >
+                        >
 
 
 
-                                            {isAnalyzing ? 'Analyzing...' : 'Why wasn\'t this recommended?'}
+                            {isAnalyzing ? 'Analyzing...' : 'Why wasn\'t this recommended?'}
 
 
 
-                                        </button>
+                        </button>
 
 
 
-                                    </div>
+                    </div>
 
 
 
-                                )}
+                )}
 
 
 
-                
 
 
 
-                                {explanation && (
 
+                {explanation && (
 
 
-                                    <div className="mt-6 max-w-md mx-auto">
 
+                    <div className="mt-6 max-w-md mx-auto">
 
 
-                                        <div className="bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-lg">
 
+                        <div className="bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-lg">
 
 
-                                            <h3 className="font-bold mb-2">Analysis Result</h3>
 
+                            <h3 className="font-bold mb-2">Analysis Result</h3>
 
 
-                                            {explanation.error ? (
 
+                            {explanation.error ? (
 
 
-                                                <p className="text-red-600">{explanation.error}</p>
 
+                                <p className="text-red-600">{explanation.error}</p>
 
 
-                                            ) : (
 
+                            ) : (
 
 
-                                                <ul className="space-y-2 list-disc list-inside">
 
+                                <ul className="space-y-2 list-disc list-inside">
 
 
-                                                    {explanation.suggestions?.map((suggestion: string, index: number) => (
 
+                                    {explanation.suggestions?.map((suggestion: string, index: number) => (
 
 
-                                                        <li key={index}>{suggestion}</li>
 
+                                        <li key={index}>{suggestion}</li>
 
 
-                                                    ))}
 
+                                    ))}
 
 
-                                                </ul>
 
+                                </ul>
 
 
-                                            )}
 
+                            )}
 
 
-                                            {!explanation.error && explanation.potential_score_improvement && (
 
+                            {!explanation.error && explanation.potential_score_improvement && (
 
 
-                                                <p className="text-sm mt-3 font-semibold">
 
+                                <p className="text-sm mt-3 font-semibold">
 
 
-                                                    Potential Score Improvement: +{(explanation.potential_score_improvement * 100).toFixed(0)}%
 
+                                    Potential Score Improvement: +{(explanation.potential_score_improvement * 100).toFixed(0)}%
 
 
-                                                </p>
 
+                                </p>
 
 
-                                            )}
 
+                            )}
 
 
-                                        </div>
 
+                        </div>
 
 
-                                    </div>
 
+                    </div>
 
 
-                                )}
 
+                )}
 
 
-                            </div>
+
+            </div>
 
 
 
@@ -1290,5 +1286,7 @@ function ForYouPage() {
     );
 
 }
+
+export default ForYouPage;
 
 

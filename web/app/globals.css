@@ -1,5 +1,29 @@
 @import "tailwindcss";
 
+@layer base {
+  :root {
+    --mr-ink: #0f172a;
+    --mr-paper: #ffffff;
+    --mr-sand: #f7f2ea;
+    --mr-rose: #e64458;
+    --mr-mint: #3cbfa7;
+    --mr-gold: #f59e0b;
+    --mr-graphite: #334155;
+    --mr-border: #e6dfd5;
+  }
+
+  :root.high-contrast {
+    --mr-ink: #000000;
+    --mr-paper: #ffffff;
+    --mr-sand: #ffffff;
+    --mr-rose: #d00000;
+    --mr-mint: #008000;
+    --mr-gold: #b07000;
+    --mr-graphite: #000000;
+    --mr-border: #000000;
+  }
+}
+
 :root {
   --mr-ink: #0f172a;
   --mr-graphite: #111322;
@@ -20,7 +44,7 @@
   --color-foreground: var(--mr-ink);
   --font-sans: var(--font-space-grotesk);
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  
+
   --color-mr-ink: var(--mr-ink);
   --color-mr-graphite: var(--mr-graphite);
   --color-mr-rose: var(--mr-rose);

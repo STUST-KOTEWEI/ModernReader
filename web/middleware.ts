@@ -7,14 +7,19 @@ const intlMiddleware = createMiddleware({
     defaultLocale: 'en'
 });
 
-const authMiddleware = withAuth({
-    pages: {
-        signIn: "/",
+const authMiddleware = withAuth(
+    function onSuccess(req) {
+        return intlMiddleware(req);
     },
-});
+    {
+        pages: {
+            signIn: "/",
+        },
+    }
+);
 
 export default function middleware(req: NextRequest) {
-    const publicPathnameRegex = /^\/(?:(en|zh)\/)?(auth|branding|api|_next|favicon.ico|.*\\.).*/;
+    const publicPathnameRegex = /^\/(?:(en|zh)\/)?(auth|branding|api|_next|favicon.ico|.*\\.|$)*/;
 
     if (publicPathnameRegex.test(req.nextUrl.pathname)) {
         return intlMiddleware(req);

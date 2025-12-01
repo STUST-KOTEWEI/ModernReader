@@ -6,7 +6,7 @@ const POPULAR_LANGUAGES = [
     'English', 'Spanish', 'French', 'German', 'Chinese', 'Japanese', 'Korean',
     'Arabic', 'Hindi', 'Portuguese', 'Russian', 'Italian', 'Dutch', 'Polish',
     'Turkish', 'Vietnamese', 'Thai', 'Indonesian', 'Malay', 'Filipino',
-    // Indigenous languages
+    // Rare languages
     'Paiwan', 'Atayal', 'Amis', 'Bunun', 'Puyuma', 'Rukai', 'Tsou',
     'Saisiyat', 'Yami', 'Thao', 'Kavalan', 'Truku', 'Sakizaya', 'Seediq'
 ];
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
             messages: [
                 {
                     role: "system",
-                    content: `You are a professional translator specializing in indigenous and rare languages. Translate the following text to ${targetLanguage}. Maintain cultural context and nuance. If translating indigenous content, preserve traditional meanings and respect cultural significance.`
+                    content: `You are a professional translator specializing in diverse and rare languages. Translate the following text to ${targetLanguage}. Maintain cultural context and nuance. If translating cultural content, preserve traditional meanings and respect cultural significance.`
                 },
                 {
                     role: "user",

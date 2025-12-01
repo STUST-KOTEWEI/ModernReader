@@ -3,7 +3,7 @@ import { Space_Grotesk, Playfair_Display } from "next/font/google";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
-import "../../globals.css";
+import "../globals.css";
 import ClientLayout from "@/components/ClientLayout";
 import ClientOnly from "@/components/ClientOnly";
 
@@ -62,9 +62,9 @@ export default async function LocaleLayout({
   params
 }: Readonly<{
   children: React.ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }>) {
-  const { locale } = params;
+  const { locale } = await params;
 
   // Ensure that the incoming `locale` is valid
   if (!['en', 'zh'].includes(locale)) {

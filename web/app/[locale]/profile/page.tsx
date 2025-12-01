@@ -30,7 +30,7 @@ const LANGUAGES = [
 ];
 
 const CULTURAL_PREFERENCES = [ // New cultural preferences list
-    'Indigenous Taiwanese', 'Hakka', 'Min-nan', 'Western', 'East Asian',
+    'Taiwanese', 'Hakka', 'Min-nan', 'Western', 'East Asian',
     'Southeast Asian', 'European', 'African', 'Latin American'
 ];
 
@@ -293,7 +293,7 @@ export default function ProfilePage() {
                     ))}
                 </div>
             </section>
-            
+
             {/* Cultural Preferences */}
             <section className="bg-white rounded-2xl border border-[#e5e0d8] p-8 mb-8">
                 <h2 className="font-serif font-bold text-xl mb-6 flex items-center gap-2">

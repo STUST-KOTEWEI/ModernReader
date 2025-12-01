@@ -23,7 +23,7 @@ export default function SweetReader({ title, author, content }: SweetReaderProps
     const [hapticState, setHapticState] = useState({ temp: 0, vibe: 0, texture: false });
     const [isPlaying, setIsPlaying] = useState(false);
     const [language, setLanguage] = useState("English");
-    const [selectedPersona, setSelectedPersona] = useState<PersonaType>("Elder");
+    const [selectedPersona, setSelectedPersona] = useState<PersonaType>("universal_guide");
     const [currentEmotion, setCurrentEmotion] = useState<Emotion>("neutral");
     const [messages, setMessages] = useState([
         { role: 'ai', content: 'This story reminds us of the importance of listening to the wind. What do you think the wind represents?' }
@@ -140,7 +140,7 @@ export default function SweetReader({ title, author, content }: SweetReaderProps
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     prompt: `Illustration for this story: ${prompt.substring(0, 200)}`,
-                    style: 'indigenous folklore art'
+                    style: 'cultural folklore art'
                 })
             });
 
@@ -271,6 +271,7 @@ export default function SweetReader({ title, author, content }: SweetReaderProps
                         "absolute top-4 right-4 z-20 p-2 rounded-full bg-[#1a1a1a] text-white shadow-lg transition-all duration-300",
                         isImmersive ? "bg-red-500" : ""
                     )}
+                    aria-label={isImmersive ? "Exit Immersive Mode" : "Enter Immersive Mode"}
                 >
                     {isImmersive ? <Maximize2 size={20} /> : <Minimize2 size={20} />}
                 </button>
@@ -322,7 +323,7 @@ export default function SweetReader({ title, author, content }: SweetReaderProps
                                             <span className="text-white/90 text-sm font-medium capitalize">{currentEmotion}</span>
                                         </div>
                                         <div className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
-                                            <span className="text-white/90 text-sm font-medium">{PERSONAS[selectedPersona].name}</span>
+                                            <span className="text-white/90 text-sm font-medium">{PERSONAS.find(p => p.id === selectedPersona)?.name}</span>
                                         </div>
                                     </div>
                                     <p className="text-white/60 text-sm max-w-md">
@@ -358,8 +359,8 @@ export default function SweetReader({ title, author, content }: SweetReaderProps
                                             Temp: {hapticState.temp}°C <br />
                                             Vibe: {hapticState.vibe}Hz
                                         </p>
-                                        <button 
-                                            onClick={handleSimulateTactileFeedback} 
+                                        <button
+                                            onClick={handleSimulateTactileFeedback}
                                             className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg text-sm"
                                         >
                                             Simulate Tactile Feedback
@@ -650,8 +651,8 @@ export default function SweetReader({ title, author, content }: SweetReaderProps
                             onChange={(e) => setSelectedPersona(e.target.value as PersonaType)}
                             className="w-full px-3 py-2 rounded-lg border border-[#e5e0d8] text-sm focus:outline-none focus:border-[#1a1a1a] bg-white"
                         >
-                            {Object.entries(PERSONAS).map(([key, persona]) => (
-                                <option key={key} value={key}>
+                            {PERSONAS.map((persona) => (
+                                <option key={persona.id} value={persona.id}>
                                     {persona.name}
                                 </option>
                             ))}
@@ -693,8 +694,9 @@ export default function SweetReader({ title, author, content }: SweetReaderProps
                             onChange={(e) => setInputValue(e.target.value)}
                             placeholder="Ask the Elder about this story..."
                             className="flex-1 px-3 py-2 rounded-lg border border-[#e5e0d8] text-sm focus:outline-none focus:border-[#1a1a1a]"
+                            aria-label="Chat message"
                         />
-                        <button type="submit" className="p-2 bg-[#1a1a1a] text-white rounded-lg hover:bg-black transition-colors">
+                        <button type="submit" className="p-2 bg-[#1a1a1a] text-white rounded-lg hover:bg-black transition-colors" aria-label="Send message">
                             <Share2 size={18} />
                         </button>
                     </form>

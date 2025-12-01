@@ -51,7 +51,7 @@ export default function PersonaManager({ isOpen, onClose, onSelectPersona, curre
                         </h2>
                         <p className="text-sm text-[#666] mt-1">Choose or create your AI conversation partner</p>
                     </div>
-                    <button onClick={onClose} className="text-[#666] hover:text-[#1a1a1a]">
+                    <button onClick={onClose} className="text-[#666] hover:text-[#1a1a1a]" aria-label="Close">
                         <X size={24} />
                     </button>
                 </div>
@@ -60,7 +60,7 @@ export default function PersonaManager({ isOpen, onClose, onSelectPersona, curre
                 <div className="flex-1 overflow-y-auto p-6">
                     {/* Built-in Personas by Category */}
                     {categories.map(category => {
-                        const personas = Object.values(PERSONAS).filter(p => p.category === category.id);
+                        const personas = PERSONAS.filter(p => p.category === category.id);
                         return (
                             <div key={category.id} className="mb-8">
                                 <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
@@ -75,8 +75,8 @@ export default function PersonaManager({ isOpen, onClose, onSelectPersona, curre
                                                 onClose();
                                             }}
                                             className={`p-4 rounded-xl border-2 text-left transition-all ${currentPersona === persona.id
-                                                    ? 'border-[#1a1a1a] bg-[#fdfbf7]'
-                                                    : 'border-[#e5e0d8] hover:border-[#1a1a1a]'
+                                                ? 'border-[#1a1a1a] bg-[#fdfbf7]'
+                                                : 'border-[#e5e0d8] hover:border-[#1a1a1a]'
                                                 }`}
                                         >
                                             <div className="flex items-start gap-3">

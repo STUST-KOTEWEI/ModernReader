@@ -1,35 +1,33 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { BookOpen, Library, Mic, Settings, User, MessageSquare, LogIn, LogOut, Sparkles, Activity, Compass, Trophy, Menu, X } from "lucide-react";
+import { Library, Mic, Settings, LogIn, LogOut, Sparkles, Menu, X, MessageSquare } from "lucide-react";
 import { useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname } from "@/i18n/navigation";
 import { useSession, signOut } from "next-auth/react";
 import LoginModal from "@/components/auth/LoginModal";
 import Image from "next/image";
 import { Toaster } from "react-hot-toast";
 import { NavLink } from "@/components/ui/NavLink";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
-import { Skeleton } from "@/components/ui/Skeleton";
 import { clsx } from "clsx";
+import { useTranslations } from "next-intl";
+import { HighContrastToggle } from "@/components/ui/HighContrastToggle";
 
-/**
- * ClientLayout Component
- * 
- * Main layout component for the application that handles:
- * - Sidebar navigation with responsive mobile drawer
- * - User authentication state display
- * - Global error handling via ErrorBoundary
- * - Loading states via Skeleton
- * 
- * @param children - The main content to render
- */
+function isActive(pathname: string, href: string) {
+    if (href === '/') {
+        return pathname === '/';
+    }
+    return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 function ClientLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const { data: session, status } = useSession();
     const [isLoginOpen, setIsLoginOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const isLoading = status === "loading";
+    const t = useTranslations('Navigation');
 
     return (
         <div className="flex min-h-screen bg-[#0f172a]">
@@ -79,45 +77,51 @@ function ClientLayout({ children }: { children: React.ReactNode }) {
                 </div>
 
                 <nav className="relative flex-1 px-4 py-4 space-y-2 overflow-y-auto scrollbar-hide" aria-label="Main Menu">
-                    <div onClick={() => setIsMobileMenuOpen(false)}>
-                        <NavLink href="/" icon={<Library size={18} />} label="Library" active={pathname === "/"} />
-                    </div>
-                    <div onClick={() => setIsMobileMenuOpen(false)}>
-                        <NavLink href="/for-you" icon={<Sparkles size={18} />} label="For You" active={pathname === "/for-you"} />
-                    </div>
-                    <div onClick={() => setIsMobileMenuOpen(false)}>
-                        <NavLink href="/learning-path" icon={<Compass size={18} />} label="Learning Path" active={pathname === "/learning-path"} />
-                    </div>
-                    <div onClick={() => setIsMobileMenuOpen(false)}>
-                        <NavLink href="/reader" icon={<BookOpen size={18} />} label="Current Read" active={pathname === "/reader"} />
-                    </div>
-                    <div onClick={() => setIsMobileMenuOpen(false)}>
-                        <NavLink href="/podcasts" icon={<Mic size={18} />} label="Podcasts" active={pathname === "/podcasts"} />
-                    </div>
-                    <div onClick={() => setIsMobileMenuOpen(false)}>
-                        <NavLink href="/isbn-podcast" icon={<Mic size={18} />} label="ISBN Podcast" active={pathname === "/isbn-podcast"} />
-                    </div>
-                    <div onClick={() => setIsMobileMenuOpen(false)}>
-                        <NavLink href="/chat" icon={<MessageSquare size={18} />} label="Chat Rooms" active={pathname.startsWith("/chat")} />
-                    </div>
-                    <div onClick={() => setIsMobileMenuOpen(false)}>
-                        <NavLink href="/diagnostics" icon={<Activity size={18} />} label="Diagnostics" active={pathname === "/diagnostics"} />
-                    </div>
-                    <div onClick={() => setIsMobileMenuOpen(false)}>
-                        <NavLink href="/profile" icon={<User size={18} />} label="Profile" active={pathname === "/profile"} />
-                    </div>
-                    <div onClick={() => setIsMobileMenuOpen(false)}>
-                        <NavLink href="/leaderboard" icon={<Trophy size={18} />} label="Leaderboard" active={pathname === "/leaderboard"} />
-                    </div>
+                    <NavLink
+                        href="/"
+                        icon={<Library size={18} />}
+                        label={t('library')}
+                        active={isActive(pathname, '/')}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                    />
+                    <NavLink
+                        href="/for-you"
+                        icon={<Sparkles size={18} />}
+                        label={t('forYou')}
+                        active={isActive(pathname, '/for-you')}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                    />
+                    <NavLink
+                        href="/chat"
+                        icon={<MessageSquare size={18} />}
+                        label={t('chat')}
+                        active={isActive(pathname, '/chat')}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                    />
+                    <NavLink
+                        href="/podcasts"
+                        icon={<Mic size={18} />}
+                        label={t('podcasts')}
+                        active={isActive(pathname, '/podcasts')}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                    />
+                    <NavLink
+                        href="/settings"
+                        icon={<Settings size={18} />}
+                        label={t('settings')}
+                        active={isActive(pathname, '/settings')}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                    />
                 </nav>
 
                 <div className="relative p-4 border-t border-white/10 space-y-3 bg-white/5 backdrop-blur-sm">
+                    <HighContrastToggle />
                     {isLoading ? (
                         <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/10 border border-white/10">
-                            <Skeleton className="w-8 h-8 rounded-full" />
+                            <div className="w-8 h-8 rounded-full bg-white/10 animate-pulse" />
                             <div className="flex-1 space-y-2">
-                                <Skeleton className="h-3 w-20" />
-                                <Skeleton className="h-2 w-12" />
+                                <div className="h-3 w-20 bg-white/10 rounded animate-pulse" />
+                                <div className="h-2 w-12 bg-white/10 rounded animate-pulse" />
                             </div>
                         </div>
                     ) : session ? (
@@ -134,9 +138,9 @@ function ClientLayout({ children }: { children: React.ReactNode }) {
                                 <button
                                     onClick={() => signOut()}
                                     className="text-xs text-white/70 hover:text-white flex items-center gap-1 transition-colors"
-                                    aria-label="Sign Out"
+                                    aria-label={t('signOut')}
                                 >
-                                    <LogOut size={10} /> Sign Out
+                                    <LogOut size={10} /> {t('signOut')}
                                 </button>
                             </div>
                         </div>
@@ -144,15 +148,12 @@ function ClientLayout({ children }: { children: React.ReactNode }) {
                         <button
                             onClick={() => setIsLoginOpen(true)}
                             className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-white/80 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-all duration-200 group text-left"
-                            aria-label="Sign In"
+                            aria-label={t('signIn')}
                         >
                             <LogIn size={18} />
-                            <span className="font-medium text-sm">Sign In</span>
+                            <span className="font-medium text-sm">{t('signIn')}</span>
                         </button>
                     )}
-                    <div onClick={() => setIsMobileMenuOpen(false)}>
-                        <NavLink href="/settings" icon={<Settings size={18} />} label="Settings" active={pathname === "/settings"} />
-                    </div>
                 </div>
             </aside>
 

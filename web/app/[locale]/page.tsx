@@ -1,10 +1,11 @@
 "use client";
 
-import Link from "next/link";
-import { Search, User, TrendingUp, Globe, Activity } from "lucide-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
+import { Link } from "@/i18n/navigation";
+import { Search, User, TrendingUp, Globe, Activity } from "lucide-react";
+import { useTranslations } from 'next-intl';
 
 interface Book {
   key: string;
@@ -138,11 +139,12 @@ function getFallbackBooks(): Book[] {
 
 
 export default function LibraryPage() {
+  const t = useTranslations('HomePage');
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['books', page],
     queryFn: async () => {
       const limit = 24;
@@ -174,18 +176,18 @@ export default function LibraryPage() {
           <div className="space-y-6">
             <div className="flex flex-wrap items-center gap-3">
               <span className="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-[0.2em] bg-mr-rose/10 text-mr-rose border border-mr-rose/30">
-                Modern Atlas
+                {t('modernAtlas')}
               </span>
               <span className="text-xs text-mr-ink/60">
-                Live catalogue · {displayBooks.length || 0} works loaded
+                {t('liveCatalogue', { count: displayBooks.length || 0 })}
               </span>
             </div>
             <div className="space-y-3">
               <h1 className="font-serif text-4xl lg:text-5xl font-bold text-mr-ink leading-tight">
-                Light up the long tail of knowledge.
+                {t('title')}
               </h1>
               <p className="text-mr-ink/75 max-w-2xl text-base lg:text-lg">
-                A living reading room that pulls from Open Library in real-time. Dip into live clusters, author trails, and indigenous-inspired SweetReader sessions without feeling “resource empty.”
+                {t('subtitle')}
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
@@ -193,27 +195,27 @@ export default function LibraryPage() {
                 href="/for-you"
                 className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-mr-ink text-white font-semibold shadow-[var(--mr-shadow-soft)] hover:shadow-[var(--mr-shadow-strong)] transition-all"
               >
-                Personal Flow
+                {t('personalFlow')}
               </Link>
               <Link
                 href="/reader"
                 className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white/70 text-mr-ink border border-mr-border font-semibold hover:border-mr-ink transition-all"
               >
-                Open Reader
+                {t('openReader')}
               </Link>
               <Link
                 href="/podcasts"
                 className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-mr-rose/10 text-mr-rose border border-mr-rose/30 font-semibold hover:border-mr-rose/60 transition-all"
               >
-                Listen In
+                {t('listenIn')}
               </Link>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <StatBadge icon={<Globe size={16} />} label="Languages indexed" value="1,642" />
-              <StatBadge icon={<TrendingUp size={16} />} label="Daily reads" value="84.2k" />
-              <StatBadge icon={<User size={16} />} label="Active scholars" value="12k" />
-              <StatBadge icon={<Activity size={16} />} label="New works today" value="+128" />
+              <StatBadge icon={<Globe size={16} />} label={t('stats.languages')} value="1,642" />
+              <StatBadge icon={<TrendingUp size={16} />} label={t('stats.dailyReads')} value="84.2k" />
+              <StatBadge icon={<User size={16} />} label={t('stats.scholars')} value="12k" />
+              <StatBadge icon={<Activity size={16} />} label={t('stats.newWorks')} value="+128" />
             </div>
           </div>
 
@@ -262,7 +264,7 @@ export default function LibraryPage() {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-mr-ink/40" size={20} />
             <input
               type="text"
-              placeholder="Search the global reading mesh..."
+              placeholder={t('searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-12 pr-4 py-3 rounded-2xl bg-white/80 border border-mr-border focus:border-mr-ink focus:ring-0 transition-all shadow-sm"
@@ -286,10 +288,10 @@ export default function LibraryPage() {
 
         {/* Stats Row */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatBadge icon={<Globe size={16} />} label="Languages" value="1,642" />
-          <StatBadge icon={<TrendingUp size={16} />} label="Daily Reads" value="84.2k" />
-          <StatBadge icon={<User size={16} />} label="Active Scholars" value="12k" />
-          <StatBadge icon={<Activity size={16} />} label="New Works" value="+128" />
+          <StatBadge icon={<Globe size={16} />} label={t('stats.languages')} value="1,642" />
+          <StatBadge icon={<TrendingUp size={16} />} label={t('stats.dailyReads')} value="84.2k" />
+          <StatBadge icon={<User size={16} />} label={t('stats.scholars')} value="12k" />
+          <StatBadge icon={<Activity size={16} />} label={t('stats.newWorks')} value="+128" />
         </div>
 
         {/* Book Grid */}
@@ -357,7 +359,7 @@ export default function LibraryPage() {
               onClick={() => setPage(p => p + 1)}
               className="px-10 py-3 bg-mr-rose text-white rounded-full hover:bg-[#c83549] transition-colors font-semibold shadow-[var(--mr-shadow-soft)]"
             >
-              Load More Books
+              {t('loadMore')}
             </button>
           </div>
         )}
@@ -366,8 +368,8 @@ export default function LibraryPage() {
       <section className="rounded-3xl border border-mr-border bg-white/80 backdrop-blur-xl p-6 lg:p-8 shadow-[var(--mr-shadow-soft)] space-y-6">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
-            <p className="text-[11px] uppercase tracking-[0.24em] text-mr-ink/50">Global sources</p>
-            <h3 className="font-serif text-2xl font-semibold text-mr-ink">Plug into open and institutional stacks</h3>
+            <p className="text-[11px] uppercase tracking-[0.24em] text-mr-ink/50">{t('globalSources')}</p>
+            <h3 className="font-serif text-2xl font-semibold text-mr-ink">{t('plugInto')}</h3>
           </div>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -380,7 +382,7 @@ export default function LibraryPage() {
               href="/chat"
               className="px-4 py-2 rounded-full bg-white/80 border border-mr-border text-sm font-semibold text-mr-ink hover:border-mr-ink"
             >
-              Ask your PDF (beta)
+              {t('askPdf')}
             </Link>
           </div>
         </div>

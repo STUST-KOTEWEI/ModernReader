@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -14,6 +14,7 @@ interface NavLinkProps {
     label: string;
     active?: boolean;
     className?: string;
+    onClick?: () => void;
 }
 
 /**
@@ -26,12 +27,14 @@ interface NavLinkProps {
  * @param label - The text label for the link
  * @param active - Whether the link is currently active
  * @param className - Additional CSS classes
+ * @param onClick - Optional click handler
  */
-export function NavLink({ href, icon, label, active = false, className }: NavLinkProps) {
+export function NavLink({ href, icon, label, active = false, className, onClick }: NavLinkProps) {
     return (
         <Link
             href={href}
             aria-current={active ? "page" : undefined}
+            onClick={onClick}
             className={cn(
                 "flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 group border",
                 active

@@ -20,11 +20,11 @@ export async function POST(req: NextRequest) {
             messages: [
                 {
                     role: "system",
-                    content: `You are a storyteller creating indigenous folklore stories. Style: ${style || 'Elder'}. Keep stories under 100 words, mystical and culturally rich.`
+                    content: `You are a storyteller creating cultural folklore stories. Style: ${style || 'Elder'}. Keep stories under 100 words, mystical and culturally rich.`
                 },
                 {
                     role: "user",
-                    content: "Generate a short indigenous folklore story about nature and wisdom."
+                    content: "Generate a short cultural folklore story about nature and wisdom."
                 }
             ],
             max_tokens: 200,
