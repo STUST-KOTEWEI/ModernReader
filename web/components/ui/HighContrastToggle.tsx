@@ -3,7 +3,7 @@
 import { useAccessibility } from "@/components/AccessibilityProvider";
 import { Eye, EyeOff } from "lucide-react";
 import { clsx } from "clsx";
-import { useTranslations } from "next-intl";
+
 
 export function HighContrastToggle() {
     const { highContrast, toggleHighContrast } = useAccessibility();

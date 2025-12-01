@@ -15,9 +15,9 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
     useEffect(() => {
         // Check local storage or system preference on mount
         const saved = localStorage.getItem("high-contrast");
-        if (saved) {
-            // eslint-disable-next-line react-hooks/exhaustive-deps
-            setHighContrast(saved === "true");
+        if (saved === "true") {
+            // Use setTimeout to avoid "synchronous setState in effect" warning
+            setTimeout(() => setHighContrast(true), 0);
         }
     }, []);
 

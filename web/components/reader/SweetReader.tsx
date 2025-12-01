@@ -9,6 +9,8 @@ import { PERSONAS, PersonaType } from "@/lib/personas";
 
 // Dynamically import 3D avatar to avoid SSR issues
 const EmotionalAvatar = lazy(() => import("@/components/3d/EmotionalAvatar"));
+import HapticPanel from "./HapticPanel";
+import AIChatPanel from "./AIChatPanel";
 
 type Emotion = 'joy' | 'sadness' | 'anger' | 'fear' | 'surprise' | 'neutral';
 
@@ -20,7 +22,7 @@ interface SweetReaderProps {
 
 export default function SweetReader({ title, author, content }: SweetReaderProps) {
     const [activeMode, setActiveMode] = useState<"read" | "watch" | "experience" | "tell">("read");
-    const [hapticState, setHapticState] = useState({ temp: 0, vibe: 0, texture: false });
+    const [hapticState, setHapticState] = useState<{ temp: number; vibe: number; texture: boolean; scent?: string }>({ temp: 0, vibe: 0, texture: false });
     const [isPlaying, setIsPlaying] = useState(false);
     const [language, setLanguage] = useState("English");
     const [selectedPersona, setSelectedPersona] = useState<PersonaType>("universal_guide");
@@ -80,13 +82,13 @@ export default function SweetReader({ title, author, content }: SweetReaderProps
 
             // If HF fails or not configured, try OpenAI
             if (!response.ok) {
-                response = await fetch('/api/ai/chat-persona', {
+                response = await fetch('/api/ai/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         message: userMessage,
                         history: messages,
-                        persona: selectedPersona,
+                        personaId: selectedPersona,
                         userEmotion: detectedEmotion
                     })
                 });
@@ -195,6 +197,13 @@ export default function SweetReader({ title, author, content }: SweetReaderProps
             if (response.ok) {
                 const data = await response.json();
                 setTactileFeedbackText(data.feedback_description);
+                // Update haptic state with API data including scent
+                setHapticState(prev => ({
+                    ...prev,
+                    temp: data.intensity?.temperature || prev.temp,
+                    vibe: data.intensity?.vibration || prev.vibe,
+                    scent: data.intensity?.scent
+                }));
                 setShowTactileFeedback(true);
                 setTimeout(() => setShowTactileFeedback(false), 5000); // Hide after 5 seconds
             } else {
@@ -334,55 +343,12 @@ export default function SweetReader({ title, author, content }: SweetReaderProps
                         )}
 
                         {activeMode === "experience" && (
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                className="h-full flex flex-col items-center justify-center p-8"
-                            >
-                                <div className="relative w-64 h-96 bg-white rounded-3xl border-4 border-[#e5e0d8] shadow-xl overflow-hidden flex items-center justify-center">
-                                    {/* Haptic Visualization Layer */}
-                                    <div
-                                        className="absolute inset-0 transition-opacity duration-500 bg-orange-500 mix-blend-multiply"
-                                        style={{ opacity: hapticState.temp / 200 }}
-                                    />
-                                    <motion.div
-                                        className="absolute inset-0 bg-blue-500 mix-blend-multiply"
-                                        animate={{ opacity: hapticState.vibe > 0 ? [0, hapticState.vibe / 200, 0] : 0 }}
-                                        transition={{ duration: 0.1, repeat: Infinity }}
-                                    />
-
-                                    <div className="z-10 text-center p-6">
-                                        <Fingerprint size={48} className="mx-auto mb-4 text-[#1a1a1a] opacity-50" />
-                                        <h3 className="font-bold text-lg mb-2">Haptic Surface</h3>
-                                        <p className="text-xs text-[#666]">
-                                            Temp: {hapticState.temp}°C <br />
-                                            Vibe: {hapticState.vibe}Hz
-                                        </p>
-                                        <button
-                                            onClick={handleSimulateTactileFeedback}
-                                            className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg text-sm"
-                                        >
-                                            Simulate Tactile Feedback
-                                        </button>
-                                    </div>
-                                </div>
-                                <p className="mt-8 text-[#666] text-sm max-w-md text-center">
-                                    Touch the screen to feel the warmth of the campfire and the rumble of the thunder.
-                                    <br />
-                                    <span className="text-xs opacity-50">(Hardware Simulation Active)</span>
-                                </p>
-                                {showTactileFeedback && tactileFeedbackText && (
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: -20 }}
-                                        className="absolute bottom-8 bg-black/70 text-white text-sm px-4 py-2 rounded-lg"
-                                    >
-                                        {tactileFeedbackText}
-                                    </motion.div>
-                                )}
-                            </motion.div>
+                            <HapticPanel
+                                hapticState={hapticState}
+                                onSimulate={handleSimulateTactileFeedback}
+                                feedbackText={tactileFeedbackText}
+                                showFeedback={showTactileFeedback}
+                            />
                         )}
 
                         {activeMode === "tell" && (
@@ -642,65 +608,15 @@ export default function SweetReader({ title, author, content }: SweetReaderProps
                 </div>
 
                 {/* Chat / Notes */}
-                <div className="flex-1 p-6 flex flex-col min-h-0">
-                    {/* Persona Selector */}
-                    <div className="mb-4">
-                        <label className="text-xs font-bold text-[#666] uppercase tracking-wider mb-2 block">AI Persona</label>
-                        <select
-                            value={selectedPersona}
-                            onChange={(e) => setSelectedPersona(e.target.value as PersonaType)}
-                            className="w-full px-3 py-2 rounded-lg border border-[#e5e0d8] text-sm focus:outline-none focus:border-[#1a1a1a] bg-white"
-                        >
-                            {PERSONAS.map((persona) => (
-                                <option key={persona.id} value={persona.id}>
-                                    {persona.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <h2 className="font-serif font-bold text-lg mb-4 flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full ${isTyping ? 'bg-green-500 animate-pulse' : 'bg-[#e5e0d8]'}`} />
-                        Discussion
-                    </h2>
-
-                    <div className="flex-1 bg-white rounded-xl border border-[#e5e0d8] p-4 mb-4 overflow-y-auto text-sm space-y-4">
-                        {messages.map((msg, i) => (
-                            <div key={i} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
-                                <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold ${msg.role === 'ai' ? 'bg-[#1a1a1a] text-white' : 'bg-[#e5e0d8] text-[#666]'}`}>
-                                    {msg.role === 'ai' ? 'AI' : 'ME'}
-                                </div>
-                                <div className={`max-w-[80%] p-3 rounded-2xl ${msg.role === 'ai' ? 'bg-[#fdfbf7] border border-[#e5e0d8] text-[#1a1a1a]' : 'bg-[#1a1a1a] text-white'}`}>
-                                    {msg.content}
-                                </div>
-                            </div>
-                        ))}
-                        {isTyping && (
-                            <div className="flex gap-3">
-                                <div className="w-8 h-8 rounded-full bg-[#1a1a1a] text-white flex items-center justify-center text-xs font-bold">AI</div>
-                                <div className="bg-[#fdfbf7] border border-[#e5e0d8] p-3 rounded-2xl flex gap-1 items-center">
-                                    <span className="w-1.5 h-1.5 bg-[#666] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                                    <span className="w-1.5 h-1.5 bg-[#666] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                                    <span className="w-1.5 h-1.5 bg-[#666] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
-                    <form onSubmit={handleSendMessage} className="flex gap-2">
-                        <input
-                            type="text"
-                            value={inputValue}
-                            onChange={(e) => setInputValue(e.target.value)}
-                            placeholder="Ask the Elder about this story..."
-                            className="flex-1 px-3 py-2 rounded-lg border border-[#e5e0d8] text-sm focus:outline-none focus:border-[#1a1a1a]"
-                            aria-label="Chat message"
-                        />
-                        <button type="submit" className="p-2 bg-[#1a1a1a] text-white rounded-lg hover:bg-black transition-colors" aria-label="Send message">
-                            <Share2 size={18} />
-                        </button>
-                    </form>
-                </div>
+                <AIChatPanel
+                    messages={messages}
+                    inputValue={inputValue}
+                    setInputValue={setInputValue}
+                    isTyping={isTyping}
+                    onSendMessage={handleSendMessage}
+                    selectedPersona={selectedPersona}
+                    setSelectedPersona={setSelectedPersona}
+                />
             </div>
         </div >
     );

@@ -5,7 +5,7 @@ import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import "../globals.css";
 import ClientLayout from "@/components/ClientLayout";
-import ClientOnly from "@/components/ClientOnly";
+
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -80,9 +80,7 @@ export default async function LocaleLayout({
       <body className={`${spaceGrotesk.variable} ${playfair.variable} antialiased`}>
         <NextIntlClientProvider messages={messages}>
           <Providers>
-            <ClientOnly>
-              <ClientLayout>{children}</ClientLayout>
-            </ClientOnly>
+            <ClientLayout>{children}</ClientLayout>
           </Providers>
         </NextIntlClientProvider>
       </body>
