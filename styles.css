@@ -893,3 +893,228 @@ button:active, .chip:active {
   animation: aurora-flow 20s ease infinite;
   background-size: 400% 400%;
 }
+
+/* ===== ADVANCED INTERACTIVE STYLES ===== */
+
+/* 1. Cursor Glow Effect */
+.cursor-glow {
+    position: fixed;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 100, 200, 0.6), transparent 70%);
+    pointer-events: none;
+    z-index: 9999;
+    mix-blend-mode: screen;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s, height 0.3s;
+}
+
+body:hover .cursor-glow {
+    width: 60px;
+    height: 60px;
+}
+
+/* 2. Scroll-Triggered Fade In Animation */
+.animate-on-scroll {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.animate-on-scroll.fade-in-up {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* 3. Card 3D Transform */
+.feature-card,
+.book-card {
+    transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+    transform-style: preserve-3d;
+    will-change: transform;
+}
+
+.feature-card:hover,
+.book-card:hover {
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 
+                0 0 60px rgba(132, 94, 247, 0.4);
+}
+
+/* 4. Counter Animation */
+.stat-24, .stat-180, .stat-99 {
+    font-variant-numeric: tabular-nums;
+    transition: color 0.3s ease;
+}
+
+.stat-24:hover, .stat-180:hover, .stat-99:hover {
+    color: var(--accent);
+    text-shadow: 0 0 20px rgba(132, 94, 247, 0.6);
+}
+
+/* 5. Floating Animation Enhancement */
+@keyframes float-smooth {
+    0%, 100% {
+        transform: translateY(0px) scale(1);
+    }
+    50% {
+        transform: translateY(-15px) scale(1.02);
+    }
+}
+
+.floating-card {
+    animation: float-smooth 6s ease-in-out infinite;
+}
+
+/* 6. Gradient Border Animation */
+@keyframes gradient-border {
+    0% {
+        border-image-source: linear-gradient(90deg, #845ef7, #ff6b9d, #845ef7);
+    }
+    50% {
+        border-image-source: linear-gradient(90deg, #ff6b9d, #845ef7, #ff6b9d);
+    }
+    100% {
+        border-image-source: linear-gradient(90deg, #845ef7, #ff6b9d, #845ef7);
+    }
+}
+
+/* 7. Text Glow on Hover */
+h1, h2, h3 {
+    transition: text-shadow 0.3s ease;
+}
+
+h1:hover, h2:hover {
+    text-shadow: 0 0 30px rgba(132, 94, 247, 0.8),
+                 0 0 60px rgba(132, 94, 247, 0.4);
+}
+
+/* 8. Button Pulse Effect */
+@keyframes button-pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(132, 94, 247, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 15px rgba(132, 94, 247, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(132, 94, 247, 0);
+    }
+}
+
+button:hover,
+.chip:hover {
+    animation: button-pulse 1.5s infinite;
+}
+
+/* 9. Parallax Layers */
+.parallax-layer {
+    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* 10. Loading Bar Animation */
+@keyframes loading-bar {
+    0% {
+        width: 0%;
+        opacity: 1;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        width: 100%;
+        opacity: 0;
+    }
+}
+
+.loading-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #845ef7, #ff6b9d);
+    z-index: 10000;
+    animation: loading-bar 2s ease-in-out;
+}
+
+/* 11. Backdrop Blur Enhancement */
+.glass-enhanced {
+    backdrop-filter: blur(30px) saturate(200%);
+    -webkit-backdrop-filter: blur(30px) saturate(200%);
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+}
+
+/* 12. Ink Splash Effect */
+@keyframes ink-splash {
+    0% {
+        transform: scale(0);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+.ink-splash {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(132, 94, 247, 0.5);
+    animation: ink-splash 0.6s ease-out;
+}
+
+/* 13. Magnetic Hover Effect */
+.magnetic {
+    transition: transform 0.2s ease-out;
+}
+
+.magnetic:hover {
+    transform: scale(1.05);
+}
+
+/* 14. Gradient Text */
+.gradient-text {
+    background: linear-gradient(120deg, #845ef7, #ff6b9d, #ffd166);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 200% 200%;
+    animation: gradient-shift 3s ease infinite;
+}
+
+@keyframes gradient-shift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* 15. Stagger Animation */
+.stagger-item {
+    animation: fade-in-up 0.6s ease-out forwards;
+    opacity: 0;
+}
+
+.stagger-item:nth-child(1) { animation-delay: 0.1s; }
+.stagger-item:nth-child(2) { animation-delay: 0.2s; }
+.stagger-item:nth-child(3) { animation-delay: 0.3s; }
+.stagger-item:nth-child(4) { animation-delay: 0.4s; }
+.stagger-item:nth-child(5) { animation-delay: 0.5s; }
+
+@keyframes fade-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
