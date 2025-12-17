@@ -163,3 +163,159 @@ window.addEventListener('load', () => {
   const initialTheme = document.querySelector('[data-control="theme"] .chip.active');
   if (initialTheme) updateTheme(initialTheme.dataset.value);
 });
+
+// ========================================
+// Enhanced Interactions & Animations
+// ========================================
+
+// Parallax scroll effect for hero section
+function initParallaxEffect() {
+  const hero = document.querySelector('.hero');
+  if (!hero) return;
+  
+  window.addEventListener('scroll', () => {
+    const scrolled = window.pageYOffset;
+    const rate = scrolled * 0.5;
+    hero.style.transform = `translate3d(0, ${rate}px, 0)`;
+  });
+}
+
+// Smooth scroll for navigation links
+function initSmoothScroll() {
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    });
+  });
+}
+
+// Interactive card hover effects
+function enhanceCardInteractions() {
+  const cards = document.querySelectorAll('.experience-card, .sound-card');
+  
+  cards.forEach(card => {
+    card.addEventListener('mouseenter', function() {
+      this.style.transform = 'translateY(-8px) scale(1.02)';
+      this.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+    });
+    
+    card.addEventListener('mouseleave', function() {
+      this.style.transform = 'translateY(0) scale(1)';
+    });
+  });
+}
+
+// Add ripple effect to buttons
+function addRippleEffect() {
+  const buttons = document.querySelectorAll('button, .chip, .cta');
+  
+  buttons.forEach(button => {
+    button.addEventListener('click', function(e) {
+      const ripple = document.createElement('span');
+      const rect = this.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      const x = e.clientX - rect.left - size / 2;
+      const y = e.clientY - rect.top - size / 2;
+      
+      ripple.style.width = ripple.style.height = size + 'px';
+      ripple.style.left = x + 'px';
+      ripple.style.top = y + 'px';
+      ripple.classList.add('ripple-effect');
+      
+      this.appendChild(ripple);
+      
+      setTimeout(() => ripple.remove(), 600);
+    });
+  });
+}
+
+// Animate elements on scroll
+function animateOnScroll() {
+  const elements = document.querySelectorAll('.fade-in, section');
+  
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, {
+    threshold: 0.1,
+    rootMargin: '0px 0px -100px 0px'
+  });
+  
+  elements.forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(30px)';
+    el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    observer.observe(el);
+  });
+}
+
+// Mock API integration layer
+const ModernReaderAPI = {
+  async analyzeText(text) {
+    // Simulate API call to H.O.L.O. backend
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({
+          sentiment: 'positive',
+          emotion: 'joy',
+          tone: 'inspirational',
+          readability: 0.82
+        });
+      }, 1000);
+    });
+  },
+  
+  async generateSoundscape(mood) {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({
+          track: 'ambient_' + mood,
+          duration: 180,
+          frequency: '432Hz'
+        });
+      }, 800);
+    });
+  },
+  
+  async getSuggestions(context) {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve([
+          { title: '《星際旅人》', author: '劉慈欣', match: 0.92 },
+          { title: '《三體》', author: '劉慈欣', match: 0.88 },
+          { title: '《流浪地球》', author: '劉慈欣', match: 0.85 }
+        ]);
+      }, 1200);
+    });
+  }
+};
+
+// Initialize enhanced features
+function initEnhancedFeatures() {
+  initParallaxEffect();
+  initSmoothScroll();
+  enhanceCardInteractions();
+  addRippleEffect();
+  animateOnScroll();
+  
+  console.log('✨ ModernReader Enhanced Features Loaded');
+  console.log('🔗 Connected to Project H.O.L.O. API Layer');
+}
+
+// Run when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initEnhancedFeatures);
+} else {
+  initEnhancedFeatures();
+}
