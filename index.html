@@ -103,14 +103,14 @@
       </div>
       <div class="immersion__layout">
         <div class="immersion__controls">
-          <div class="control-group">
-            <p class="control-label">場景主題</p>
+          <fieldset class="control-group">
+            <legend class="control-label">場景主題</legend>
             <div class="control-options" data-control="theme">
               <button class="chip active" data-value="lumina">晨光 Lumina</button>
               <button class="chip" data-value="noir">暮夜 Noir</button>
               <button class="chip" data-value="aurum">琥珀 Aurum</button>
             </div>
-          </div>
+          </fieldset>
           <div class="control-group">
             <label for="fontSize" class="control-label">字體比例</label>
             <input type="range" id="fontSize" min="0.8" max="1.4" step="0.05" value="1" />
@@ -119,23 +119,23 @@
             <label for="letterSpacing" class="control-label">字距與呼吸</label>
             <input type="range" id="letterSpacing" min="0" max="0.08" step="0.01" value="0.02" />
           </div>
-          <div class="control-group">
-            <p class="control-label">沉浸音場</p>
+          <fieldset class="control-group">
+            <legend class="control-label">沉浸音場</legend>
             <div class="soundscape">
-              <div class="sound-card active" data-sound="ocean">
+              <div class="sound-card active" data-sound="ocean" data-label="星海潮汐">
                 <span>星海潮汐</span>
                 <small>清晨海岸·波長 432Hz</small>
               </div>
-              <div class="sound-card" data-sound="forest">
+              <div class="sound-card" data-sound="forest" data-label="松林霧徑">
                 <span>松林霧徑</span>
                 <small>靜心 Alpha·滲透率 64%</small>
               </div>
-              <div class="sound-card" data-sound="city">
+              <div class="sound-card" data-sound="city" data-label="夜幕都會">
                 <span>夜幕都會</span>
                 <small>城市律動·低頻馭化</small>
               </div>
             </div>
-          </div>
+          </fieldset>
         </div>
         <div class="immersion__preview">
           <div class="preview-panel">
@@ -200,8 +200,8 @@
           </article>
         </div>
         <div class="collection-controls">
-          <button class="chip" id="scrollLeft">◄</button>
-          <button class="chip" id="scrollRight">►</button>
+          <button class="chip" id="scrollLeft" aria-label="向左捲動">◄</button>
+          <button class="chip" id="scrollRight" aria-label="向右捲動">►</button>
         </div>
       </div>
     </section>

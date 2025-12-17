@@ -72,7 +72,7 @@ soundCards.forEach((card) => {
     card.classList.add('active');
     const track = card.dataset.sound;
     if (previewProgress) {
-      previewProgress.textContent = `當前節奏：${card.querySelector('span').textContent}`;
+      previewProgress.textContent = `當前節奏：${card.dataset.label}`;
     }
     if (livePreview) {
       livePreview.animate(
@@ -118,7 +118,7 @@ function createPulse(button, message) {
   pulse.className = 'pulse';
   pulse.textContent = message;
   button.appendChild(pulse);
-  setTimeout(() => pulse.remove(), 1600);
+  pulse.addEventListener('animationend', () => pulse.remove());
 }
 
 if (saveRitualBtn) {
