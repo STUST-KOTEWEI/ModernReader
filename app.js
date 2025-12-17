@@ -1,4 +1,5 @@
-const themeButtons = document.querySelectorAll('[data-control="theme"] .chip');
+// 在 app.js 最上方加入 Google Sheet API URL
+const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbxn7bJVcz8pukPxtRMuHhYscGwrXdnQ06G3unFT1qMf0R6vbGscGv4sa2iWZoRAEZ9Q.../exec';const themeButtons = document.querySelectorAll('[data-control="theme"] .chip');
 const livePreview = document.getElementById('livePreview');
 const fontSizeControl = document.getElementById('fontSize');
 const letterSpacingControl = document.getElementById('letterSpacing');
