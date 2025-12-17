@@ -18,6 +18,7 @@ import { Bluetooth } from "lucide-react";
 const EmotionalAvatar = lazy(() => import("@/components/3d/EmotionalAvatar"));
 import HapticPanel from "./HapticPanel";
 import AIChatPanel from "./AIChatPanel";
+import HandwritingCanvas from "@/components/learning/HandwritingCanvas";
 
 type Emotion = 'joy' | 'sadness' | 'anger' | 'fear' | 'surprise' | 'neutral';
 
@@ -47,6 +48,43 @@ export default function SweetReader({ title: initialTitle, author: initialAuthor
     const [inputValue, setInputValue] = useState("");
     const [isTyping, setIsTyping] = useState(false);
     const [isImmersive, setIsImmersive] = useState(false);
+    
+    // Handwriting State
+    const [recognitionResult, setRecognitionResult] = useState<any>(null);
+    const [isRecognizing, setIsRecognizing] = useState(false);
+
+    const handleHandwritingRecognize = async (blob: Blob) => {
+        setIsRecognizing(true);
+        setRecognitionResult(null);
+        
+        try {
+            const formData = new FormData();
+            formData.append('image', blob);
+            formData.append('language', 'ami'); // Default to Amis for demo
+            formData.append('auto_romanize', 'true');
+
+            // Use the correct API endpoint
+            const response = await fetch('/api/v1/indigenous/handwriting/recognize', {
+                method: 'POST',
+                body: formData,
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                setRecognitionResult(data);
+                // Optionally auto-fill the chat input or add to notes
+                if (data.romanized_text) {
+                    // Feedback via TTS could be added here
+                }
+            } else {
+                console.error("Recognition failed");
+            }
+        } catch (error) {
+            console.error("Error recognizing handwriting:", error);
+        } finally {
+            setIsRecognizing(false);
+        }
+    };
 
     // New Features State
     const [isHandwriting, setIsHandwriting] = useState(false);
@@ -763,22 +801,65 @@ export default function SweetReader({ title: initialTitle, author: initialAuthor
                             </div>
 
                             {/* Handwriting Toggle */}
-                            <div className="bg-white p-4 rounded-xl shadow-sm border border-[#e5e0d8] mb-4 flex items-center justify-between">
-                                <h3 className="font-medium text-sm flex items-center gap-2">
-                                    <PenTool size={16} /> Handwriting
-                                </h3>
-                                <button
-                                    onClick={() => setIsHandwriting(!isHandwriting)}
-                                    className={clsx(
-                                        "w-12 h-6 rounded-full p-1 transition-colors duration-300",
-                                        isHandwriting ? "bg-[#1a1a1a]" : "bg-[#e5e0d8]"
-                                    )}
-                                >
-                                    <div className={clsx(
-                                        "w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300",
-                                        isHandwriting ? "translate-x-6" : "translate-x-0"
-                                    )} />
-                                </button>
+                            <div className="bg-white p-4 rounded-xl shadow-sm border border-[#e5e0d8] mb-4">
+                                <div className="flex items-center justify-between">
+                                    <h3 className="font-medium text-sm flex items-center gap-2">
+                                        <PenTool size={16} /> Handwriting
+                                    </h3>
+                                    <button
+                                        onClick={() => setIsHandwriting(!isHandwriting)}
+                                        className={clsx(
+                                            "w-12 h-6 rounded-full p-1 transition-colors duration-300",
+                                            isHandwriting ? "bg-[#1a1a1a]" : "bg-[#e5e0d8]"
+                                        )}
+                                    >
+                                        <div className={clsx(
+                                            "w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300",
+                                            isHandwriting ? "translate-x-6" : "translate-x-0"
+                                        )} />
+                                    </button>
+                                </div>
+                                
+                                {isHandwriting && (
+                                    <div className="mt-4 space-y-4">
+                                        <HandwritingCanvas 
+                                            onSave={handleHandwritingRecognize}
+                                            width={280} // Fit sidebar
+                                            height={180}
+                                        />
+                                        
+                                        {isRecognizing && (
+                                            <div className="flex items-center gap-2 text-sm text-gray-500 animate-pulse">
+                                                <Sparkles size={14} /> Recognizing...
+                                            </div>
+                                        )}
+
+                                        {recognitionResult && (
+                                            <div className="p-3 bg-[#fdfbf7] rounded-lg border border-[#e5e0d8] text-sm space-y-2">
+                                                <div>
+                                                    <span className="text-xs text-gray-500 uppercase">Recognized</span>
+                                                    <div className="font-medium">{recognitionResult.recognized_text}</div>
+                                                </div>
+                                                <div>
+                                                    <span className="text-xs text-gray-500 uppercase">Romanized</span>
+                                                    <div className="font-serif italic text-lg">{recognitionResult.romanized_text}</div>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <button 
+                                                        onClick={() => {
+                                                            setInputValue(prev => prev + " " + recognitionResult.romanized_text);
+                                                            setRecognitionResult(null);
+                                                            setIsHandwriting(false);
+                                                        }}
+                                                        className="flex-1 py-1.5 bg-black text-white text-xs rounded hover:bg-gray-800"
+                                                    >
+                                                        Insert to Chat
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
 
                             {/* Story Generator */}
