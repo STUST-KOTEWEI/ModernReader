@@ -665,8 +665,7 @@ function showNotification(type, message) {
 
 // Initialize Button Handlers
 function initButtonHandlers() {
-    const buttons = document.querySelectorAll('button, .btn');
-    
+  const buttons = document.querySelectorAll('button, .btn, .cta');    
     buttons.forEach(button => {
         const text = button.textContent.trim();
         
@@ -703,7 +702,7 @@ document.addEventListener('keydown', (event) => {
 const originalInit = initAllEnhancements;
 initAllEnhancements = function() {
     originalInit();
-    initButtonHandlers();
+    667();
     console.log('💬 LLM Chat System Ready');
     console.log('🎯 Modal System Initialized');
 };
