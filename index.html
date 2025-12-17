@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ModernReader Royale</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="aurora"></div>
+  <header class="header">
+    <div class="logo">ModernReader<span>Royale</span></div>
+    <nav class="nav">
+      <a href="#experiences">體驗</a>
+      <a href="#immersion">閱讀殿堂</a>
+      <a href="#curation">私藏</a>
+      <a href="#concierge">管家服務</a>
+    </nav>
+    <button class="cta">預約專屬導覽</button>
+  </header>
+
+  <main>
+    <section class="hero" id="hero">
+      <div class="hero__content">
+        <p class="eyebrow">世界級閱讀美學</p>
+        <h1>喚醒靈感的<br />新世代旗艦閱讀體驗</h1>
+        <p class="lead">結合奢華工藝、感官演算法與專屬閱讀策展，將每一次翻閱，化為無可取代的私人盛典。</p>
+        <div class="hero__actions">
+          <button class="btn btn--primary">立即啟用禮賓模式</button>
+          <button class="btn btn--ghost">探索星級策展</button>
+        </div>
+      </div>
+      <div class="hero__preview">
+        <div class="device-frame">
+          <div class="device-screen">
+            <div class="reader-preview" data-theme="lumina">
+              <div class="preview-header">
+                <span>《星際旅人》</span>
+                <span class="preview-page">p. 47</span>
+              </div>
+              <p class="preview-text">晨光洒落在鉑金色的水面，潮汐回應著恆星的律動。讀者的心跳與宇宙共振，故事因你而改寫。</p>
+              <div class="preview-footer">
+                <div class="progress">
+                  <div class="progress-bar" style="width: 68%"></div>
+                </div>
+                <span>閱讀完成度 68%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="floating-card">
+          <p class="floating-title">情緒場景自動調校</p>
+          <p class="floating-body">AI 解讀你的節奏，調整色溫、字距與氛圍聲景，提供最貼近心境的沉浸體驗。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="experiences" id="experiences">
+      <div class="section-heading">
+        <span class="eyebrow">Signature Experiences</span>
+        <h2>為菁英讀者打造的專屬場景</h2>
+        <p>每項功能皆由跨領域設計團隊親自操刀，結合藝術、聲學與智能科技，讓閱讀不只是閱讀。</p>
+      </div>
+      <div class="experience-grid">
+        <article class="experience-card">
+          <div class="card-glow"></div>
+          <h3>光譜劇院模式</h3>
+          <p>採用全景光譜投射與空間聲景，將文字化作多感官沉浸劇院，讓故事在你周圍環繞。</p>
+          <div class="card-meta">
+            <span>實時環境偵測</span>
+            <span>Dolby Atmos</span>
+          </div>
+        </article>
+        <article class="experience-card">
+          <div class="card-glow"></div>
+          <h3>禪境專注引擎</h3>
+          <p>以心率與腦波節奏精準調和字距、光影與背景，打造超越靜心課程的專注閱讀狀態。</p>
+          <div class="card-meta">
+            <span>Alpha 波優化</span>
+            <span>深層呼吸提醒</span>
+          </div>
+        </article>
+        <article class="experience-card">
+          <div class="card-glow"></div>
+          <h3>星級品味策展</h3>
+          <p>全球書庫私人管家，根據你的旅程與心情量身策劃，提供隱藏版限量內容與作者私訊。</p>
+          <div class="card-meta">
+            <span>策展顧問團</span>
+            <span>限量解鎖</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="immersion" id="immersion">
+      <div class="section-heading">
+        <span class="eyebrow">Immersive Atelier</span>
+        <h2>專屬訂製的沉浸式閱讀殿堂</h2>
+        <p>立即預覽專屬面板，透過細緻的控制打造最貼近心境的閱讀儀式。</p>
+      </div>
+      <div class="immersion__layout">
+        <div class="immersion__controls">
+          <fieldset class="control-group">
+            <legend class="control-label">場景主題</legend>
+            <div class="control-options" data-control="theme">
+              <button class="chip active" data-value="lumina">晨光 Lumina</button>
+              <button class="chip" data-value="noir">暮夜 Noir</button>
+              <button class="chip" data-value="aurum">琥珀 Aurum</button>
+            </div>
+          </fieldset>
+          <div class="control-group">
+            <label for="fontSize" class="control-label">字體比例</label>
+            <input type="range" id="fontSize" min="0.8" max="1.4" step="0.05" value="1" />
+          </div>
+          <div class="control-group">
+            <label for="letterSpacing" class="control-label">字距與呼吸</label>
+            <input type="range" id="letterSpacing" min="0" max="0.08" step="0.01" value="0.02" />
+          </div>
+          <fieldset class="control-group">
+            <legend class="control-label">沉浸音場</legend>
+            <div class="soundscape">
+              <div class="sound-card active" data-sound="ocean" data-label="星海潮汐">
+                <span>星海潮汐</span>
+                <small>清晨海岸·波長 432Hz</small>
+              </div>
+              <div class="sound-card" data-sound="forest" data-label="松林霧徑">
+                <span>松林霧徑</span>
+                <small>靜心 Alpha·滲透率 64%</small>
+              </div>
+              <div class="sound-card" data-sound="city" data-label="夜幕都會">
+                <span>夜幕都會</span>
+                <small>城市律動·低頻馭化</small>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+        <div class="immersion__preview">
+          <div class="preview-panel">
+            <div class="preview-status">
+              <span class="status-label">禮賓偵測中</span>
+              <span class="status-value">靈感波段 92%</span>
+            </div>
+            <div class="reader-preview" id="livePreview" data-theme="lumina">
+              <div class="preview-header">
+                <span>《銀色航海日誌》</span>
+                <span class="preview-page">第 12 章．星河宣言</span>
+              </div>
+              <p class="preview-text">銀白色的帆船穿越星際迷霧，船身外觀如同雕琢的水晶，於光譜中折射出無數色彩。此刻，閱讀不再是逃離，而是掌握宇宙的主控權。</p>
+              <p class="preview-text">指尖滑過玻璃般的頁面，AI 以微妙的亮度與色溫回應心率波動，宛如專屬侍從在一旁伺候。</p>
+              <div class="preview-footer">
+                <div class="progress">
+                  <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <span class="preview-progress">當前節奏：靈動 72%</span>
+              </div>
+            </div>
+          </div>
+          <div class="preview-actions">
+            <button class="btn btn--primary" id="saveRitual">儲存閱讀儀式</button>
+            <button class="btn btn--ghost" id="shareExperience">邀請共讀</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="curation" id="curation">
+      <div class="section-heading">
+        <span class="eyebrow">Curated Constellations</span>
+        <h2>全球限量藏書的私人星圖</h2>
+        <p>採用星座軌跡般的策展視覺，為你呈現每一部作品的靈魂頻率與適讀情境。</p>
+      </div>
+      <div class="collection">
+        <div class="collection-track" id="collectionTrack">
+          <article class="collection-card">
+            <div class="constellation"></div>
+            <h3>《薔薇與黑曜》</h3>
+            <p>適合夜晚的低語時刻，輕柔爵士與暗紫光影交織的感官盛宴。</p>
+            <span>珍藏序號 11 · 巴黎館</span>
+          </article>
+          <article class="collection-card">
+            <div class="constellation"></div>
+            <h3>《雲端流光》</h3>
+            <p>當代詩選，搭配晨曦金色調與琥珀噴霧，為靈感揭幕。</p>
+            <span>珍藏序號 24 · 東京館</span>
+          </article>
+          <article class="collection-card">
+            <div class="constellation"></div>
+            <h3>《時間裁縫師》</h3>
+            <p>沉浸於鐘錶滴答與暖調木質香氣的靜謐儀式。</p>
+            <span>珍藏序號 03 · 瑞士館</span>
+          </article>
+          <article class="collection-card">
+            <div class="constellation"></div>
+            <h3>《星海序章》</h3>
+            <p>太空歌劇專屬伴奏與低頻震動座椅，為冒險揭開序幕。</p>
+            <span>珍藏序號 19 · 紐約館</span>
+          </article>
+        </div>
+        <div class="collection-controls">
+          <button class="chip" id="scrollLeft" aria-label="向左捲動">◄</button>
+          <button class="chip" id="scrollRight" aria-label="向右捲動">►</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="concierge" id="concierge">
+      <div class="concierge__card">
+        <div class="concierge__content">
+          <span class="eyebrow">Concierge Intelligence</span>
+          <h2>私人閱讀管家，全天候待命</h2>
+          <p>無論你身在六星飯店頂樓、私人遊艇或空中艙房，ModernReader Royale 以全域雲端禮賓網絡為你安排每一場閱讀盛宴。</p>
+          <ul class="concierge__list">
+            <li>跨時區同步，為旅程變換最佳書單節奏</li>
+            <li>支援聲控、手勢與腦波感測的全方位控制</li>
+            <li>專屬語音導讀，邀請作者於你耳畔娓娓道來</li>
+          </ul>
+          <div class="hero__actions">
+            <button class="btn btn--primary">安排私人導讀</button>
+            <button class="btn btn--ghost">即時聯繫禮賓</button>
+          </div>
+        </div>
+        <div class="concierge__visual">
+          <div class="halo"></div>
+          <div class="orb orb--primary"></div>
+          <div class="orb orb--secondary"></div>
+          <div class="concierge__stats">
+            <div>
+              <span class="stat-value">24/7</span>
+              <span class="stat-label">全球禮賓</span>
+            </div>
+            <div>
+              <span class="stat-value">180+</span>
+              <span class="stat-label">合作館藏</span>
+            </div>
+            <div>
+              <span class="stat-value">99.8%</span>
+              <span class="stat-label">滿意度</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div>
+      <div class="logo">ModernReader<span>Royale</span></div>
+      <p>重新定義閱讀奢華，打造你的專屬靈感宮殿。</p>
+    </div>
+    <div class="footer__links">
+      <a href="#">隱私條款</a>
+      <a href="#">品牌誌</a>
+      <a href="#">投資人</a>
+      <a href="#">加入禮賓</a>
+    </div>
+    <p class="footer__note">© 2024 ModernReader Royale. All Rights Reserved.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
