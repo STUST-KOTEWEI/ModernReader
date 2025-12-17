@@ -13,7 +13,7 @@ ModernReader Royale 是一款專為頂級閱讀體驗打造的單頁網站樣板
 ## 使用方式
 
 1. 以任意靜態伺服器開啟專案根目錄（例如 `npx serve .`）。
-2. 造訪瀏覽器 `http://localhost:3000`（或對應埠口）體驗互動介面。
+2. 造訪瀏覽器 `https://stust-kotewei.github.io/ModernReader/`（或對應埠口）體驗互動介面。
 3. 在 Immersive Atelier 區塊調整主題、字距與音場，感受動態反饋。
 
 ## 開發與設計重點
