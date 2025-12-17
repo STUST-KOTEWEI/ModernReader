@@ -319,3 +319,172 @@ if (document.readyState === 'loading') {
 } else {
   initEnhancedFeatures();
 }
+
+// ===== ADVANCED INTERACTIVE FEATURES =====
+
+// 1. Cursor Glow Effect
+function initCursorGlow() {
+    const cursor = document.createElement('div');
+    cursor.className = 'cursor-glow';
+    document.body.appendChild(cursor);
+    
+    let mouseX = 0, mouseY = 0;
+    let cursorX = 0, cursorY = 0;
+    
+    document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+    });
+    
+    function animate() {
+        cursorX += (mouseX - cursorX) * 0.1;
+        cursorY += (mouseY - cursorY) * 0.1;
+        cursor.style.left = cursorX + 'px';
+        cursor.style.top = cursorY + 'px';
+        requestAnimationFrame(animate);
+    }
+    animate();
+}
+
+// 2. Scroll-Triggered Animations
+function initScrollAnimations() {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('fade-in-up');
+            }
+        });
+    }, { threshold: 0.1 });
+    
+    document.querySelectorAll('.feature-card, .book-card, section > *').forEach(el => {
+        el.classList.add('animate-on-scroll');
+        observer.observe(el);
+    });
+}
+
+// 3. Counter Animation
+function animateCounter(element, target, duration = 2000) {
+    const start = 0;
+    const increment = target / (duration / 16);
+    let current = start;
+    
+    const timer = setInterval(() => {
+        current += increment;
+        if (current >= target) {
+            current = target;
+            clearInterval(timer);
+        }
+        
+        if (element.dataset.format === 'percent') {
+            element.textContent = current.toFixed(1) + '%';
+        } else if (element.dataset.format === 'plus') {
+            element.textContent = Math.floor(current) + '+';
+        } else {
+            element.textContent = Math.floor(current);
+        }
+    }, 16);
+}
+
+function initCounterAnimations() {
+    const counters = [
+        { selector: '.stat-24', target: 24, format: '' },
+        { selector: '.stat-180', target: 180, format: 'plus' },
+        { selector: '.stat-99', target: 99.8, format: 'percent' }
+    ];
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting && !entry.target.dataset.animated) {
+                const counter = counters.find(c => entry.target.matches(c.selector));
+                if (counter) {
+                    entry.target.dataset.format = counter.format;
+                    animateCounter(entry.target, counter.target);
+                    entry.target.dataset.animated = 'true';
+                }
+            }
+        });
+    }, { threshold: 0.5 });
+    
+    counters.forEach(c => {
+        const element = document.querySelector(c.selector);
+        if (element) observer.observe(element);
+    });
+}
+
+// 4. 3D Card Flip Effect
+function init3DCardFlip() {
+    document.querySelectorAll('.book-card, .feature-card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'perspective(1000px) rotateY(5deg) translateZ(10px)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'perspective(1000px) rotateY(0deg) translateZ(0px)';
+        });
+        
+        card.addEventListener('mousemove', function(e) {
+            const rect = this.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            const rotateX = (y - centerY) / 10;
+            const rotateY = (centerX - x) / 10;
+            
+            this.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`;
+        });
+    });
+}
+
+// 5. Gradient Background Animation
+function initGradientAnimation() {
+    const hero = document.querySelector('.hero, header');
+    if (!hero) return;
+    
+    let angle = 0;
+    setInterval(() => {
+        angle = (angle + 1) % 360;
+        hero.style.background = `linear-gradient(${angle}deg, rgba(132, 94, 247, 0.3), rgba(5, 1, 15, 0.92))`;
+    }, 50);
+}
+
+// 6. Floating Elements
+function initFloatingElements() {
+    document.querySelectorAll('.floating-card, .aurora').forEach((el, index) => {
+        let direction = index % 2 === 0 ? 1 : -1;
+        let position = 0;
+        
+        setInterval(() => {
+            position += direction * 0.5;
+            if (Math.abs(position) > 10) direction *= -1;
+            el.style.transform = `translateY(${position}px)`;
+        }, 50);
+    });
+}
+
+// Update the initialization function
+function initAllEnhancements() {
+    initParallaxEffect();
+    initSmoothScroll();
+    enhanceCardInteractions();
+    addRippleEffect();
+    animateOnScroll();
+    
+    // New enhancements
+    initCursorGlow();
+    initScrollAnimations();
+    initCounterAnimations();
+    init3DCardFlip();
+    initGradientAnimation();
+    initFloatingElements();
+    
+    console.log('✨ All Enhanced Features Loaded');
+    console.log('🚀 Connected to Project H.O.L.O. API Layer');
+}
+
+// Run when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAllEnhancements);
+} else {
+    initAllEnhancements();
+}
