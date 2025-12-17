@@ -99,7 +99,10 @@ export class HapticFeedback {
         pageFlip: [30],
         highlight: [20, 50, 20],
         longPress: [500],
-        typing: [5]
+        typing: [5],
+        heartbeat: [50, 200, 50, 200], // Lub-dub
+        shudder: [20, 10, 20, 10, 20, 10, 20, 10], // Fast ripple
+        breeze: [10, 50, 10] // Gentle wave
     };
 
     static triggerFeedback(type: keyof typeof HapticFeedback.patterns) {
@@ -214,12 +217,14 @@ export class OptimisticScheduler {
 
                         // Map Sentiment to Sensory Effects
                         if (sentiment.label === 'POSITIVE') {
-                            sensoryData.haptic = 'success';
+                            sensoryData.haptic = 'heartbeat';
                             sensoryData.audio = 'happy';
-                            // In a full implementation, we would also trigger visual context here
                         } else if (sentiment.label === 'NEGATIVE') {
-                            sensoryData.haptic = 'warning';
+                            sensoryData.haptic = 'shudder';
                             sensoryData.audio = 'sad';
+                        } else {
+                            sensoryData.haptic = 'breeze';
+                            sensoryData.audio = 'neutral';
                         }
                     }
 
