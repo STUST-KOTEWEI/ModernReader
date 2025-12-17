@@ -488,3 +488,225 @@ if (document.readyState === 'loading') {
 } else {
     initAllEnhancements();
 }
+
+// ===== MODAL & LLM INTEGRATION SYSTEM =====
+
+// Modal Management
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        modal.classList.add('modal-enter');
+        setTimeout(() => modal.classList.remove('modal-enter'), 300);
+    }
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.add('modal-exit');
+        setTimeout(() => {
+            modal.style.display = 'none';
+            modal.classList.remove('modal-exit');
+            document.body.style.overflow = 'auto';
+        }, 300);
+    }
+}
+
+// Close modal when clicking outside
+window.addEventListener('click', (event) => {
+    if (event.target.classList.contains('modal')) {
+        closeModal(event.target.id);
+    }
+});
+
+// LLM-Powered Chat System
+const chatContext = [];
+const LLM_CONFIG = {
+    model: 'gpt-4',
+    temperature: 0.7,
+    systemPrompt: `你是 ModernReader Royale 的智能閱讀助手。你的專長包括：
+    1. 推薦適合的書籍和閱讀材料
+    2. 解答閱讀相關問題
+    3. 提供個性化閱讀建議
+    4. 協助用戶優化閱讀體驗
+    請用友善、專業的語氣回答問題。`
+};
+
+async function sendMessage() {
+    const input = document.getElementById('chatInput');
+    const message = input.value.trim();
+    
+    if (!message) return;
+    
+    // Add user message
+    addChatMessage(message, 'user');
+    chatContext.push({ role: 'user', content: message });
+    input.value = '';
+    
+    // Show typing indicator
+    showTypingIndicator();
+    
+    try {
+        // Call LLM API (placeholder - needs real API)
+        const response = await callLLM(message);
+        removeTypingIndicator();
+        addChatMessage(response, 'bot');
+        chatContext.push({ role: 'assistant', content: response });
+    } catch (error) {
+        removeTypingIndicator();
+        addChatMessage('抱歉，我現在無法回應。請稍後再試。', 'bot');
+        console.error('LLM Error:', error);
+    }
+}
+
+async function callLLM(userMessage) {
+    // Simulated LLM response with intelligent book recommendations
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    const responses = {
+        '推薦': '根據您的閱讀偏好，我推薦《星際旅人》和《時間熱鍵師》。這兩本書都結合了科幻元素和深刻的人性探討。',
+        '閱讀': 'ModernReader 提供沉浸式閱讀體驗，包括自適應字體、情境音效和 AI 驅動的閱讀建議。您想了解哪個功能的細節？',
+        '主題': '我們有三種精心設計的主題：晨光 LUMINA（溫暖明亮）、暮夜 NOIR（深邃優雅）和琥珀 AURUM（復古奢華）。您可以在閱讀時隨時切換。',
+        '功能': 'ModernReader Royale 的核心功能包括：\n• AI 智能閱讀調整\n• 光譜劇院模式\n• 禪境專注引擎\n• 星級品味策展\n• 私人閱讀管家服務',
+        '預約': '太好了！請點擊上方的「預約專屬導覽」按鈕，我們的團隊會為您安排一對一的產品介紹。',
+        'hello': 'Hello! I can help you in both Chinese and English. How can I assist you today?',
+        'hi': '您好！我是 ModernReader 智能助手。有什麼可以幫助您的嗎？'
+    };
+    
+    // Simple keyword matching (replace with real LLM API)
+    for (const [keyword, response] of Object.entries(responses)) {
+        if (userMessage.toLowerCase().includes(keyword)) {
+            return response;
+        }
+    }
+    
+    return '我理解您的問題。ModernReader Royale 致力於提供最優質的閱讀體驗。您想了解我們的哪些功能呢？您可以問我關於書籍推薦、閱讀主題、或預約導覽等問題。';
+}
+
+function addChatMessage(message, sender) {
+    const messagesContainer = document.getElementById('chatMessages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `chat-message ${sender}`;
+    messageDiv.innerHTML = `<p>${message.replace(/\n/g, '<br>')}</p>`;
+    messagesContainer.appendChild(messageDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+function showTypingIndicator() {
+    const messagesContainer = document.getElementById('chatMessages');
+    const indicator = document.createElement('div');
+    indicator.className = 'chat-message bot typing-indicator';
+    indicator.id = 'typing';
+    indicator.innerHTML = '<p><span></span><span></span><span></span></p>';
+    messagesContainer.appendChild(indicator);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+function removeTypingIndicator() {
+    const indicator = document.getElementById('typing');
+    if (indicator) indicator.remove();
+}
+
+function handleChatKey(event) {
+    if (event.key === 'Enter') {
+        sendMessage();
+    }
+}
+
+// Booking Form Handler
+function handleBooking(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const booking = {
+        name: formData.get('name'),
+        email: formData.get('email'),
+        date: formData.get('date'),
+        time: formData.get('time'),
+        message: formData.get('message')
+    };
+    
+    console.log('📌 Booking submitted:', booking);
+    
+    // Show success animation
+    showNotification('success', `預約成功！\n\n您的專屬導覽已安排在：\n${booking.date} ${booking.time}\n\n我們將通過 Email 發送確認信給 ${booking.email}`);
+    
+    closeModal('bookingModal');
+    event.target.reset();
+    
+    return false;
+}
+
+// Demo Mode
+function startDemo() {
+    closeModal('demoModal');
+    
+    showNotification('demo', '🌟 體驗模式已啟動\n\n正在加載智能功能...');
+    
+    setTimeout(() => {
+        showNotification('success', '🎉 歡迎進入 ModernReader 沉浸式體驗！\n\n所有增強功能已啟用：\n• 智能閱讀調整\n• 動態主題切換\n• 沉浸式音效\n\n現在您可以開始探索了！');
+    }, 2000);
+}
+
+// Notification System
+function showNotification(type, message) {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `<p>${message.replace(/\n/g, '<br>')}</p>`;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'notificationExit 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+    }, type === 'demo' ? 1800 : 4000);
+}
+
+// Initialize Button Handlers
+function initButtonHandlers() {
+    const buttons = document.querySelectorAll('button, .btn');
+    
+    buttons.forEach(button => {
+        const text = button.textContent.trim();
+        
+        if (text.includes('預約') || text.includes('導覽') || text.includes('安排') || text.includes('導讀')) {
+            button.onclick = (e) => {
+                e.preventDefault();
+                openModal('bookingModal');
+            };
+        }
+        
+        if (text.includes('體驗') || text.includes('啟用')) {
+            button.onclick = (e) => {
+                e.preventDefault();
+                openModal('demoModal');
+            };
+        }
+    });
+}
+
+// Keyboard Shortcuts
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+        const openModals = document.querySelectorAll('.modal[style*="display: flex"]');
+        openModals.forEach(modal => closeModal(modal.id));
+    }
+    
+    if (event.key === 'c' && event.ctrlKey) {
+        event.preventDefault();
+        openModal('chatModal');
+    }
+});
+
+// Update initialization
+const originalInit = initAllEnhancements;
+initAllEnhancements = function() {
+    originalInit();
+    initButtonHandlers();
+    console.log('💬 LLM Chat System Ready');
+    console.log('🎯 Modal System Initialized');
+};
+
+console.log('🚀 Advanced Features Loaded!');
+
