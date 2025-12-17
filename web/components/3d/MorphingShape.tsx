@@ -1,7 +1,7 @@
 "use client";
 
 import * as THREE from 'three';
-import { useMemo, useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useSpring, animated } from '@react-spring/three';
 
@@ -127,6 +127,7 @@ function MorphingShape({ persona, isSpeaking = false }: MorphingShapeProps) {
   });
 
   return (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     <animated.mesh ref={meshRef} geometry={BASE_GEOMETRY} scale={scale as any}>
       <animated.meshStandardMaterial color={color} />
     </animated.mesh>

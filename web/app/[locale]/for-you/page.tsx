@@ -1,6 +1,5 @@
 "use client";
 
-import dynamic from 'next/dynamic';
 import { useState, useEffect, useCallback } from 'react';
 import { Sparkles, TrendingUp, Target, Loader2, Library, MapPin } from 'lucide-react';
 import { Link } from "@/i18n/navigation";
@@ -49,6 +48,12 @@ type OpenLibraryWork = {
     subjects?: string[];
 };
 
+type Explanation = {
+    error?: string;
+    suggestions?: string[];
+    potential_score_improvement?: number;
+};
+
 
 
 
@@ -79,7 +84,7 @@ function ForYouPage() {
 
     const [selectedBookForAnalysis, setSelectedBookForAnalysis] = useState<BookSearchResult | null>(null);
 
-    const [explanation, setExplanation] = useState<any | null>(null); // State for the explanation
+    const [explanation, setExplanation] = useState<Explanation | null>(null); // State for the explanation
 
     const [isAnalyzing, setIsAnalyzing] = useState(false); // Loading state for analysis
 
@@ -187,65 +192,38 @@ function ForYouPage() {
 
 
 
-    useEffect(() => {
-
-        detectEmotion();
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-
-    }, []);
-
-
-
-    async function detectEmotion() {
-
+    const detectEmotion = useCallback(async () => {
         setEmotionLoading(true);
 
         try {
-
             const context = `
-
             Occupation: ${userProfile.occupation}
-
             Goals: ${userProfile.readingGoals.join(', ')}
-
             Interests: ${userProfile.interests.join(', ')}
-
             `;
 
             const res = await fetch('/api/emotion/detect', {
-
                 method: 'POST',
-
                 headers: { 'Content-Type': 'application/json' },
-
                 body: JSON.stringify({ text: context })
-
             });
 
             if (res.ok) {
-
                 const data = await res.json();
-
                 setEmotionConfidence(data.confidence || 0);
-
                 setEmotionReason(data.reason || '');
-
                 setUserProfile(prev => ({ ...prev, emotion: data.emotion || prev.emotion }));
-
             }
-
         } catch (error) {
-
             console.error('Emotion detection failed', error);
-
         } finally {
-
             setEmotionLoading(false);
-
         }
+    }, [userProfile.occupation, userProfile.readingGoals, userProfile.interests]);
 
-    }
+    useEffect(() => {
+        detectEmotion();
+    }, [detectEmotion]);
 
 
 
@@ -1001,11 +979,7 @@ function ForYouPage() {
 
                                                 <Sparkles size={12} className="text-[#e64458] mt-0.5 flex-shrink-0" />
 
-                                                <p className="text-xs text-[#0f172a]/70 leading-relaxed line-clamp-3">
-
-                                                    {rec.reasoning}
-
-                                                </p>
+                                                <p className="text-sm text-[#0f172a]/70">You&apos;re all caught up! Check back later for more.</p>
 
                                             </div>
 
@@ -1087,7 +1061,7 @@ function ForYouPage() {
 
                 <p className="text-center text-gray-600 max-w-2xl mx-auto mb-6">
 
-                    Ever wonder why a specific book wasn't recommended to you? Select a book to find out what would need to change for it to appear in your recommendations.
+                    Ever wonder why a specific book wasn&apos;t recommended to you? Select a book to find out what would need to change for it to appear in your recommendations.
 
                 </p>
 

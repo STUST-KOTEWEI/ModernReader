@@ -25,6 +25,7 @@ from app.api.v1 import (
     sessions,
     chat, # Import the new chat router
     gamification, # Import the new gamification router
+    academic, # Import the new academic router
 )
 
 
@@ -90,6 +91,7 @@ def register(app: FastAPI) -> None:
     )
     router.include_router(chat.router, prefix="/v1", tags=["chat"])
     router.include_router(gamification.router, prefix="/v1/gamification", tags=["gamification"]) # Add the new gamification router
+    router.include_router(academic.router, prefix="/v1/academic", tags=["academic"])
     app.include_router(router)
     # Crowdsourcing router has its own prefix, register directly
     app.include_router(crowdsourcing.router)

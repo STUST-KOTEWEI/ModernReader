@@ -1,7 +1,0 @@
-{
-  "name": "ModernReader: 4D AI Analysis",
-  "description": "An advanced reading companion that uses AI to provide multi-dimensional analysis of any text. Get summaries, key concept explanations, Q&A, and even visual and auditory representations of your content.",
-  "requestFramePermissions": [
-    "camera"
-  ]
-}

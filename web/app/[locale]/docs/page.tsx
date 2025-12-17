@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Upload, Loader2, FileText, Search, BookOpen, Sparkles } from "lucide-react";
+import { Upload, Loader2, FileText, Search, BookOpen, Sparkles, PenTool } from "lucide-react";
+import * as pdfjs from 'pdfjs-dist';
+
+// Path to worker script
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 type DocumentRecord = {
   id: string;
@@ -58,6 +62,11 @@ export default function DocsPage() {
   const [answer, setAnswer] = useState<string>("");
   const [snippets, setSnippets] = useState<DocQuerySnippet[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  // Paper Generation State
+  const [paperFormat, setPaperFormat] = useState<'arXiv' | 'IEEE' | 'ACM'>('arXiv');
+  const [generatedPaper, setGeneratedPaper] = useState('');
+  const [generatingPaper, setGeneratingPaper] = useState(false);
 
   const fetchDocuments = async () => {
     setLoadingDocs(true);
@@ -161,6 +170,65 @@ export default function DocsPage() {
       else next.add(id);
       return next;
     });
+  };
+
+
+  const handleGeneratePaper = async () => {
+    if (!file) {
+      setError("請先選擇檔案以生成論文");
+      return;
+    }
+    setGeneratingPaper(true);
+    setError(null);
+    setGeneratedPaper("");
+
+    try {
+      // 1. Extract text locally
+      const reader = new FileReader();
+      reader.readAsArrayBuffer(file);
+
+      const textContent = await new Promise<string>((resolve, reject) => {
+        reader.onload = async (e) => {
+          if (!e.target?.result) {
+            reject(new Error("File read failed"));
+            return;
+          }
+          try {
+            const pdf = await pdfjs.getDocument(e.target.result as ArrayBuffer).promise;
+            let text = '';
+            for (let i = 1; i <= pdf.numPages; i++) {
+              const page = await pdf.getPage(i);
+              const content = await page.getTextContent();
+              text += content.items.map(s => (s as { str: string }).str).join(' ');
+            }
+            resolve(text);
+          } catch (err) {
+            reject(err);
+          }
+        };
+        reader.onerror = reject;
+      });
+
+      // 2. Call Generation API
+      const res = await fetch('/api/paper/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: textContent, format: paperFormat })
+      });
+
+      const data = await res.json();
+      if (data.paper) {
+        setGeneratedPaper(data.paper);
+      } else {
+        throw new Error("Generation failed");
+      }
+
+    } catch (err) {
+      console.error(err);
+      setError("論文生成失敗，請確認檔案格式 (PDF) 或稍後再試。");
+    } finally {
+      setGeneratingPaper(false);
+    }
   };
 
   const formattedDocs = useMemo(
@@ -376,9 +444,8 @@ export default function DocsPage() {
                   key={doc.id}
                   type="button"
                   onClick={() => toggleSelection(doc.id)}
-                  className={`text-left border rounded-xl p-4 transition-all ${
-                    checked ? "border-[#1a1a1a] bg-[#f7f4ed]" : "border-[#e5e0d8] bg-white hover:border-[#1a1a1a]"
-                  }`}
+                  className={`text-left border rounded-xl p-4 transition-all ${checked ? "border-[#1a1a1a] bg-[#f7f4ed]" : "border-[#e5e0d8] bg-white hover:border-[#1a1a1a]"
+                    }`}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className="font-semibold text-[#1a1a1a] line-clamp-1">{doc.title}</div>
@@ -396,6 +463,54 @@ export default function DocsPage() {
           </div>
         )}
       </div>
-    </div>
+
+
+      {/* Paper Generation Section */}
+      <div className="bg-white rounded-2xl border border-[#e5e0d8] p-6 shadow-sm space-y-4">
+        <div className="flex items-center gap-2 text-[#1a1a1a]">
+          <PenTool size={20} />
+          <h2 className="font-semibold text-lg">學術論文生成 (Beta)</h2>
+        </div>
+        <p className="text-sm text-[#666]">
+          使用當前選擇的檔案 ({file ? file.name : "未選擇"}) 生成學術論文草稿。
+          <br />
+          支援格式：arXiv, IEEE, ACM。
+        </p>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <select
+            value={paperFormat}
+            onChange={(e) => setPaperFormat(e.target.value as 'arXiv' | 'IEEE' | 'ACM')}
+            className="px-3 py-2 rounded-lg border border-[#e5e0d8] focus:border-[#1a1a1a] focus:ring-0"
+            disabled={generatingPaper}
+          >
+            <option value="arXiv">arXiv</option>
+            <option value="IEEE">IEEE</option>
+            <option value="ACM">ACM</option>
+          </select>
+
+          <button
+            onClick={handleGeneratePaper}
+            disabled={generatingPaper || !file}
+            className="flex items-center gap-2 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {generatingPaper ? <Loader2 className="animate-spin" size={18} /> : <Sparkles size={18} />}
+            {generatingPaper ? "生成中..." : "生成論文草稿"}
+          </button>
+        </div>
+
+        {generatedPaper && (
+          <div className="mt-6 bg-[#f8fafc] border border-blue-100 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-4 border-b border-blue-200 pb-2">
+              <h3 className="font-serif font-bold text-xl text-slate-900">Generated {paperFormat} Draft</h3>
+              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">AI Generated</span>
+            </div>
+            <div className="prose prose-slate max-w-none whitespace-pre-wrap font-serif">
+              {generatedPaper}
+            </div>
+          </div>
+        )}
+      </div>
+    </div >
   );
 }

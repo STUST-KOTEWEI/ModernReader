@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { Book, Compass } from 'lucide-react';
+import { Compass } from 'lucide-react';
 import BookSearchInput from '@/components/learning/BookSearchInput';
 
 type BookSearchResult = {
@@ -15,7 +15,7 @@ import { useGamification } from '@/hooks/useGamification';
 function LearningPathPage() {
   const [startBook, setStartBook] = useState<BookSearchResult | null>(null);
   const [endBook, setEndBook] = useState<BookSearchResult | null>(null);
-  const [path, setPath] =useState<BookSearchResult[]>([]);
+  const [path, setPath] = useState<BookSearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { logActivity } = useGamification(); // Use the hook
 
@@ -99,7 +99,7 @@ function LearningPathPage() {
               )}
             </div>
           </div>
-          
+
           <div className="text-center pt-4">
             <button
               onClick={handleFindPath}
@@ -135,9 +135,9 @@ function LearningPathPage() {
 
         {/* Placeholder for no path found */}
         {!isLoading && path.length === 0 && startBook && endBook && (
-            <div className="text-center text-gray-500 mt-8">
-                <p>Could not find a learning path between these two books.</p>
-            </div>
+          <div className="text-center text-gray-500 mt-8">
+            <p>Could not find a learning path between these two books.</p>
+          </div>
         )}
       </div>
     </div>

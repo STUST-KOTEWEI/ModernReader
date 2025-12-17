@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react';
 import { Trophy } from 'lucide-react';
 
 type LeaderboardEntry = {
-    username: string;
-    points: number;
-    level: number;
+  username: string;
+  points: number;
+  level: number;
 };
 
 function LeaderboardPage() {
@@ -23,8 +23,12 @@ function LeaderboardPage() {
         }
         const data = await response.json();
         setLeaderboard(data);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('An unknown error occurred');
+        }
       } finally {
         setIsLoading(false);
       }
@@ -38,7 +42,7 @@ function LeaderboardPage() {
       <header className="mb-12 text-center">
         <Trophy className="mx-auto h-16 w-16 text-yellow-500" />
         <h1 className="font-serif font-bold text-4xl text-gray-900 mt-4">Leaderboard</h1>
-        <p className="text-gray-600 text-lg mt-2">See who's leading the reading community.</p>
+        <p className="text-gray-600 text-lg mt-2">See who&apos;s leading the reading community.</p>
       </header>
 
       <div>

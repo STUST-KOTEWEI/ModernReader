@@ -12,6 +12,8 @@ type LoginStep = "menu" | "credentials" | "biometric" | "success";
 export default function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
     const [step, setStep] = useState<LoginStep>("menu");
     const [loginType, setLoginType] = useState<"google" | "demo">("demo");
+    const [name, setName] = useState("");
+    const [isRegistering, setIsRegistering] = useState(false);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isScanning, setIsScanning] = useState(false);
@@ -22,6 +24,8 @@ export default function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClo
         return { num1, num2, answer: num1 + num2 };
     });
 
+    // ... captcha setup ...
+
     // Reset state when opening
     useEffect(() => {
         if (!isOpen) {
@@ -30,6 +34,8 @@ export default function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClo
                 setStep("menu");
                 setEmail("");
                 setPassword("");
+                setName("");
+                setIsRegistering(false);
                 setIsScanning(false);
                 setCaptchaAnswer("");
             }, 200);
@@ -42,23 +48,48 @@ export default function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClo
     const handleStartLogin = (type: "google" | "demo") => {
         setLoginType(type);
         if (type === "demo") {
-            setEmail("kaleb@modernreader.com");
-            setPassword("demo123");
-        } else {
+            // Only autofill if not trying to register manual account
+            // Actually, keep it simple: clear for everything except specific demo click
             setEmail("");
             setPassword("");
         }
         setStep("credentials");
     };
 
+    const handleRegisterSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            const res = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, password })
+            });
+
+            if (res.ok) {
+                alert("Account created! Logging you in...");
+                setIsRegistering(false);
+                // Proceed to Login simulation
+                handleCredentialsSubmit(e);
+            } else {
+                const data = await res.json();
+                alert(data.message || "Registration failed");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Registration error");
+        }
+    };
+
     const handleCredentialsSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Verify CAPTCHA
-        if (parseInt(captchaAnswer) !== captchaQuestion.answer) {
-            alert("CAPTCHA incorrect! Please try again.");
-            setCaptchaAnswer("");
-            return;
+        // Verify CAPTCHA only if we are logging in (we skipped it for register UI for simplicity)
+        if (!isRegistering) {
+            if (parseInt(captchaAnswer) !== captchaQuestion.answer) {
+                alert("CAPTCHA incorrect! Please try again.");
+                setCaptchaAnswer("");
+                return;
+            }
         }
 
         setStep("biometric");
@@ -142,7 +173,7 @@ export default function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClo
                             </motion.div>
                         )}
 
-                        {/* STEP 2: CREDENTIALS */}
+                        {/* STEP 2: CREDENTIALS (LOGIN / REGISTER) */}
                         {step === "credentials" && (
                             <motion.div
                                 key="credentials"
@@ -151,9 +182,27 @@ export default function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClo
                                 exit={{ opacity: 0, x: -20 }}
                             >
                                 <h2 className="font-serif font-bold text-2xl text-[#1a1a1a] mb-6 text-center">
-                                    {loginType === "google" ? "Sign in with Google" : "Demo Login"}
+                                    {isRegistering ? "Create Account" : (loginType === "google" ? "Sign in with Google" : "Login")}
                                 </h2>
-                                <form onSubmit={handleCredentialsSubmit} className="space-y-4">
+
+                                <form onSubmit={isRegistering ? handleRegisterSubmit : handleCredentialsSubmit} className="space-y-4">
+
+                                    {isRegistering && (
+                                        <div>
+                                            <label className="block text-xs font-bold text-[#666] uppercase tracking-wider mb-1">Full Name</label>
+                                            <div className="relative">
+                                                <input
+                                                    type="text"
+                                                    value={name}
+                                                    onChange={(e) => setName(e.target.value)}
+                                                    className="w-full px-4 py-2.5 rounded-xl border border-[#e5e0d8] focus:border-[#1a1a1a] focus:ring-1 focus:ring-[#1a1a1a] outline-none transition-all"
+                                                    placeholder="Your Name"
+                                                    required
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+
                                     <div>
                                         <label className="block text-xs font-bold text-[#666] uppercase tracking-wider mb-1">Email</label>
                                         <div className="relative">
@@ -183,30 +232,43 @@ export default function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClo
                                         </div>
                                     </div>
 
-                                    {/* CAPTCHA */}
-                                    <div className="bg-[#fdfbf7] p-4 rounded-xl border border-[#e5e0d8]">
-                                        <label className="block text-xs font-bold text-[#666] uppercase tracking-wider mb-2">
-                                            Security Check: {captchaQuestion.num1} + {captchaQuestion.num2} = ?
-                                        </label>
-                                        <input
-                                            type="number"
-                                            value={captchaAnswer}
-                                            onChange={(e) => setCaptchaAnswer(e.target.value)}
-                                            className="w-full px-4 py-2.5 rounded-xl border border-[#e5e0d8] focus:border-[#1a1a1a] focus:ring-1 focus:ring-[#1a1a1a] outline-none transition-all"
-                                            placeholder="Your answer"
-                                            required
-                                        />
-                                    </div>
+                                    {/* CAPTCHA - Only for Login to match backend logic, or skip for simplicity in UX if verified earlier */}
+                                    {!isRegistering && (
+                                        <div className="bg-[#fdfbf7] p-4 rounded-xl border border-[#e5e0d8]">
+                                            <label className="block text-xs font-bold text-[#666] uppercase tracking-wider mb-2">
+                                                Security Check: {captchaQuestion.num1} + {captchaQuestion.num2} = ?
+                                            </label>
+                                            <input
+                                                type="number"
+                                                value={captchaAnswer}
+                                                onChange={(e) => setCaptchaAnswer(e.target.value)}
+                                                className="w-full px-4 py-2.5 rounded-xl border border-[#e5e0d8] focus:border-[#1a1a1a] focus:ring-1 focus:ring-[#1a1a1a] outline-none transition-all"
+                                                placeholder="Your answer"
+                                                required
+                                            />
+                                        </div>
+                                    )}
 
                                     <button
                                         type="submit"
                                         className="w-full bg-[#1a1a1a] text-white font-medium py-3 px-4 rounded-xl flex items-center justify-center gap-2 hover:bg-black transition-all mt-6"
                                     >
-                                        <span>Continue</span>
+                                        <span>{isRegistering ? "Create Account" : "Continue"}</span>
                                         <ArrowRight size={16} />
                                     </button>
                                 </form>
-                                <button onClick={() => setStep("menu")} className="w-full text-center text-xs text-[#666] mt-4 hover:underline">Back</button>
+
+                                <div className="mt-4 text-center space-y-2">
+                                    <button
+                                        onClick={() => setIsRegistering(!isRegistering)}
+                                        className="text-sm font-medium text-[#1a1a1a] hover:underline"
+                                    >
+                                        {isRegistering ? "Already have an account? Sign In" : "Don't have an account? Sign Up"}
+                                    </button>
+                                    <button onClick={() => setStep("menu")} className="block w-full text-xs text-[#666] hover:underline">
+                                        Back to Menu
+                                    </button>
+                                </div>
                             </motion.div>
                         )}
 

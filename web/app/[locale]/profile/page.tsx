@@ -51,8 +51,7 @@ export default function ProfilePage() {
     const [selectedGoals, setSelectedGoals] = useState<string[]>(['Professional Development']);
     const [selectedLanguages, setSelectedLanguages] = useState<string[]>(['English', 'Chinese']);
     const [selectedCulturalPreferences, setSelectedCulturalPreferences] = useState<string[]>([]);
-    const [points, setPoints] = useState(0); // New state for points
-    const [level, setLevel] = useState(1); // New state for level
+
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -80,11 +79,12 @@ export default function ProfilePage() {
                 setSelectedGoals(data.readingGoals || ['Professional Development']);
                 setSelectedLanguages(data.preferredLanguages || ['English', 'Chinese']);
                 setSelectedCulturalPreferences(data.cultural_preferences || []); // Load new field
-                setPoints(data.points || 0);
-                setLevel(data.level || 1);
-            } catch (err: any) {
-                setError(err.message);
-                console.error('Error fetching profile:', err);
+                setSelectedCulturalPreferences(data.cultural_preferences || []); // Load new field
+            } catch (err: unknown) {
+                if (err instanceof Error) {
+                    setError(err.message);
+                    console.error('Error fetching profile:', err);
+                }
             } finally {
                 setIsLoading(false);
             }
@@ -136,10 +136,12 @@ export default function ProfilePage() {
 
             alert('✅ Profile saved successfully!');
             logActivity('PROFILE_UPDATED'); // Log activity
-        } catch (err: any) {
-            setError(err.message);
-            console.error('Error saving profile:', err);
-            alert(`❌ Error saving profile: ${err.message}`);
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setError(err.message);
+                console.error('Error saving profile:', err);
+                alert(`❌ Error saving profile: ${err.message}`);
+            }
         } finally {
             setIsSaving(false);
         }

@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Library, Mic, Settings, LogIn, LogOut, Sparkles, Menu, X, MessageSquare } from "lucide-react";
+import { Library, Mic, Settings, LogIn, LogOut, Sparkles, Menu, X, MessageSquare, GraduationCap } from "lucide-react";
 import { useState } from "react";
 import { usePathname } from "@/i18n/navigation";
 import { useSession, signOut } from "next-auth/react";
@@ -82,6 +82,13 @@ function ClientLayout({ children }: { children: React.ReactNode }) {
                         icon={<Library size={18} />}
                         label={t('library')}
                         active={isActive(pathname, '/')}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                    />
+                    <NavLink
+                        href="/academic"
+                        icon={<GraduationCap size={18} />}
+                        label="Academic"
+                        active={isActive(pathname, '/academic')}
                         onClick={() => setIsMobileMenuOpen(false)}
                     />
                     <NavLink

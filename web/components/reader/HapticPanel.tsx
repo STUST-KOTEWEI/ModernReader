@@ -5,6 +5,7 @@ interface HapticState {
     temp: number;
     vibe: number;
     scent?: string;
+    audio?: string;
 }
 
 interface HapticPanelProps {
@@ -50,6 +51,16 @@ export default function HapticPanel({ hapticState, onSimulate, feedbackText, sho
                                 <span className="text-sm font-bold">Scent Detected</span>
                             </div>
                             <p className="text-sm font-serif italic text-[#1a1a1a]">&quot;{hapticState.scent}&quot;</p>
+                        </div>
+                    )}
+
+                    {/* Audio Display */}
+                    {hapticState.audio && (
+                        <div className="mb-4 animate-in fade-in slide-in-from-bottom-2">
+                            <div className="flex items-center justify-center gap-2 text-blue-700 mb-1">
+                                <span className="text-sm font-bold">♫ Ambient Audio</span>
+                            </div>
+                            <p className="text-sm font-serif italic text-[#1a1a1a]">&quot;{hapticState.audio}&quot;</p>
                         </div>
                     )}
 

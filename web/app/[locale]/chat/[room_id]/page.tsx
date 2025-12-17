@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
-import { Send, Loader2 } from 'lucide-react';
+import { Send } from 'lucide-react';
 import { useParams } from 'next/navigation';
 
 interface Message {
@@ -29,7 +29,7 @@ function ChatRoomPage() {
         const isSecure = window.location.protocol === 'https:';
         const wsProtocol = isSecure ? 'wss://' : 'ws://';
         const wsUrl = `${wsProtocol}${window.location.host}/api/v1/ws/chat/${room_id}?token=${session.accessToken}`;
-        
+
         const ws = new WebSocket(wsUrl);
         websocketRef.current = ws;
 
@@ -72,7 +72,7 @@ function ChatRoomPage() {
     if (status === 'loading') {
         return <div className="p-8 text-center">Loading session...</div>;
     }
-    
+
     if (status !== 'authenticated') {
         return <div className="p-8 text-center">Please log in to join the chat.</div>;
     }

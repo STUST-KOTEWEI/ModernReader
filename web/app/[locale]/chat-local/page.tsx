@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useRef, useCallback } from 'react';
-import { UploadCloud, MessageSquare, FileText, Loader2, Search } from 'lucide-react';
+import { useState, useCallback } from 'react';
+import { UploadCloud, MessageSquare, FileText, Loader2, Search, Eye } from 'lucide-react';
+import { neuralReading } from '@/lib/services/neuralReading';
 import * as pdfjs from 'pdfjs-dist';
 import { pipeline, cos_sim } from '@xenova/transformers';
 
@@ -20,6 +21,11 @@ function LocalChatPage() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<DocumentChunk[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [fullText, setFullText] = useState('');
+  const [generatedPaper, setGeneratedPaper] = useState('');
+  const [isGeneratingPaper, setIsGeneratingPaper] = useState(false);
+  const [selectedFormat, setSelectedFormat] = useState<'arXiv' | 'IEEE' | 'ACM'>('arXiv');
+  const [isBionic, setIsBionic] = useState(false);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
@@ -27,6 +33,8 @@ function LocalChatPage() {
       setFile(selectedFile);
       setDocumentChunks([]);
       setResults([]);
+      setFullText('');
+      setGeneratedPaper('');
     } else {
       alert('Please select a PDF file.');
     }
@@ -47,8 +55,10 @@ function LocalChatPage() {
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
           const text = await page.getTextContent();
-          textContent += text.items.map(s => (s as any).str).join(' ');
+          textContent += text.items.map(s => (s as { str: string }).str).join(' ');
         }
+
+        setFullText(textContent);
 
         // 2. Chunk the text
         const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 512, chunkOverlap: 50 });
@@ -70,6 +80,29 @@ function LocalChatPage() {
       setIsProcessing(false);
     }
   }, [file]);
+
+  const handleGeneratePaper = async () => {
+    if (!fullText) return;
+    setIsGeneratingPaper(true);
+    try {
+      const response = await fetch('/api/paper/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: fullText, format: selectedFormat })
+      });
+      const data = await response.json();
+      if (data.paper) {
+        setGeneratedPaper(data.paper);
+      } else {
+        alert('Failed to generate paper.');
+      }
+    } catch (error) {
+      console.error('Paper generation error:', error);
+      alert('Error generating paper.');
+    } finally {
+      setIsGeneratingPaper(false);
+    }
+  };
 
   const handleSearch = useCallback(async () => {
     if (!query.trim() || documentChunks.length === 0) return;
@@ -130,18 +163,70 @@ function LocalChatPage() {
         </div>
 
         {file && (
-          <div className="text-center">
+          <div className="text-center space-y-4">
             <div className="inline-flex items-center gap-3 bg-green-100 text-green-800 p-4 rounded-lg">
               <FileText className="h-5 w-5" />
               <span className="font-semibold">{file.name}</span>
             </div>
-            <button
-              onClick={handleProcessDocument}
-              className="mt-4 bg-purple-600 text-white font-bold py-3 px-8 rounded-lg shadow-md hover:bg-purple-700 disabled:bg-gray-400"
-              disabled={isProcessing}
-            >
-              {isProcessing ? 'Processing...' : 'Process Document'}
-            </button>
+
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={handleProcessDocument}
+                className="bg-purple-600 text-white font-bold py-3 px-8 rounded-lg shadow-md hover:bg-purple-700 disabled:bg-gray-400 transition-colors"
+                disabled={isProcessing}
+              >
+                {isProcessing ? 'Processing...' : 'Process Document'}
+              </button>
+
+              {fullText && (
+                <div className="flex items-center gap-2">
+                  <select
+                    value={selectedFormat}
+                    onChange={(e) => setSelectedFormat(e.target.value as 'arXiv' | 'IEEE' | 'ACM')}
+                    className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
+                    disabled={isGeneratingPaper}
+                  >
+                    <option value="arXiv">arXiv</option>
+                    <option value="IEEE">IEEE</option>
+                    <option value="ACM">ACM</option>
+                  </select>
+                  <button
+                    onClick={handleGeneratePaper}
+                    className="bg-blue-600 text-white font-bold py-3 px-8 rounded-lg shadow-md hover:bg-blue-700 disabled:bg-gray-400 transition-colors flex items-center gap-2"
+                    disabled={isGeneratingPaper}
+                  >
+                    {isGeneratingPaper ? <Loader2 className="animate-spin" size={20} /> : <FileText size={20} />}
+                    {isGeneratingPaper ? 'Generating...' : `Generate ${selectedFormat}`}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Generated Paper Section */}
+        {generatedPaper && (
+          <div className="bg-white p-8 rounded-xl border border-gray-200 shadow-lg">
+            <div className="flex items-center justify-between mb-6 border-b pb-4">
+              <h2 className="text-2xl font-serif font-bold text-gray-900">Generated Academic Paper</h2>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setIsBionic(!isBionic)}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${isBionic ? 'bg-black text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                >
+                  <Eye size={16} />
+                  {isBionic ? 'Bionic On' : 'Bionic Off'}
+                </button>
+                <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">{selectedFormat} Draft</span>
+              </div>
+            </div>
+            <div
+              className="prose prose-lg max-w-none font-serif text-gray-800 whitespace-pre-wrap"
+              dangerouslySetInnerHTML={{
+                __html: isBionic ? neuralReading.applyBionicReading(generatedPaper) : generatedPaper
+              }}
+            />
           </div>
         )}
 

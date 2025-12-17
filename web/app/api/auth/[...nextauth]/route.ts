@@ -1,50 +1,39 @@
-import NextAuth from "next-auth";
+import NextAuth, { type Session } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { rateLimit } from "@/lib/rate-limit";
+import { localUserStore } from "@/lib/db/localUserStore";
 
-const handler = NextAuth({
+export const authOptions = {
     providers: [
         GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID || "mock-client-id",
             clientSecret: process.env.GOOGLE_CLIENT_SECRET || "mock-client-secret",
         }),
         CredentialsProvider({
-            name: "Demo Account",
+            name: "Local Account",
             credentials: {
-                username: { label: "Username", type: "text", placeholder: "demo" },
+                username: { label: "Email", type: "email", placeholder: "you@example.com" },
                 password: { label: "Password", type: "password" },
-                loginType: { label: "Login Type", type: "text" },
-                captcha: { label: "CAPTCHA", type: "text" }
             },
             async authorize(credentials) {
-                // Rate limiting check (5 attempts per minute per username)
+                // Rate limiting check
                 const identifier = credentials?.username || 'anonymous';
-                const rateLimitResult = rateLimit(identifier, 5, 60000);
-                if (!rateLimitResult.success) {
-                    // Return null to indicate failed auth without throwing a 500
-                    return null;
-                }
+                const rateLimitResult = rateLimit(identifier, 10, 60000); // Relaxed for local
+                if (!rateLimitResult.success) return null;
 
-                // CAPTCHA verification (simple math check)
-                const expectedAnswer = credentials?.captcha;
-                if (!expectedAnswer || expectedAnswer !== "correct") {
-                    return null;
-                }
+                if (!credentials?.username || !credentials?.password) return null;
 
-                // Mock Google Login
-                if (credentials?.loginType === "google") {
+                // Validate against Local Store
+                const user = localUserStore.validateCredentials(credentials.username, credentials.password);
+
+                if (user) {
                     return {
-                        id: "2",
-                        name: "Kaleb Chen",
-                        email: "kaleb.google@gmail.com",
-                        image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"
+                        id: user.id,
+                        name: user.name,
+                        email: user.email,
+                        image: user.image
                     };
-                }
-
-                // Mock authentication for demo
-                if (credentials?.username === "demo" && credentials?.password === "demo") {
-                    return { id: "1", name: "Kaleb (Demo)", email: "kaleb@modernreader.com", image: "https://api.dicebear.com/7.x/micah/svg?seed=Kaleb" };
                 }
 
                 return null;
@@ -55,10 +44,12 @@ const handler = NextAuth({
         signIn: '/auth/signin', // We'll use a custom modal instead, but this is a fallback
     },
     callbacks: {
-        async session({ session }) {
+        async session({ session }: { session: Session }) {
             return session;
         },
     },
-});
+};
+
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
