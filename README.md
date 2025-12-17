@@ -23,3 +23,60 @@ ModernReader Royale 是一款專為頂級閱讀體驗打造的單頁網站樣板
 - 使用 Intersection Observer 與自訂動畫增強進場動態。
 
 歡迎依品牌需求進一步擴充內容或整合後端服務。
+
+
+---
+
+## 🤖 技術架構
+
+**ModernReader** 是一個完整的AI驅動閱讀體驗平台，結合前端UI與後端AI框架：
+
+### 前端層 (Current Repository)
+- **ModernReader Royale UI** - 豪華閱讀介面
+- 玻璃擬態設計 (Glassmorphism)
+- Aurora 漸變背景效果
+- 響應式互動控制
+- GitHub Pages: [https://stust-kotewei.github.io/ModernReader/](https://stust-kotewei.github.io/ModernReader/)
+
+### 後端層 (AI Engine)
+- **Project H.O.L.O.** (Holistic Omni-sensory Literary Orchestra)
+- 深度語意分析 (NLP)
+- 多模態感知生成 (Multi-modal AI)
+- 情感與語調識別
+- Text-to-Speech, Text-to-Sound, Text-to-Scent
+- Repository: [AI-Reader](https://github.com/STUST-KOTEWEI/AI-Reader)
+
+### 整合特性
+
+✨ **完整技術棧**
+- Frontend: HTML5, CSS3, JavaScript (ES6+)
+- Backend: Python, NLP Models, Generative AI
+- Deployment: GitHub Pages + API Services
+
+🎯 **核心創新**
+1. **視覺體驗** - ModernReader Royale豪華UI
+2. **AI理解** - Project H.O.L.O.深度語意分析
+3. **多感官輸出** - 聽覺、觸覺、嗅覺整合
+4. **個性化** - AI驅動的閱讀推薦與適應
+
+---
+
+## 🔗 相關專案
+
+- [AI-Reader (Project H.O.L.O.)](https://github.com/STUST-KOTEWEI/AI-Reader) - AI後端引擎
+- [Profile](https://github.com/STUST-KOTEWEI/profile) - 研究者個人網站
+
+---
+
+## 📝 授權
+
+MIT License © 2025 Te-Wei Ko (柯德瑋)
+
+---
+
+## 👨‍💻 作者
+
+**柯德瑋 (Te-Wei Ko)**
+- 情感運算與多模態互動研究者
+- 南臺科技大學 資訊工程系
+- 專注於AI、E-paper技術與多感官使用者體驗
