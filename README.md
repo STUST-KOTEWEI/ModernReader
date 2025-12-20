@@ -1,5 +1,7 @@
 # ModernReader Royale
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/20deccb04b914a50a0ce3b529031e793)](https://app.codacy.com/gh/STUST-KOTEWEI/ModernReader?utm_source=github.com&utm_medium=referral&utm_content=STUST-KOTEWEI/ModernReader&utm_campaign=Badge_Grade)
+
 ModernReader Royale 是一款專為頂級閱讀體驗打造的單頁網站樣板，結合光譜視覺、動態交互與禮賓級功能展示，呈現世界級的奢華閱讀品牌形象。
 
 ## 功能亮點
