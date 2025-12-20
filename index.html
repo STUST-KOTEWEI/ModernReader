@@ -18,8 +18,17 @@
       <a href="#immersion">閱讀殿堂</a>
       <a href="#curation">私藏</a>
       <a href="#concierge">管家服務</a>
+      <a href="#" id="searchToggle" aria-label="搜尋書籍">🔍</a>
     </nav>
-    <button class="cta">預約專屬導覽</button>
+    <div class="header-actions">
+      <button class="theme-toggle" id="themeToggle" aria-label="切換深色/淺色模式" title="切換主題">
+        <span class="theme-icon">🌙</span>
+      </button>
+      <button class="shortcuts-btn" id="shortcutsBtn" aria-label="鍵盤快捷鍵" title="快捷鍵 (按 ?)">
+        <span>⌨️</span>
+      </button>
+      <button class="cta">預約專屬導覽</button>
+    </div>
   </header>
 
   <main>
@@ -251,6 +260,7 @@
       <p>重新定義閱讀奢華，打造你的專屬靈感宮殿。</p>
     </div>
     <div class="footer__links">
+      <a href="#" onclick="openModal('statsModal'); return false;">閱讀統計</a>
       <a href="#">隱私條款</a>
       <a href="#">品牌誌</a>
       <a href="#">投資人</a>
@@ -384,6 +394,132 @@
     <!-- Floating Chat Button -->
     <div class="floating-chat-btn" onclick="openModal('chatModal')" title="即時聯繫">
         <span>💬</span>
+    </div>
+
+    <!-- Search Modal -->
+    <div id="searchModal" class="modal">
+        <div class="modal-content search-content">
+            <span class="modal-close" onclick="closeModal('searchModal')">&times;</span>
+            <h2>🔍 搜尋書籍</h2>
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="輸入書名、作者或關鍵字..." autocomplete="off">
+                <button onclick="performSearch()" class="btn btn--primary">搜尋</button>
+            </div>
+            <div class="search-filters">
+                <button class="chip active" data-filter="all">全部</button>
+                <button class="chip" data-filter="fiction">小說</button>
+                <button class="chip" data-filter="nonfiction">非文學</button>
+                <button class="chip" data-filter="poetry">詩集</button>
+                <button class="chip" data-filter="scifi">科幻</button>
+            </div>
+            <div class="search-results" id="searchResults">
+                <p class="search-placeholder">輸入關鍵字開始搜尋精選書籍...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Keyboard Shortcuts Modal -->
+    <div id="shortcutsModal" class="modal">
+        <div class="modal-content shortcuts-content">
+            <span class="modal-close" onclick="closeModal('shortcutsModal')">&times;</span>
+            <h2>⌨️ 鍵盤快捷鍵</h2>
+            <div class="shortcuts-grid">
+                <div class="shortcut-item">
+                    <kbd>?</kbd>
+                    <span>顯示快捷鍵說明</span>
+                </div>
+                <div class="shortcut-item">
+                    <kbd>Esc</kbd>
+                    <span>關閉對話框</span>
+                </div>
+                <div class="shortcut-item">
+                    <kbd>Ctrl</kbd> + <kbd>C</kbd>
+                    <span>開啟聊天視窗</span>
+                </div>
+                <div class="shortcut-item">
+                    <kbd>/</kbd>
+                    <span>開啟搜尋</span>
+                </div>
+                <div class="shortcut-item">
+                    <kbd>T</kbd>
+                    <span>切換主題模式</span>
+                </div>
+                <div class="shortcut-item">
+                    <kbd>←</kbd> <kbd>→</kbd>
+                    <span>瀏覽藏書</span>
+                </div>
+                <div class="shortcut-item">
+                    <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd>
+                    <span>切換閱讀主題</span>
+                </div>
+                <div class="shortcut-item">
+                    <kbd>S</kbd>
+                    <span>儲存閱讀儀式</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reading Stats Modal -->
+    <div id="statsModal" class="modal">
+        <div class="modal-content stats-content">
+            <span class="modal-close" onclick="closeModal('statsModal')">&times;</span>
+            <h2>📊 閱讀統計</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📚</div>
+                    <div class="stat-number" id="booksRead">0</div>
+                    <div class="stat-text">已閱讀書籍</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⏱️</div>
+                    <div class="stat-number" id="readingTime">0</div>
+                    <div class="stat-text">閱讀時數</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🔥</div>
+                    <div class="stat-number" id="streak">0</div>
+                    <div class="stat-text">連續閱讀天數</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-number" id="favorites">0</div>
+                    <div class="stat-text">收藏書籍</div>
+                </div>
+            </div>
+            <div class="reading-progress-section">
+                <h3>📖 當前閱讀進度</h3>
+                <div class="current-book">
+                    <div class="book-info">
+                        <span class="book-title">《銀色航海日誌》</span>
+                        <span class="book-chapter">第 12 章 · 星河宣言</span>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress">
+                            <div class="progress-bar" id="currentProgress" style="width: 72%"></div>
+                        </div>
+                        <span class="progress-text">72%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="share-section">
+                <h3>📤 分享你的閱讀成就</h3>
+                <div class="share-buttons">
+                    <button class="share-btn twitter" onclick="shareToSocial('twitter')" aria-label="分享到 Twitter">
+                        <span aria-hidden="true">𝕏</span> Twitter
+                    </button>
+                    <button class="share-btn facebook" onclick="shareToSocial('facebook')" aria-label="分享到 Facebook">
+                        <span aria-hidden="true">f</span> Facebook
+                    </button>
+                    <button class="share-btn line" onclick="shareToSocial('line')" aria-label="分享到 LINE">
+                        <span aria-hidden="true">💬</span> LINE
+                    </button>
+                    <button class="share-btn copy" onclick="copyShareLink()" aria-label="複製分享連結">
+                        <span aria-hidden="true">📋</span> 複製連結
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
   <script src="app.js"></script>
