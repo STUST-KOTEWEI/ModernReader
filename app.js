@@ -1,5 +1,8 @@
 // 在 app.js 最上方加入 Google Sheet API URL
-const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbxn7bJVcz8pukPxtRMuHhYscGwrXdnQ06G3unFT1qMf0R6vbGscGv4sa2iWZoRAEZ9Q.../exec';const themeButtons = document.querySelectorAll('[data-control="theme"] .chip');
+const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbxn7bJVcz8pukPxtRMuHhYscGwrXdnQ06G3unFT1qMf0R6vbGscGv4sa2iWZoRAEZ9Q.../exec';
+const SHARE_URL = 'https://stust-kotewei.github.io/ModernReader/';
+
+const themeButtons = document.querySelectorAll('[data-control="theme"] .chip');
 const livePreview = document.getElementById('livePreview');
 const fontSizeControl = document.getElementById('fontSize');
 const letterSpacingControl = document.getElementById('letterSpacing');
@@ -703,10 +706,353 @@ document.addEventListener('keydown', (event) => {
 const originalInit = initAllEnhancements;
 initAllEnhancements = function() {
     originalInit();
-    667();
+    initButtonHandlers();
     console.log('💬 LLM Chat System Ready');
     console.log('🎯 Modal System Initialized');
 };
 
 console.log('🚀 Advanced Features Loaded!');
+
+// ===== NEW ENHANCED FEATURES =====
+
+// Sample book database for search
+const bookDatabase = [
+    { id: 1, title: '星際旅人', author: '劉慈欣', category: 'scifi', icon: '🚀' },
+    { id: 2, title: '三體', author: '劉慈欣', category: 'scifi', icon: '🌌' },
+    { id: 3, title: '流浪地球', author: '劉慈欣', category: 'scifi', icon: '🌍' },
+    { id: 4, title: '薔薇與黑曜', author: '艾蜜莉·伯朗特', category: 'fiction', icon: '🌹' },
+    { id: 5, title: '雲端流光', author: '村上春樹', category: 'poetry', icon: '☁️' },
+    { id: 6, title: '時間裁縫師', author: '卡爾維諾', category: 'fiction', icon: '⏰' },
+    { id: 7, title: '星海序章', author: '艾西莫夫', category: 'scifi', icon: '✨' },
+    { id: 8, title: '銀色航海日誌', author: '海明威', category: 'fiction', icon: '⛵' },
+    { id: 9, title: '深淵之歌', author: '馬奎斯', category: 'fiction', icon: '🎭' },
+    { id: 10, title: '未來簡史', author: '哈拉瑞', category: 'nonfiction', icon: '📚' },
+    { id: 11, title: '人類大歷史', author: '哈拉瑞', category: 'nonfiction', icon: '🏛️' },
+    { id: 12, title: '詩經新譯', author: '余光中', category: 'poetry', icon: '📜' },
+    { id: 13, title: '夜行詩集', author: '席慕蓉', category: 'poetry', icon: '🌙' },
+    { id: 14, title: '賈伯斯傳', author: '艾薩克森', category: 'nonfiction', icon: '🍎' },
+    { id: 15, title: '銀河帝國', author: '艾西莫夫', category: 'scifi', icon: '👑' }
+];
+
+// Reading Stats Storage
+const ReadingStats = {
+    init() {
+        const saved = localStorage.getItem('modernReaderStats');
+        if (saved) {
+            return JSON.parse(saved);
+        }
+        // Default stats for demo
+        return {
+            booksRead: 12,
+            readingTime: 47,
+            streak: 5,
+            favorites: 8,
+            currentProgress: 72
+        };
+    },
+    
+    save(stats) {
+        localStorage.setItem('modernReaderStats', JSON.stringify(stats));
+    },
+    
+    updateUI() {
+        const stats = this.init();
+        const booksReadEl = document.getElementById('booksRead');
+        const readingTimeEl = document.getElementById('readingTime');
+        const streakEl = document.getElementById('streak');
+        const favoritesEl = document.getElementById('favorites');
+        const progressEl = document.getElementById('currentProgress');
+        
+        if (booksReadEl) booksReadEl.textContent = stats.booksRead;
+        if (readingTimeEl) readingTimeEl.textContent = stats.readingTime + 'h';
+        if (streakEl) streakEl.textContent = stats.streak;
+        if (favoritesEl) favoritesEl.textContent = stats.favorites;
+        if (progressEl) progressEl.style.width = stats.currentProgress + '%';
+    }
+};
+
+// Theme Toggle
+function initThemeToggle() {
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.querySelector('.theme-icon');
+    
+    // Check saved theme preference
+    const savedTheme = localStorage.getItem('modernReaderTheme');
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-mode');
+        if (themeIcon) themeIcon.textContent = '☀️';
+    }
+    
+    if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('light-mode');
+            const isLight = document.body.classList.contains('light-mode');
+            
+            if (themeIcon) {
+                themeIcon.textContent = isLight ? '☀️' : '🌙';
+            }
+            
+            localStorage.setItem('modernReaderTheme', isLight ? 'light' : 'dark');
+            
+            showNotification('success', isLight ? '☀️ 已切換至淺色模式' : '🌙 已切換至深色模式');
+        });
+    }
+}
+
+// Search Functionality
+let currentFilter = 'all';
+
+function initSearch() {
+    const searchToggle = document.getElementById('searchToggle');
+    const searchInput = document.getElementById('searchInput');
+    const filterChips = document.querySelectorAll('.search-filters .chip');
+    
+    if (searchToggle) {
+        searchToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            openModal('searchModal');
+            setTimeout(() => {
+                if (searchInput) searchInput.focus();
+            }, 300);
+        });
+    }
+    
+    if (searchInput) {
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+        
+        // Real-time search
+        searchInput.addEventListener('input', () => {
+            performSearch();
+        });
+    }
+    
+    filterChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+            filterChips.forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            currentFilter = chip.dataset.filter;
+            performSearch();
+        });
+    });
+}
+
+function performSearch() {
+    const searchInput = document.getElementById('searchInput');
+    const resultsContainer = document.getElementById('searchResults');
+    const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
+    
+    if (!resultsContainer) return;
+    
+    if (query.length === 0) {
+        resultsContainer.innerHTML = '<p class="search-placeholder">輸入關鍵字開始搜尋精選書籍...</p>';
+        return;
+    }
+    
+    let results = bookDatabase.filter(book => {
+        const matchesQuery = book.title.toLowerCase().includes(query) || 
+                           book.author.toLowerCase().includes(query);
+        const matchesFilter = currentFilter === 'all' || book.category === currentFilter;
+        return matchesQuery && matchesFilter;
+    });
+    
+    if (results.length === 0) {
+        resultsContainer.innerHTML = `
+            <p class="search-placeholder">
+                找不到符合「${query}」的書籍<br>
+                <small>試試其他關鍵字或調整篩選條件</small>
+            </p>
+        `;
+        return;
+    }
+    
+    resultsContainer.innerHTML = results.map(book => `
+        <div class="search-result-item" onclick="selectBook(${book.id})">
+            <div class="search-result-icon">${book.icon}</div>
+            <div class="search-result-info">
+                <div class="search-result-title">《${book.title}》</div>
+                <div class="search-result-author">${book.author}</div>
+            </div>
+            <div class="search-result-category">${getCategoryLabel(book.category)}</div>
+        </div>
+    `).join('');
+}
+
+function getCategoryLabel(category) {
+    const labels = {
+        'fiction': '小說',
+        'nonfiction': '非文學',
+        'poetry': '詩集',
+        'scifi': '科幻'
+    };
+    return labels[category] || category;
+}
+
+function selectBook(bookId) {
+    const book = bookDatabase.find(b => b.id === bookId);
+    if (book) {
+        closeModal('searchModal');
+        showNotification('success', `📖 已選擇《${book.title}》\n\n正在為您準備沉浸式閱讀體驗...`);
+    }
+}
+
+// Shortcuts Modal
+function initShortcuts() {
+    const shortcutsBtn = document.getElementById('shortcutsBtn');
+    
+    if (shortcutsBtn) {
+        shortcutsBtn.addEventListener('click', () => {
+            openModal('shortcutsModal');
+        });
+    }
+}
+
+// Enhanced Keyboard Shortcuts
+function initEnhancedKeyboardShortcuts() {
+    document.addEventListener('keydown', (event) => {
+        // Don't trigger shortcuts when typing in input fields
+        if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+            return;
+        }
+        
+        switch(event.key) {
+            case '?':
+                event.preventDefault();
+                openModal('shortcutsModal');
+                break;
+            case '/':
+                event.preventDefault();
+                openModal('searchModal');
+                setTimeout(() => {
+                    const searchInput = document.getElementById('searchInput');
+                    if (searchInput) searchInput.focus();
+                }, 300);
+                break;
+            case 't':
+            case 'T':
+                if (!event.ctrlKey && !event.metaKey) {
+                    event.preventDefault();
+                    document.getElementById('themeToggle')?.click();
+                }
+                break;
+            case 'ArrowLeft':
+                scrollCollection(-260);
+                break;
+            case 'ArrowRight':
+                scrollCollection(260);
+                break;
+            case '1':
+                if (!event.ctrlKey && !event.metaKey) {
+                    const lumina = document.querySelector('[data-value="lumina"]');
+                    if (lumina) lumina.click();
+                }
+                break;
+            case '2':
+                if (!event.ctrlKey && !event.metaKey) {
+                    const noir = document.querySelector('[data-value="noir"]');
+                    if (noir) noir.click();
+                }
+                break;
+            case '3':
+                if (!event.ctrlKey && !event.metaKey) {
+                    const aurum = document.querySelector('[data-value="aurum"]');
+                    if (aurum) aurum.click();
+                }
+                break;
+            case 's':
+            case 'S':
+                if (!event.ctrlKey && !event.metaKey) {
+                    event.preventDefault();
+                    const saveBtn = document.getElementById('saveRitual');
+                    if (saveBtn) saveBtn.click();
+                }
+                break;
+        }
+    });
+}
+
+// Social Sharing
+function shareToSocial(platform) {
+    const stats = ReadingStats.init();
+    const shareText = `📚 我在 ModernReader Royale 已閱讀 ${stats.booksRead} 本書，累計 ${stats.readingTime} 小時！連續閱讀 ${stats.streak} 天！一起來享受沉浸式閱讀體驗吧！`;
+    
+    let url;
+    switch(platform) {
+        case 'twitter':
+            url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(SHARE_URL)}`;
+            break;
+        case 'facebook':
+            url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(SHARE_URL)}&quote=${encodeURIComponent(shareText)}`;
+            break;
+        case 'line':
+            url = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(SHARE_URL)}&text=${encodeURIComponent(shareText)}`;
+            break;
+    }
+    
+    if (url) {
+        window.open(url, '_blank', 'width=600,height=400');
+    }
+}
+
+function copyShareLink() {
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(SHARE_URL).then(() => {
+            showNotification('success', '📋 連結已複製到剪貼簿！');
+        }).catch(() => {
+            fallbackCopyTextToClipboard(SHARE_URL);
+        });
+    } else {
+        fallbackCopyTextToClipboard(SHARE_URL);
+    }
+}
+
+function fallbackCopyTextToClipboard(text) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+        document.execCommand('copy');
+        showNotification('success', '📋 連結已複製到剪貼簿！');
+    } catch (err) {
+        showNotification('error', '複製失敗，請手動複製連結');
+    }
+    
+    document.body.removeChild(textArea);
+}
+
+// Stats Modal Initialization
+function initStatsModal() {
+    ReadingStats.updateUI();
+}
+
+// Initialize all new features
+function initNewFeatures() {
+    initThemeToggle();
+    initSearch();
+    initShortcuts();
+    initEnhancedKeyboardShortcuts();
+    initStatsModal();
+    
+    console.log('✨ New Enhanced Features Loaded');
+    console.log('🎨 Theme Toggle Ready');
+    console.log('🔍 Search System Ready');
+    console.log('⌨️ Keyboard Shortcuts Enhanced');
+    console.log('📊 Reading Stats Ready');
+    console.log('📤 Social Sharing Ready');
+}
+
+// Run new features when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initNewFeatures);
+} else {
+    initNewFeatures();
+}
 
