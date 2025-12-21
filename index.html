@@ -19,7 +19,12 @@
       <a href="#curation">私藏</a>
       <a href="#concierge">管家服務</a>
     </nav>
-    <button class="cta">預約專屬導覽</button>
+    <div class="header-actions">
+      <button class="theme-toggle" id="themeToggle" title="切換深色/淺色模式" aria-label="切換主題">
+        <span class="theme-icon">🌙</span>
+      </button>
+      <button class="cta">預約專屬導覽</button>
+    </div>
   </header>
 
   <main>
@@ -349,6 +354,13 @@
         <span>💬</span>
     </div>
 
+  <!-- Utility Modules -->
+  <script src="config/settings.js"></script>
+  <script src="utils/storage.js"></script>
+  <script src="utils/analytics.js"></script>
+  <script src="components/toast.js"></script>
+  
+  <!-- Main Application -->
   <script src="app.js"></script>
 </body>
 </html>
