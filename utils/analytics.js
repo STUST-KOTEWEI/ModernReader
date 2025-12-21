@@ -126,3 +126,8 @@ if (typeof window !== 'undefined') {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { Analytics };
 }
+
+// 瀏覽器環境下掛載到 window
+if (typeof window !== 'undefined') {
+  window.Analytics = Analytics;
+}

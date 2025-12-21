@@ -180,3 +180,8 @@ const Toast = {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { Toast };
 }
+
+// 瀏覽器環境下掛載到 window
+if (typeof window !== 'undefined') {
+  window.Toast = Toast;
+}

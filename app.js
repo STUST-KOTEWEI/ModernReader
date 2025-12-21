@@ -814,7 +814,7 @@ function initPreferencePersistence() {
         });
     }
     
-    // 監聯主題變更
+    // 監聽主題變更
     themeButtons.forEach(chip => {
         chip.addEventListener('click', () => {
             UserPreferences.save({ theme: chip.dataset.value });
@@ -881,7 +881,9 @@ function getBookmarks(bookTitle) {
 function initAutoSaveProgress() {
     if (typeof ReadingProgress === 'undefined') return;
     
-    const currentBook = '銀色航海日誌'; // 可以從頁面狀態獲取
+    // 從頁面元素或 URL 參數獲取當前書籍名稱
+    const bookTitleElement = document.querySelector('#livePreview .preview-header span:first-child');
+    const currentBook = bookTitleElement ? bookTitleElement.textContent.replace(/[《》]/g, '') : 'default';
     let lastSaveTime = Date.now();
     
     // 監聽滾動事件

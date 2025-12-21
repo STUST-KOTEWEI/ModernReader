@@ -129,3 +129,9 @@ function getSetting(path, defaultValue = null) {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { Settings, getSetting };
 }
+
+// 瀏覽器環境下掛載到 window
+if (typeof window !== 'undefined') {
+  window.Settings = Settings;
+  window.getSetting = getSetting;
+}

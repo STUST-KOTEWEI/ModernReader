@@ -185,3 +185,12 @@ const UserPreferences = {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { Storage, StorageKeys, ReadingProgress, Bookmarks, UserPreferences };
 }
+
+// 瀏覽器環境下掛載到 window
+if (typeof window !== 'undefined') {
+  window.Storage = Storage;
+  window.StorageKeys = StorageKeys;
+  window.ReadingProgress = ReadingProgress;
+  window.Bookmarks = Bookmarks;
+  window.UserPreferences = UserPreferences;
+}
