@@ -1,0 +1,170 @@
+{
+  "soundscapes": {
+    "ocean": {
+      "id": "ocean",
+      "name": "星海潮汐",
+      "nameEn": "Star Ocean Tide",
+      "description": "清晨海岸·波長 432Hz",
+      "category": "nature",
+      "mood": ["peaceful", "meditative"],
+      "frequency": 432,
+      "files": {
+        "main": "assets/sounds/ocean-waves.mp3",
+        "ambient": "assets/sounds/ocean-ambient.mp3"
+      },
+      "settings": {
+        "volume": 0.6,
+        "fadeIn": 2000,
+        "fadeOut": 3000
+      },
+      "icon": "🌊"
+    },
+    "forest": {
+      "id": "forest",
+      "name": "松林霧徑",
+      "nameEn": "Pine Forest Path",
+      "description": "靜心 Alpha·滲透率 64%",
+      "category": "nature",
+      "mood": ["calm", "focused"],
+      "frequency": 528,
+      "files": {
+        "main": "assets/sounds/forest-birds.mp3",
+        "ambient": "assets/sounds/forest-wind.mp3"
+      },
+      "settings": {
+        "volume": 0.5,
+        "fadeIn": 1500,
+        "fadeOut": 2000
+      },
+      "icon": "🌲"
+    },
+    "city": {
+      "id": "city",
+      "name": "夜幕都會",
+      "nameEn": "Night Metropolis",
+      "description": "城市律動·低頻馭化",
+      "category": "urban",
+      "mood": ["creative", "energetic"],
+      "frequency": 396,
+      "files": {
+        "main": "assets/sounds/city-cafe.mp3",
+        "ambient": "assets/sounds/city-rain.mp3"
+      },
+      "settings": {
+        "volume": 0.4,
+        "fadeIn": 1000,
+        "fadeOut": 1500
+      },
+      "icon": "🌃"
+    },
+    "rain": {
+      "id": "rain",
+      "name": "雨聲輕語",
+      "nameEn": "Gentle Rain",
+      "description": "溫柔雨滴·白噪音療癒",
+      "category": "nature",
+      "mood": ["relaxed", "sleepy"],
+      "frequency": 174,
+      "files": {
+        "main": "assets/sounds/rain-soft.mp3",
+        "ambient": "assets/sounds/rain-thunder.mp3"
+      },
+      "settings": {
+        "volume": 0.55,
+        "fadeIn": 2000,
+        "fadeOut": 3000
+      },
+      "icon": "🌧️"
+    },
+    "fireplace": {
+      "id": "fireplace",
+      "name": "爐火暖意",
+      "nameEn": "Cozy Fireplace",
+      "description": "木材燃燒·溫暖擁抱",
+      "category": "indoor",
+      "mood": ["cozy", "nostalgic"],
+      "frequency": 285,
+      "files": {
+        "main": "assets/sounds/fireplace-crackling.mp3",
+        "ambient": "assets/sounds/fireplace-room.mp3"
+      },
+      "settings": {
+        "volume": 0.5,
+        "fadeIn": 1500,
+        "fadeOut": 2000
+      },
+      "icon": "🔥"
+    },
+    "library": {
+      "id": "library",
+      "name": "圖書館靜謐",
+      "nameEn": "Library Silence",
+      "description": "翻頁聲·鐘擺節奏",
+      "category": "indoor",
+      "mood": ["focused", "studious"],
+      "frequency": 639,
+      "files": {
+        "main": "assets/sounds/library-ambient.mp3",
+        "ambient": "assets/sounds/library-pages.mp3"
+      },
+      "settings": {
+        "volume": 0.35,
+        "fadeIn": 1000,
+        "fadeOut": 1500
+      },
+      "icon": "📚"
+    }
+  },
+  "uiSounds": {
+    "click": {
+      "file": "assets/sounds/ui-click.mp3",
+      "volume": 0.3
+    },
+    "hover": {
+      "file": "assets/sounds/ui-hover.mp3",
+      "volume": 0.2
+    },
+    "success": {
+      "file": "assets/sounds/ui-success.mp3",
+      "volume": 0.4
+    },
+    "error": {
+      "file": "assets/sounds/ui-error.mp3",
+      "volume": 0.4
+    },
+    "notification": {
+      "file": "assets/sounds/ui-notification.mp3",
+      "volume": 0.5
+    },
+    "pageFlip": {
+      "file": "assets/sounds/page-flip.mp3",
+      "volume": 0.35
+    },
+    "bookmark": {
+      "file": "assets/sounds/bookmark.mp3",
+      "volume": 0.4
+    }
+  },
+  "categories": [
+    { "id": "nature", "name": "自然", "icon": "🌿" },
+    { "id": "urban", "name": "都市", "icon": "🏙️" },
+    { "id": "indoor", "name": "室內", "icon": "🏠" },
+    { "id": "music", "name": "音樂", "icon": "🎵" }
+  ],
+  "moods": [
+    { "id": "peaceful", "name": "平和" },
+    { "id": "focused", "name": "專注" },
+    { "id": "creative", "name": "創意" },
+    { "id": "relaxed", "name": "放鬆" },
+    { "id": "energetic", "name": "活力" },
+    { "id": "meditative", "name": "冥想" }
+  ],
+  "frequencies": {
+    "174": { "name": "Pain Relief", "description": "減輕疼痛" },
+    "285": { "name": "Healing", "description": "組織修復" },
+    "396": { "name": "Liberation", "description": "釋放恐懼" },
+    "432": { "name": "Cosmic", "description": "宇宙頻率" },
+    "528": { "name": "Transformation", "description": "DNA 修復" },
+    "639": { "name": "Connection", "description": "人際和諧" }
+  }
+}

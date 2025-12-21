@@ -1,0 +1,83 @@
+/**
+ * ModernReader - Theme Styles
+ * 主題樣式
+ */
+
+/* Lumina 主題 (晨光) */
+.theme-lumina {
+  --primary: #ffd166;
+  --secondary: #ff9a8b;
+  --background: #faf8f5;
+  --surface: #ffffff;
+  --text: #2d2a24;
+  --text-secondary: #6b6860;
+  --accent: #e07b39;
+  --border: rgba(0, 0, 0, 0.08);
+  --reader-bg: #fdfcf9;
+  --reader-text: #3d3a34;
+}
+
+/* Noir 主題 (暮夜) */
+.theme-noir {
+  --primary: #845ef7;
+  --secondary: #ff6b9d;
+  --background: #0a0118;
+  --surface: #1a0f2e;
+  --text: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --accent: #ff6b9d;
+  --border: rgba(255, 255, 255, 0.1);
+  --reader-bg: #12081f;
+  --reader-text: #e8e6f0;
+}
+
+/* Aurum 主題 (琥珀) */
+.theme-aurum {
+  --primary: #f6d365;
+  --secondary: #fda085;
+  --background: #1c1810;
+  --surface: #2a2418;
+  --text: #f5f0e6;
+  --text-secondary: rgba(245, 240, 230, 0.7);
+  --accent: #d4a574;
+  --border: rgba(212, 165, 116, 0.2);
+  --reader-bg: #201c14;
+  --reader-text: #e8e0d0;
+}
+
+/* Serenity 主題 (靜謐) */
+.theme-serenity {
+  --primary: #4ecdc4;
+  --secondary: #44a08d;
+  --background: #0a1a18;
+  --surface: #122624;
+  --text: #e8f4f2;
+  --text-secondary: rgba(232, 244, 242, 0.7);
+  --accent: #56d9cd;
+  --border: rgba(78, 205, 196, 0.2);
+  --reader-bg: #0e1f1d;
+  --reader-text: #d8ece8;
+}
+
+/* Rosewood 主題 (玫瑰木) */
+.theme-rosewood {
+  --primary: #e07b9c;
+  --secondary: #c45a7d;
+  --background: #1a0f14;
+  --surface: #2a1a22;
+  --text: #f5e8ed;
+  --text-secondary: rgba(245, 232, 237, 0.7);
+  --accent: #f096b0;
+  --border: rgba(224, 123, 156, 0.2);
+  --reader-bg: #1c1218;
+  --reader-text: #efe0e6;
+}
+
+/* Light Mode 覆蓋 */
+body.light-mode {
+  --background: #faf8f5;
+  --surface: #ffffff;
+  --text: #2d2a24;
+  --text-secondary: #6b6860;
+  --border: rgba(0, 0, 0, 0.08);
+}
