@@ -1,13 +1,14 @@
 {
   "name": "modernreader-royale",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "ModernReader Royale - 專為頂級閱讀體驗打造的單頁網站樣板",
   "main": "app.js",
   "scripts": {
     "start": "npx serve .",
     "dev": "npx serve . -l 3000",
-    "lint": "echo 'No linter configured'",
-    "test": "echo 'No tests configured'"
+    "lint": "npx eslint . --ext .js --ignore-pattern node_modules/",
+    "lint:fix": "npx eslint . --ext .js --ignore-pattern node_modules/ --fix",
+    "test": "echo 'Open browser console and run runTests()'"
   },
   "keywords": [
     "reader",
@@ -15,7 +16,9 @@
     "modern",
     "glassmorphism",
     "reading",
-    "ux"
+    "ux",
+    "pwa",
+    "i18n"
   ],
   "author": "Te-Wei Ko (柯德瑋)",
   "license": "MIT",
@@ -23,5 +26,8 @@
     "type": "git",
     "url": "https://github.com/STUST-KOTEWEI/ModernReader"
   },
-  "homepage": "https://stust-kotewei.github.io/ModernReader/"
+  "homepage": "https://stust-kotewei.github.io/ModernReader/",
+  "devDependencies": {
+    "eslint": "^8.0.0"
+  }
 }

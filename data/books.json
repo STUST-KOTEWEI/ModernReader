@@ -1,0 +1,166 @@
+{
+  "books": [
+    {
+      "id": "book-001",
+      "title": "薔薇與黑曜",
+      "author": "艾琳娜·蒙特羅",
+      "description": "適合夜晚的低語時刻，輕柔爵士與暗紫光影交織的感官盛宴。",
+      "cover": "assets/images/covers/rose-obsidian.jpg",
+      "genre": ["浪漫", "懸疑"],
+      "pages": 324,
+      "language": "zh-TW",
+      "publishDate": "2024-03-15",
+      "serialNumber": "11",
+      "location": "巴黎館",
+      "mood": "contemplative",
+      "soundscape": "city",
+      "theme": "noir",
+      "chapters": [
+        { "title": "序幕：暮色中的邂逅", "pages": 15 },
+        { "title": "第一章：玫瑰園的秘密", "pages": 28 },
+        { "title": "第二章：黑曜石的呢喃", "pages": 32 },
+        { "title": "第三章：月光下的真相", "pages": 26 }
+      ],
+      "excerpt": "月光穿透玻璃窗，灑落在黑曜石般的地板上。她站在那裡，如同一朵綻放的玫瑰，在黑暗中散發著危險而迷人的香氣。"
+    },
+    {
+      "id": "book-002",
+      "title": "雲端流光",
+      "author": "林昊宇",
+      "description": "當代詩選，搭配晨曦金色調與琥珀噴霧，為靈感揭幕。",
+      "cover": "assets/images/covers/cloud-light.jpg",
+      "genre": ["詩集", "現代文學"],
+      "pages": 186,
+      "language": "zh-TW",
+      "publishDate": "2024-01-20",
+      "serialNumber": "24",
+      "location": "東京館",
+      "mood": "inspirational",
+      "soundscape": "forest",
+      "theme": "aurum",
+      "chapters": [
+        { "title": "晨曦篇", "pages": 45 },
+        { "title": "流雲篇", "pages": 52 },
+        { "title": "星河篇", "pages": 48 },
+        { "title": "黎明篇", "pages": 41 }
+      ],
+      "excerpt": "雲在天際流轉\n如同時光的絲線\n編織著我們看不見的夢\n在晨曦的金光中\n化作一片溫柔的海洋"
+    },
+    {
+      "id": "book-003",
+      "title": "時間裁縫師",
+      "author": "馬克斯·韋伯",
+      "description": "沉浸於鐘錶滴答與暖調木質香氣的靜謐儀式。",
+      "cover": "assets/images/covers/time-tailor.jpg",
+      "genre": ["奇幻", "歷史"],
+      "pages": 412,
+      "language": "zh-TW",
+      "publishDate": "2023-11-08",
+      "serialNumber": "03",
+      "location": "瑞士館",
+      "mood": "mysterious",
+      "soundscape": "ocean",
+      "theme": "lumina",
+      "chapters": [
+        { "title": "第一針：破曉", "pages": 38 },
+        { "title": "第二針：正午", "pages": 45 },
+        { "title": "第三針：黃昏", "pages": 42 },
+        { "title": "第四針：午夜", "pages": 50 }
+      ],
+      "excerpt": "他坐在工作台前，手中的針線穿梭於時間的織物之間。每一針，都是一個瞬間；每一線，都是一段記憶。他是時間的裁縫師，用雙手縫合過去與未來的裂縫。"
+    },
+    {
+      "id": "book-004",
+      "title": "星海序章",
+      "author": "亞歷山大·諾瓦克",
+      "description": "太空歌劇專屬伴奏與低頻震動座椅，為冒險揭開序幕。",
+      "cover": "assets/images/covers/star-sea.jpg",
+      "genre": ["科幻", "冒險"],
+      "pages": 528,
+      "language": "zh-TW",
+      "publishDate": "2024-02-28",
+      "serialNumber": "19",
+      "location": "紐約館",
+      "mood": "adventurous",
+      "soundscape": "ocean",
+      "theme": "noir",
+      "chapters": [
+        { "title": "序曲：遠征號啟航", "pages": 35 },
+        { "title": "第一樂章：星塵之路", "pages": 62 },
+        { "title": "第二樂章：黑洞邊緣", "pages": 58 },
+        { "title": "第三樂章：銀河共鳴", "pages": 72 }
+      ],
+      "excerpt": "當遠征號駛離地球軌道的那一刻，艦長凝視著漸漸縮小的藍色星球。這將是一段史詩般的旅程，穿越星海，追尋人類文明的終極答案。"
+    },
+    {
+      "id": "book-005",
+      "title": "銀色航海日誌",
+      "author": "蘇菲亞·陳",
+      "description": "跨越星際的航海傳奇，在宇宙的寂靜中尋找靈魂的歸宿。",
+      "cover": "assets/images/covers/silver-voyage.jpg",
+      "genre": ["科幻", "哲學"],
+      "pages": 368,
+      "language": "zh-TW",
+      "publishDate": "2024-04-10",
+      "serialNumber": "07",
+      "location": "倫敦館",
+      "mood": "philosophical",
+      "soundscape": "ocean",
+      "theme": "lumina",
+      "chapters": [
+        { "title": "啟航：破曉的呼喚", "pages": 28 },
+        { "title": "第一章：星河宣言", "pages": 45 },
+        { "title": "第二章：量子迷霧", "pages": 52 },
+        { "title": "第三章：時間的盡頭", "pages": 48 }
+      ],
+      "excerpt": "銀白色的帆船穿越星際迷霧，船身外觀如同雕琢的水晶，於光譜中折射出無數色彩。此刻，閱讀不再是逃離，而是掌握宇宙的主控權。"
+    },
+    {
+      "id": "book-006",
+      "title": "星際旅人",
+      "author": "大衛·金",
+      "description": "一個人的宇宙漫遊，探索存在的意義與靈魂的共振。",
+      "cover": "assets/images/covers/star-traveler.jpg",
+      "genre": ["科幻", "心理"],
+      "pages": 296,
+      "language": "zh-TW",
+      "publishDate": "2023-09-22",
+      "serialNumber": "15",
+      "location": "柏林館",
+      "mood": "introspective",
+      "soundscape": "forest",
+      "theme": "aurum",
+      "chapters": [
+        { "title": "出發", "pages": 22 },
+        { "title": "漂流", "pages": 45 },
+        { "title": "遇見", "pages": 38 },
+        { "title": "歸途", "pages": 42 }
+      ],
+      "excerpt": "晨光洒落在鉑金色的水面，潮汐回應著恆星的律動。讀者的心跳與宇宙共振，故事因你而改寫。"
+    }
+  ],
+  "categories": [
+    { "id": "sci-fi", "name": "科幻", "icon": "🚀" },
+    { "id": "romance", "name": "浪漫", "icon": "💕" },
+    { "id": "mystery", "name": "懸疑", "icon": "🔍" },
+    { "id": "fantasy", "name": "奇幻", "icon": "✨" },
+    { "id": "poetry", "name": "詩集", "icon": "📝" },
+    { "id": "philosophy", "name": "哲學", "icon": "🤔" }
+  ],
+  "locations": [
+    { "id": "paris", "name": "巴黎館", "country": "法國" },
+    { "id": "tokyo", "name": "東京館", "country": "日本" },
+    { "id": "switzerland", "name": "瑞士館", "country": "瑞士" },
+    { "id": "newyork", "name": "紐約館", "country": "美國" },
+    { "id": "london", "name": "倫敦館", "country": "英國" },
+    { "id": "berlin", "name": "柏林館", "country": "德國" }
+  ],
+  "moods": [
+    { "id": "contemplative", "name": "沉思", "theme": "noir" },
+    { "id": "inspirational", "name": "啟發", "theme": "aurum" },
+    { "id": "mysterious", "name": "神秘", "theme": "lumina" },
+    { "id": "adventurous", "name": "冒險", "theme": "noir" },
+    { "id": "philosophical", "name": "哲思", "theme": "lumina" },
+    { "id": "introspective", "name": "內省", "theme": "aurum" }
+  ]
+}
