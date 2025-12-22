@@ -1,5 +1,9 @@
 # ModernReader Royale
 
+[![Release](https://img.shields.io/github/v/release/STUST-KOTEWEI/ModernReader?style=flat-square)](https://github.com/STUST-KOTEWEI/ModernReader/releases)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
+[![GitHub Pages](https://img.shields.io/badge/demo-live-success.svg?style=flat-square)](https://stust-kotewei.github.io/ModernReader/)
+
 ModernReader Royale 是一款專為頂級閱讀體驗打造的單頁網站樣板，結合光譜視覺、動態交互與禮賓級功能展示，呈現世界級的奢華閱讀品牌形象。
 
 ## 功能亮點
@@ -9,6 +13,31 @@ ModernReader Royale 是一款專為頂級閱讀體驗打造的單頁網站樣板
 - **Immersive Atelier 面板**：即時切換場景主題、字體比例、字距與音場，模擬客製化閱讀儀式。
 - **策展星圖**：橫向滑動的收藏卡片，呈現全球限量藏書的策展視覺。
 - **禮賓服務模組**：流動光暈與數據徽章展示 24/7 禮賓服務能量。
+
+## 📥 下載與使用
+
+### 方式一：下載 Release 版本
+
+1. 前往 [Releases 頁面](https://github.com/STUST-KOTEWEI/ModernReader/releases)
+2. 下載最新版本的 `ModernReader-vX.X.X.zip`
+3. 解壓縮文件
+4. 使用靜態伺服器開啟（例如 `npx serve .` 或 `python -m http.server`）
+5. 在瀏覽器中訪問 `http://localhost:3000`（或對應埠口）
+
+### 方式二：在線體驗
+
+直接訪問 GitHub Pages: [https://stust-kotewei.github.io/ModernReader/](https://stust-kotewei.github.io/ModernReader/)
+
+### 方式三：從源碼運行
+
+```bash
+git clone https://github.com/STUST-KOTEWEI/ModernReader.git
+cd ModernReader
+# 使用任意靜態伺服器
+npx serve .
+# 或
+python -m http.server
+```
 
 ## 使用方式
 
@@ -65,6 +94,54 @@ ModernReader Royale 是一款專為頂級閱讀體驗打造的單頁網站樣板
 
 - [AI-Reader (Project H.O.L.O.)](https://github.com/STUST-KOTEWEI/AI-Reader) - AI後端引擎
 - [Profile](https://github.com/STUST-KOTEWEI/profile) - 研究者個人網站
+
+---
+
+## 🚀 發行版本 (Releases)
+
+### 自動化發布系統
+
+本專案使用 GitHub Actions 實現自動化發布流程：
+
+#### 📌 手動版本發布
+要建立新的版本發布，請按照以下步驟：
+
+```bash
+# 1. 更新 VERSION 文件
+echo "1.0.1" > VERSION
+
+# 2. 提交變更
+git add VERSION
+git commit -m "Bump version to 1.0.1"
+git push
+
+# 3. 建立版本標籤
+git tag -a v1.0.1 -m "Release version 1.0.1"
+git push origin v1.0.1
+```
+
+推送版本標籤後，GitHub Actions 會自動：
+- 建立 ZIP 壓縮檔
+- 生成發布說明
+- 建立 GitHub Release
+- 上傳發布文件
+
+#### 🤖 自動發布
+每次推送到 `main` 分支並修改以下文件時，系統會自動建立發布：
+- `index.html`
+- `styles.css`
+- `app.js`
+
+自動發布使用日期和構建編號命名（例如：`v2025.12.22.build123`）
+
+### 版本命名規則
+
+- **手動版本**: `v{major}.{minor}.{patch}` (例如: v1.0.0, v2.1.3)
+- **自動版本**: `v{YYYY}.{MM}.{DD}.build{count}` (例如: v2025.12.22.build45)
+
+### 查看發布歷史
+
+訪問 [Releases 頁面](https://github.com/STUST-KOTEWEI/ModernReader/releases) 查看所有發布版本和下載文件。
 
 ---
 
