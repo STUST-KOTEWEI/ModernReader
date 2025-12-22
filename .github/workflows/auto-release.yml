@@ -1,0 +1,100 @@
+name: Auto Release on Main Branch
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'index.html'
+      - 'styles.css'
+      - 'app.js'
+
+permissions:
+  contents: write
+
+jobs:
+  auto-release:
+    name: Auto Release
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Get current date
+        id: date
+        run: echo "date=$(date +'%Y.%m.%d')" >> $GITHUB_OUTPUT
+      
+      - name: Get commit count
+        id: commit_count
+        run: |
+          COUNT=$(git rev-list --count HEAD)
+          echo "count=${COUNT}" >> $GITHUB_OUTPUT
+      
+      - name: Generate version
+        id: version
+        run: |
+          VERSION="v${{ steps.date.outputs.date }}.build${{ steps.commit_count.outputs.count }}"
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+      
+      - name: Check if tag exists
+        id: check_tag
+        run: |
+          if git rev-parse "${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Create release archive
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          mkdir -p release
+          zip -r release/ModernReader-${{ steps.version.outputs.version }}.zip \
+            index.html \
+            styles.css \
+            app.js \
+            README.md \
+            -x "*.git*"
+      
+      - name: Get latest commits
+        if: steps.check_tag.outputs.exists == 'false'
+        id: commits
+        run: |
+          COMMITS=$(git log --pretty=format:"- %s (%h)" -5 | sed 's/"/\\"/g')
+          echo "commits<<EOF" >> $GITHUB_OUTPUT
+          echo "$COMMITS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      
+      - name: Create GitHub Release
+        if: steps.check_tag.outputs.exists == 'false'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.version }}
+          name: ModernReader Royale ${{ steps.version.outputs.version }}
+          body: |
+            ## 🚀 自動發布 - ModernReader Royale
+            
+            **發布日期:** ${{ steps.date.outputs.date }}
+            **構建編號:** ${{ steps.commit_count.outputs.count }}
+            
+            ### 📦 下載
+            下載 `ModernReader-${{ steps.version.outputs.version }}.zip` 解壓即可使用
+            
+            ### 📝 最近更新
+            ${{ steps.commits.outputs.commits }}
+            
+            ### 🌐 在線預覽
+            https://stust-kotewei.github.io/ModernReader/
+            
+            ---
+            
+            此版本由 GitHub Actions 自動發布
+          files: |
+            release/ModernReader-${{ steps.version.outputs.version }}.zip
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
