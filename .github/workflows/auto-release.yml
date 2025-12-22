@@ -42,7 +42,7 @@ jobs:
       - name: Check if tag exists
         id: check_tag
         run: |
-          if git rev-parse "${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
+          if git tag -l "${{ steps.version.outputs.version }}" | grep -q "${{ steps.version.outputs.version }}"; then
             echo "exists=true" >> $GITHUB_OUTPUT
           else
             echo "exists=false" >> $GITHUB_OUTPUT

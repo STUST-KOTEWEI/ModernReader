@@ -16,7 +16,7 @@
 
 ```bash
 # 確認當前在正確的分支
-git checkout copilot/create-releases-verification
+git checkout your-feature-branch
 
 # 確認 workflow 文件已存在
 ls -la .github/workflows/
@@ -32,7 +32,7 @@ ls -la .github/workflows/
 
 ```bash
 git checkout main
-git merge copilot/create-releases-verification
+git merge your-feature-branch
 git push origin main
 ```
 
@@ -49,7 +49,10 @@ git push origin v1.0.0
 ### 步驟 4: 監控工作流程執行
 
 1. 前往 GitHub Actions 頁面：
-   `https://github.com/STUST-KOTEWEI/ModernReader/actions`
+   ```
+   https://github.com/{OWNER}/{REPO}/actions
+   ```
+   (將 {OWNER} 和 {REPO} 替換為實際的倉庫所有者和名稱)
 
 2. 查找名為 "Create Release" 的工作流程
 
@@ -60,7 +63,9 @@ git push origin v1.0.0
 ### 步驟 5: 驗證發布結果
 
 1. 前往 Releases 頁面：
-   `https://github.com/STUST-KOTEWEI/ModernReader/releases`
+   ```
+   https://github.com/{OWNER}/{REPO}/releases
+   ```
 
 2. 確認新的 release 已建立：
    - ✅ Release 標題: "ModernReader Royale v1.0.0"
@@ -70,8 +75,8 @@ git push origin v1.0.0
 
 3. 下載並測試 ZIP 文件：
    ```bash
-   # 下載 ZIP
-   wget https://github.com/STUST-KOTEWEI/ModernReader/releases/download/v1.0.0/ModernReader-v1.0.0.zip
+   # 下載 ZIP (替換為實際的倉庫 URL)
+   wget https://github.com/{OWNER}/{REPO}/releases/download/v1.0.0/ModernReader-v1.0.0.zip
    
    # 解壓縮
    unzip ModernReader-v1.0.0.zip -d test-release

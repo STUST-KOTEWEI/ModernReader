@@ -70,7 +70,7 @@ jobs:
           
           ---
           
-          **完整變更日誌:** https://github.com/${{ github.repository }}/compare/${{ steps.get_version.outputs.version }}
+          **查看完整變更:** https://github.com/${{ github.repository }}/releases/tag/${{ steps.get_version.outputs.version }}
           EOF
           
           echo "notes_file=release_notes.md" >> $GITHUB_OUTPUT
