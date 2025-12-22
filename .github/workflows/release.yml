@@ -34,6 +34,9 @@ jobs:
             styles.css \
             app.js \
             README.md \
+            CHANGELOG.md \
+            CONTRIBUTING.md \
+            VERSION \
             -x "*.git*"
       
       - name: Generate release notes
