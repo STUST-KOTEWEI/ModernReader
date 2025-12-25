@@ -1,0 +1,172 @@
+{
+  "themes": {
+    "lumina": {
+      "id": "lumina",
+      "name": "晨光 Lumina",
+      "nameEn": "Dawn Lumina",
+      "description": "溫暖的晨曦光芒，適合清晨閱讀",
+      "colors": {
+        "primary": "#ffd166",
+        "secondary": "#ff9a8b",
+        "background": "#faf8f5",
+        "surface": "#ffffff",
+        "text": "#2d2a24",
+        "textSecondary": "#6b6860",
+        "accent": "#e07b39",
+        "border": "rgba(0, 0, 0, 0.08)"
+      },
+      "reader": {
+        "background": "#fdfcf9",
+        "text": "#3d3a34",
+        "linkColor": "#b5651d",
+        "selectionColor": "rgba(255, 209, 102, 0.4)"
+      },
+      "mood": "warm",
+      "icon": "☀️"
+    },
+    "noir": {
+      "id": "noir",
+      "name": "暮夜 Noir",
+      "nameEn": "Twilight Noir",
+      "description": "深邃的夜晚色調，護眼舒適",
+      "colors": {
+        "primary": "#845ef7",
+        "secondary": "#ff6b9d",
+        "background": "#0a0118",
+        "surface": "#1a0f2e",
+        "text": "#ffffff",
+        "textSecondary": "rgba(255, 255, 255, 0.7)",
+        "accent": "#ff6b9d",
+        "border": "rgba(255, 255, 255, 0.1)"
+      },
+      "reader": {
+        "background": "#12081f",
+        "text": "#e8e6f0",
+        "linkColor": "#a78bfa",
+        "selectionColor": "rgba(132, 94, 247, 0.4)"
+      },
+      "mood": "dark",
+      "icon": "🌙"
+    },
+    "aurum": {
+      "id": "aurum",
+      "name": "琥珀 Aurum",
+      "nameEn": "Amber Aurum",
+      "description": "古典的琥珀金色，典雅沉穩",
+      "colors": {
+        "primary": "#f6d365",
+        "secondary": "#fda085",
+        "background": "#1c1810",
+        "surface": "#2a2418",
+        "text": "#f5f0e6",
+        "textSecondary": "rgba(245, 240, 230, 0.7)",
+        "accent": "#d4a574",
+        "border": "rgba(212, 165, 116, 0.2)"
+      },
+      "reader": {
+        "background": "#201c14",
+        "text": "#e8e0d0",
+        "linkColor": "#d4a574",
+        "selectionColor": "rgba(246, 211, 101, 0.3)"
+      },
+      "mood": "classic",
+      "icon": "🔶"
+    },
+    "serenity": {
+      "id": "serenity",
+      "name": "靜謐 Serenity",
+      "nameEn": "Calm Serenity",
+      "description": "平靜的藍綠色調，放鬆身心",
+      "colors": {
+        "primary": "#4ecdc4",
+        "secondary": "#44a08d",
+        "background": "#0a1a18",
+        "surface": "#122624",
+        "text": "#e8f4f2",
+        "textSecondary": "rgba(232, 244, 242, 0.7)",
+        "accent": "#56d9cd",
+        "border": "rgba(78, 205, 196, 0.2)"
+      },
+      "reader": {
+        "background": "#0e1f1d",
+        "text": "#d8ece8",
+        "linkColor": "#4ecdc4",
+        "selectionColor": "rgba(78, 205, 196, 0.3)"
+      },
+      "mood": "calm",
+      "icon": "🌊"
+    },
+    "rosewood": {
+      "id": "rosewood",
+      "name": "玫瑰木 Rosewood",
+      "nameEn": "Elegant Rosewood",
+      "description": "優雅的玫瑰木色，浪漫氛圍",
+      "colors": {
+        "primary": "#e07b9c",
+        "secondary": "#c45a7d",
+        "background": "#1a0f14",
+        "surface": "#2a1a22",
+        "text": "#f5e8ed",
+        "textSecondary": "rgba(245, 232, 237, 0.7)",
+        "accent": "#f096b0",
+        "border": "rgba(224, 123, 156, 0.2)"
+      },
+      "reader": {
+        "background": "#1c1218",
+        "text": "#efe0e6",
+        "linkColor": "#e07b9c",
+        "selectionColor": "rgba(224, 123, 156, 0.3)"
+      },
+      "mood": "romantic",
+      "icon": "🌹"
+    }
+  },
+  "presets": [
+    {
+      "id": "morning-read",
+      "name": "晨讀時光",
+      "theme": "lumina",
+      "fontSize": 1.1,
+      "letterSpacing": 0.02,
+      "soundscape": "forest"
+    },
+    {
+      "id": "night-read",
+      "name": "夜間閱讀",
+      "theme": "noir",
+      "fontSize": 1.0,
+      "letterSpacing": 0.03,
+      "soundscape": "city"
+    },
+    {
+      "id": "focus-mode",
+      "name": "專注模式",
+      "theme": "aurum",
+      "fontSize": 1.2,
+      "letterSpacing": 0.04,
+      "soundscape": "ocean"
+    },
+    {
+      "id": "relax-mode",
+      "name": "放鬆模式",
+      "theme": "serenity",
+      "fontSize": 1.15,
+      "letterSpacing": 0.025,
+      "soundscape": "ocean"
+    }
+  ],
+  "fonts": {
+    "serif": {
+      "name": "經典襯線",
+      "family": "'Playfair Display', 'Noto Serif TC', serif"
+    },
+    "sans": {
+      "name": "現代無襯線",
+      "family": "'Inter', 'Noto Sans TC', sans-serif"
+    },
+    "mono": {
+      "name": "等寬字型",
+      "family": "'Fira Code', 'Source Code Pro', monospace"
+    }
+  }
+}

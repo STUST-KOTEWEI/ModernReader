@@ -4,9 +4,25 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ModernReader Royale</title>
+  <meta name="description" content="ModernReader Royale - 專為頂級閱讀體驗打造的單頁網站樣板" />
+  <meta name="theme-color" content="#845ef7" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="ModernReader" />
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json" />
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/icons/bookmark.svg" />
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png" />
+  
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  
+  <!-- Styles -->
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -19,7 +35,12 @@
       <a href="#curation">私藏</a>
       <a href="#concierge">管家服務</a>
     </nav>
-    <button class="cta">預約專屬導覽</button>
+    <div class="header-actions">
+      <button class="theme-toggle" id="themeToggle" title="切換深色/淺色模式" aria-label="切換主題">
+        <span class="theme-icon">🌙</span>
+      </button>
+      <button class="cta">預約專屬導覽</button>
+    </div>
   </header>
 
   <main>
@@ -349,6 +370,57 @@
         <span>💬</span>
     </div>
 
+  <!-- Config -->
+  <script src="config/settings.js"></script>
+  
+  <!-- Utility Modules -->
+  <script src="utils/storage.js"></script>
+  <script src="utils/analytics.js"></script>
+  <script src="utils/i18n.js"></script>
+  <script src="utils/keyboard.js"></script>
+  <script src="utils/share.js"></script>
+  <script src="utils/audio.js"></script>
+  <script src="utils/animation.js"></script>
+  <script src="utils/validation.js"></script>
+  <script src="utils/format.js"></script>
+  
+  <!-- Components -->
+  <script src="components/toast.js"></script>
+  <script src="components/modal.js"></script>
+  <script src="components/loader.js"></script>
+  <script src="components/tooltip.js"></script>
+  <script src="components/dropdown.js"></script>
+  <script src="components/carousel.js"></script>
+  
+  <!-- Services -->
+  <script src="services/api.js"></script>
+  <script src="services/auth.js"></script>
+  <script src="services/sync.js"></script>
+  
+  <!-- Hooks & Plugins -->
+  <script src="hooks/index.js"></script>
+  <script src="plugins/index.js"></script>
+  
+  <!-- Main Application -->
   <script src="app.js"></script>
+  
+  <!-- Tests (可在 console 執行 runTests() 或 runE2ETests()) -->
+  <script src="tests/unit.test.js"></script>
+  <script src="tests/e2e.test.js"></script>
+  
+  <!-- Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then((registration) => {
+            console.log('📦 Service Worker registered:', registration.scope);
+          })
+          .catch((error) => {
+            console.warn('Service Worker registration failed:', error);
+          });
+      });
+    }
+  </script>
 </body>
 </html>

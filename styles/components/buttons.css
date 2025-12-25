@@ -1,0 +1,125 @@
+/**
+ * ModernReader - Button Component Styles
+ * 按鈕組件樣式
+ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Primary Button */
+.btn--primary {
+  background: linear-gradient(135deg, var(--primary, #845ef7), var(--secondary, #ff6b9d));
+  color: white;
+  box-shadow: 0 4px 15px rgba(132, 94, 247, 0.3);
+}
+
+.btn--primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(132, 94, 247, 0.4);
+}
+
+.btn--primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Ghost Button */
+.btn--ghost {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text, white);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn--ghost:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Secondary Button */
+.btn--secondary {
+  background: var(--surface, #1a0f2e);
+  color: var(--text, white);
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
+}
+
+.btn--secondary:hover:not(:disabled) {
+  background: rgba(132, 94, 247, 0.2);
+  border-color: var(--primary, #845ef7);
+}
+
+/* Danger Button */
+.btn--danger {
+  background: #ef4444;
+  color: white;
+}
+
+.btn--danger:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+/* Sizes */
+.btn--sm {
+  padding: 8px 16px;
+  font-size: 12px;
+}
+
+.btn--lg {
+  padding: 16px 32px;
+  font-size: 16px;
+}
+
+/* Icon Button */
+.btn--icon {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.btn--icon.btn--sm {
+  width: 32px;
+  height: 32px;
+}
+
+.btn--icon.btn--lg {
+  width: 48px;
+  height: 48px;
+}
+
+/* Button Group */
+.btn-group {
+  display: inline-flex;
+}
+
+.btn-group .btn {
+  border-radius: 0;
+}
+
+.btn-group .btn:first-child {
+  border-radius: 8px 0 0 8px;
+}
+
+.btn-group .btn:last-child {
+  border-radius: 0 8px 8px 0;
+}
+
+.btn-group .btn:not(:last-child) {
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
