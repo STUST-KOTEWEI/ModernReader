@@ -6,11 +6,14 @@ summaries and RAG answers, podcast script generation, and optional gTTS audio.
 from __future__ import annotations
 
 import hashlib
+import hmac
 import io
 import os
 import secrets
 import sqlite3
-from datetime import datetime, timezone
+import subprocess
+import tempfile
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -39,10 +42,14 @@ def db():
     connection.row_factory = sqlite3.Row
     connection.executescript("""
       CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, email TEXT UNIQUE NOT NULL, password_hash TEXT NOT NULL, created_at TEXT NOT NULL);
-      CREATE TABLE IF NOT EXISTS sessions (token TEXT PRIMARY KEY, user_id INTEGER NOT NULL, created_at TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS sessions (token TEXT PRIMARY KEY, user_id INTEGER NOT NULL, created_at TEXT NOT NULL, expires_at TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS books (id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL, title TEXT NOT NULL, content TEXT NOT NULL, created_at TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS annotations (id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL, book_id INTEGER NOT NULL, paragraph_index INTEGER NOT NULL, text TEXT NOT NULL, emotion TEXT NOT NULL, created_at TEXT NOT NULL);
     """)
+    columns = {row[1] for row in connection.execute("PRAGMA table_info(sessions)")}
+    if "expires_at" not in columns:
+        connection.execute("ALTER TABLE sessions ADD COLUMN expires_at TEXT NOT NULL DEFAULT ''")
+    connection.execute("DELETE FROM sessions WHERE expires_at != '' AND expires_at < ?", (now(),))
     return connection
 
 
@@ -50,15 +57,33 @@ def now():
     return datetime.now(timezone.utc).isoformat()
 
 
-def password_hash(password: str) -> str:
-    return hashlib.sha256(password.encode("utf-8")).hexdigest()
+def password_hash(password: str, salt: Optional[str] = None) -> str:
+    salt = salt or secrets.token_hex(16)
+    digest = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt.encode("utf-8"), 310_000).hex()
+    return f"{salt}${digest}"
+
+
+def password_matches(password: str, stored: str) -> bool:
+    try:
+        salt, digest = stored.split("$", 1)
+        candidate = password_hash(password, salt).split("$", 1)[1]
+        return hmac.compare_digest(candidate, digest)
+    except ValueError:
+        return False
+
+
+def create_session(user_id: int) -> str:
+    token = secrets.token_urlsafe(48)
+    with db() as connection:
+        connection.execute("INSERT INTO sessions(token,user_id,created_at,expires_at) VALUES(?,?,?,?)", (token, user_id, now(), (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()))
+    return token
 
 
 def current_user(authorization: Optional[str] = Header(default=None)):
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(401, "需要登入")
     with db() as connection:
-        row = connection.execute("SELECT users.* FROM sessions JOIN users ON users.id=sessions.user_id WHERE token=?", (authorization[7:],)).fetchone()
+        row = connection.execute("SELECT users.* FROM sessions JOIN users ON users.id=sessions.user_id WHERE token=? AND (expires_at='' OR expires_at>?)", (authorization[7:], now())).fetchone()
     if not row:
         raise HTTPException(401, "登入已失效")
     return row
@@ -129,22 +154,26 @@ def register(request: AuthRequest):
             user_id = cursor.lastrowid
     except sqlite3.IntegrityError as error:
         raise HTTPException(409, "Email 已註冊") from error
-    token = secrets.token_urlsafe(32)
-    with db() as connection:
-        connection.execute("INSERT INTO sessions(token,user_id,created_at) VALUES(?,?,?)", (token, user_id, now()))
+    token = create_session(user_id)
     return {"token": token, "user": {"id": user_id, "email": request.email.lower()}}
 
 
 @app.post("/api/auth/login")
 def login(request: AuthRequest):
     with db() as connection:
-        user = connection.execute("SELECT * FROM users WHERE email=? AND password_hash=?", (request.email.lower(), password_hash(request.password))).fetchone()
-    if not user:
+        user = connection.execute("SELECT * FROM users WHERE email=?", (request.email.lower(),)).fetchone()
+    if not user or not password_matches(request.password, user["password_hash"]):
         raise HTTPException(401, "Email 或密碼錯誤")
-    token = secrets.token_urlsafe(32)
-    with db() as connection:
-        connection.execute("INSERT INTO sessions(token,user_id,created_at) VALUES(?,?,?)", (token, user["id"], now()))
+    token = create_session(user["id"])
     return {"token": token, "user": {"id": user["id"], "email": user["email"]}}
+
+
+@app.post("/api/auth/logout")
+def logout(authorization: Optional[str] = Header(default=None)):
+    if authorization and authorization.startswith("Bearer "):
+        with db() as connection:
+            connection.execute("DELETE FROM sessions WHERE token=?", (authorization[7:],))
+    return {"ok": True}
 
 
 @app.get("/api/books")
@@ -225,6 +254,27 @@ def tts(request: TextRequest, user=Depends(current_user)):
     output = io.BytesIO()
     gTTS(text=request.text[:3000], lang=language).write_to_fp(output)
     return Response(output.getvalue(), media_type="audio/mpeg", headers={"Content-Disposition": "inline; filename=modernreader.mp3"})
+
+
+@app.post("/api/podcast")
+def podcast(request: TextRequest, user=Depends(current_user)):
+    """Create a downloadable spoken MP3 with a generated low-volume ambient bed.
+
+    The ambient layer is generated locally with ffmpeg, so no copyrighted music is
+    bundled. A production deployment can replace it with a licensed music track.
+    """
+    if not gTTS:
+        raise HTTPException(503, "尚未安裝 gTTS")
+    with tempfile.TemporaryDirectory() as directory:
+        voice_path = os.path.join(directory, "voice.mp3")
+        ambient_path = os.path.join(directory, "ambient.wav")
+        output_path = os.path.join(directory, "podcast.mp3")
+        language = "zh-tw" if request.language.startswith("zh") else request.language.split("-")[0]
+        gTTS(text=request.text[:7000], lang=language).save(voice_path)
+        subprocess.run(["ffmpeg", "-y", "-f", "lavfi", "-i", "sine=frequency=196:duration=120", "-af", "volume=0.035", ambient_path], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(["ffmpeg", "-y", "-i", voice_path, "-stream_loop", "-1", "-i", ambient_path, "-filter_complex", "[0:a]volume=1.0[voice];[1:a]volume=0.18[bed];[voice][bed]amix=inputs=2:duration=first:dropout_transition=2", "-c:a", "libmp3lame", "-b:a", "128k", output_path], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        audio = Path(output_path).read_bytes()
+    return Response(audio, media_type="audio/mpeg", headers={"Content-Disposition": "attachment; filename=modernreader-podcast.mp3"})
 
 
 if __name__ == "__main__":

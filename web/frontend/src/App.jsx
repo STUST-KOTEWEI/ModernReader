@@ -61,6 +61,7 @@ function App() {
   const [authPassword, setAuthPassword] = useState('');
   const [authMessage, setAuthMessage] = useState('');
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [isPodcastLoading, setIsPodcastLoading] = useState(false);
   const fileInput = useRef(null);
 
   useEffect(() => localStorage.setItem('modernreader-book', JSON.stringify(book)), [book]);
@@ -161,6 +162,16 @@ function App() {
     if (token) { try { const bookId = await syncBook(); await api('/api/annotations', { method: 'POST', body: JSON.stringify({ book_id: bookId, paragraph_index: active, text: book.paragraphs[active], emotion: emotion.label }) }); } catch { /* localStorage remains the offline fallback */ } }
   }
 
+  async function generatePodcast() {
+    if (!token) { setAuthOpen(true); setAuthMessage('登入後才能生成可下載的 Podcast MP3'); return; }
+    setIsPodcastLoading(true);
+    try {
+      const response = await fetch(`${API_URL}/api/podcast`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ text: book.paragraphs.join('\n\n'), language: 'zh-TW' }) });
+      if (!response.ok) throw new Error('Podcast 生成失敗');
+      const url = URL.createObjectURL(await response.blob()); const link = document.createElement('a'); link.href = url; link.download = `${book.title}-podcast.mp3`; link.click(); URL.revokeObjectURL(url); setAnswer('Podcast MP3 已開始下載。');
+    } catch (error) { setAnswer(`Podcast 暫時不可用：${error.message}`); } finally { setIsPodcastLoading(false); }
+  }
+
   return (
     <div className="app-shell">
       <header className="topbar">
@@ -181,7 +192,7 @@ function App() {
           <div className="reader-meta"><span>正在閱讀</span><span>{active + 1} / {book.paragraphs.length}</span></div>
           <h1>{book.title}</h1><p className="reader-subtitle">你的專注閱讀空間</p>
           <div className="focus-card"><div className="focus-label">FOCUS MODE <span>●</span></div><p>{book.paragraphs[active]}</p>{currentMark && <div className="current-mark" style={{ color: currentMark.color }}>已標記為「{currentMark.label}」</div>}</div>
-          <div className="reader-controls"><button className="primary-button" onClick={speak}>{isSpeaking ? '■ 停止朗讀' : '▶ 語音導讀'}</button><button className="secondary-button" disabled={isAiLoading} onClick={summarize}>{isAiLoading ? '處理中…' : '✦ 生成摘要'}</button><span className="control-hint">Space 播放 · ← → 切換段落</span></div>
+          <div className="reader-controls"><button className="primary-button" onClick={speak}>{isSpeaking ? '■ 停止朗讀' : '▶ 語音導讀'}</button><button className="secondary-button" disabled={isAiLoading} onClick={summarize}>{isAiLoading ? '處理中…' : '✦ 生成摘要'}</button><button className="secondary-button" disabled={isPodcastLoading} onClick={generatePodcast}>{isPodcastLoading ? '製作中…' : '♫ Podcast MP3'}</button><span className="control-hint">Space 播放 · ← → 切換段落</span></div>
           <div className="emotion-panel"><div><h3>這段文字帶給你什麼感受？</h3><p>留下情緒標記，建立你的個人閱讀地圖。</p></div><div className="emotion-buttons">{emotions.map((emotion) => <button key={emotion.label} className={currentMark?.label === emotion.label ? 'emotion active' : 'emotion'} onClick={() => markEmotion(emotion)} style={{ '--emotion': emotion.color }}><b>{emotion.icon}</b>{emotion.label}</button>)}</div></div>
           <div className="pager"><button disabled={active === 0} onClick={() => setActive((n) => n - 1)}>← 上一段</button><button disabled={active === book.paragraphs.length - 1} onClick={() => setActive((n) => n + 1)}>下一段 →</button></div>
         </section>
