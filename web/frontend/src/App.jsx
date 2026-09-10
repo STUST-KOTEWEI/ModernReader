@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import JSZip from 'jszip';
 import './App.css';
 
 const starterText = `在資訊快速流動的時代，閱讀不只是把文字看完，而是讓想法真正留下來。\n\nModernReader 將長篇內容拆成容易開始的小段落，搭配語音導讀、摘要與情緒標記，讓每一次閱讀都更有節奏。\n\n你可以先從一個問題開始：這一段文字讓我感到什麼？它和我的生活有什麼關係？當讀者能夠停下來思考，閱讀就不再只是接收資訊，而是與內容建立連結。`;
@@ -21,6 +22,28 @@ function parseText(raw, fileName = '示範文章') {
   return { title: fileName.replace(/\.(epub|txt|md|html?)$/i, '') || '未命名書籍', paragraphs: paragraphs.length ? paragraphs : [starterText] };
 }
 
+async function parseEpub(file) {
+  const zip = await JSZip.loadAsync(await file.arrayBuffer());
+  const container = new DOMParser().parseFromString(await zip.file('META-INF/container.xml').async('text'), 'application/xml');
+  const rootfile = container.querySelector('rootfile')?.getAttribute('full-path');
+  if (!rootfile || !zip.file(rootfile)) throw new Error('EPUB 缺少有效的 OPF 封裝資訊');
+  const opf = new DOMParser().parseFromString(await zip.file(rootfile).async('text'), 'application/xml');
+  const manifest = new Map([...opf.querySelectorAll('manifest > item')].map((item) => [item.getAttribute('id'), item.getAttribute('href')]));
+  const base = rootfile.includes('/') ? rootfile.slice(0, rootfile.lastIndexOf('/') + 1) : '';
+  const chapters = [];
+  for (const ref of opf.querySelectorAll('spine > itemref')) {
+    const href = manifest.get(ref.getAttribute('idref'));
+    const path = href ? `${base}${href}`.replace(/\/[^/]+\/\.\.\//g, '/') : '';
+    const entry = path && zip.file(path);
+    if (!entry) continue;
+    const document = new DOMParser().parseFromString(await entry.async('text'), 'text/html');
+    const text = document.body?.textContent?.replace(/\s+/g, ' ').trim();
+    if (text) chapters.push(text);
+  }
+  const title = opf.querySelector('metadata > title, dc\\:title')?.textContent?.trim() || file.name.replace(/\.epub$/i, '');
+  return { title, paragraphs: chapters.length ? chapters : [starterText] };
+}
+
 function App() {
   const [book, setBook] = useState(() => JSON.parse(localStorage.getItem('modernreader-book') || 'null') || parseText(starterText));
   const [active, setActive] = useState(0);
@@ -29,6 +52,7 @@ function App() {
   const [answer, setAnswer] = useState('');
   const [fontSize, setFontSize] = useState('normal');
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
   const fileInput = useRef(null);
 
   useEffect(() => localStorage.setItem('modernreader-book', JSON.stringify(book)), [book]);
@@ -48,12 +72,21 @@ function App() {
   const currentMark = marks[active];
   const wordCount = useMemo(() => book.paragraphs.join(' ').split(/\s+/).filter(Boolean).length, [book]);
 
-  function importFile(event) {
+  async function importFile(event) {
     const file = event.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => { setBook(parseText(String(reader.result), file.name)); setActive(0); setMarks({}); setAnswer(''); };
-    reader.readAsText(file);
+    setIsImporting(true);
+    try {
+      const imported = file.name.toLowerCase().endsWith('.epub') ? await parseEpub(file) : await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(parseText(String(reader.result), file.name));
+        reader.onerror = reject;
+        reader.readAsText(file);
+      });
+      setBook(imported); setActive(0); setMarks({}); setAnswer('');
+    } catch (error) {
+      setAnswer(`無法讀取這本 EPUB：${error.message}`);
+    } finally { setIsImporting(false); }
     event.target.value = '';
   }
 
@@ -88,7 +121,7 @@ function App() {
     <div className="app-shell">
       <header className="topbar">
         <div className="brand"><span className="brand-mark">MR</span><div><strong>ModernReader</strong><small>讓閱讀變得可呼吸</small></div></div>
-        <div className="top-actions"><button className="ghost-button" onClick={() => fileInput.current?.click()}>＋ 匯入書籍</button><input ref={fileInput} hidden type="file" accept=".epub,.txt,.md,.html,.htm" onChange={importFile} /><button className="icon-button" aria-label="切換字體大小" onClick={() => setFontSize(fontSize === 'large' ? 'normal' : 'large')}>Aa</button></div>
+        <div className="top-actions"><button className="ghost-button" disabled={isImporting} onClick={() => fileInput.current?.click()}>{isImporting ? '讀取中…' : '＋ 匯入書籍'}</button><input ref={fileInput} hidden type="file" accept=".epub,.txt,.md,.html,.htm" onChange={importFile} /><button className="icon-button" aria-label="切換字體大小" onClick={() => setFontSize(fontSize === 'large' ? 'normal' : 'large')}>Aa</button></div>
       </header>
 
       <main className="layout">

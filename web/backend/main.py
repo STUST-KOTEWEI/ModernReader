@@ -1,307 +1,232 @@
-from fastapi import FastAPI, UploadFile, File
-from pydantic import BaseModel
-from fastapi.middleware.cors import CORSMiddleware
-import sys
-import os
-from typing import Dict, Any, List, Optional
+"""ModernReader backend MVP.
 
-# 將專案根目錄加入 Python 路徑，以便引用 holo 模組
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+Features: SQLite accounts/books/annotations, EPUB text sync, optional OpenAI-compatible
+summaries and RAG answers, podcast script generation, and optional gTTS audio.
+"""
+from __future__ import annotations
 
-# 匯入 holo 專案的核心功能
-try:
-    from holo.vision import GoogleVisionAnalyzer, OCRProcessor
-    from holo.generation import GPTGenerator
-except ImportError as e:
-    print(f"警告：無法匯入 holo 模組：{e}")
-    GoogleVisionAnalyzer = None
-    OCRProcessor = None
-    GPTGenerator = None
-
-app = FastAPI(
-    title="Project-HOLO API",
-    description="提供神經語意框架的多模態敘事沉浸體驗 API",
-    version="0.1.0",
-)
-
-# 設定 CORS
-origins = [
-    "http://localhost",
-    "http://localhost:5173",  # React 前端開發伺服器
-    "capacitor://localhost",  # Capacitor App
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
-# 建立處理器實例
-vision_analyzer = GoogleVisionAnalyzer() if GoogleVisionAnalyzer else None
-ocr_processor = OCRProcessor(lang='ch') if OCRProcessor else None
-gpt_generator = GPTGenerator() if GPTGenerator else None
-
-
-class NarrativeRequest(BaseModel):
-    text: str
-    user_profile: Dict[str, Any] = {}
-
-
-class ImmersionResponse(BaseModel):
-    auditory_output: Dict[str, Any]
-    sensory_output: Dict[str, Any]
-    knowledge_graph: Dict[str, Any]
-
-
-@app.get("/", summary="API 根目錄", description="檢查 API 是否正常運作")
-async def read_root():
-    return {"message": "歡迎使用 Project-HOLO API"}
-
-@app.post("/generate_immersion", response_model=ImmersionResponse, summary="生成沉浸式體驗", description="輸入敘事文本，生成對應的聽覺、感官與知識圖譜輸出")
-async def generate_immersion(request: NarrativeRequest):
-    """
-    接收一段敘事文本，並回傳一個多模態的沉浸式體驗資料。
-
-    - **text**: 必要，要處理的敘事文本。
-    - **user_profile**: 可選，使用者的個人化設定。
-    """
-    # --- 在這裡呼叫您 holo 專案的核心邏輯 ---
-    # 範例:
-    # results = processor.process(request.text, request.user_profile)
-    # auditory_data = results.get("auditory")
-    # sensory_data = results.get("sensory")
-    # kg_data = results.get("knowledge_graph")
-    # -----------------------------------------
-
-    # 模擬回傳資料
-    auditory_data = {"soundscape": "forest_night.wav", "effects": ["wind", "crickets"]}
-    sensory_data = {"haptic": "gentle_breeze", "neuro": "calm_alpha_wave"}
-    kg_data = {
-        "nodes": ["forest", "night"],
-        "edges": [("forest", "has_ambience", "night")],
-    }
-
-    return ImmersionResponse(
-        auditory_output=auditory_data,
-        sensory_output=sensory_data,
-        knowledge_graph=kg_data,
-    )
-
-# 影像分析請求模型
-class ImageAnalysisRequest(BaseModel):
-    use_ocr: bool = True
-    use_vision: bool = True
-
-# 內容生成請求模型
-class ContentGenerationRequest(BaseModel):
-    text: str
-    content_type: str = 'summary'  # summary, analysis, continuation, emoticon, podcast
-    style: Optional[str] = 'narrative'
-    duration_minutes: Optional[int] = 5
-
-@app.post("/analyze_image", summary="影像識別與分析", description="上傳圖片進行情緒檢測、標籤識別和文字提取")
-async def analyze_image(
-    file: UploadFile = File(...),
-    use_ocr: bool = True,
-    use_vision: bool = True
-):
-    """
-    分析上傳的圖片
-    
-    - **file**: 要分析的圖片文件
-    - **use_ocr**: 是否使用 OCR 提取文字
-    - **use_vision**: 是否使用 Vision API 檢測情緒和標籤
-    """
-    try:
-        # 讀取圖片內容
-        image_bytes = await file.read()
-        
-        result = {
-            'filename': file.filename,
-            'content_type': file.content_type
-        }
-        
-        # 使用 Google Vision API 分析
-        if use_vision and vision_analyzer:
-            vision_result = vision_analyzer.analyze_image(image_bytes)
-            result['vision_analysis'] = vision_result
-        
-        # 使用 PaddleOCR 提取文字
-        if use_ocr and ocr_processor:
-            ocr_result = ocr_processor.extract_text(image_bytes)
-            result['ocr_result'] = ocr_result
-        
-        return result
-    
-    except Exception as e:
-        return {
-            'error': str(e),
-            'success': False
-        }
-
-@app.post("/generate_content", summary="生成式 AI 內容生成", description="使用 GPT-4 生成表情文字、播客腳本等內容")
-async def generate_content(request: ContentGenerationRequest):
-    """
-    生成各種 AI 內容
-    
-    - **text**: 輸入文本
-    - **content_type**: 內容類型（summary, analysis, continuation, emoticon, podcast）
-    - **style**: 風格（用於播客）
-    - **duration_minutes**: 時長（用於播客）
-    """
-    if not gpt_generator:
-        return {
-            'error': 'GPT 生成器未初始化',
-            'success': False
-        }
-    
-    try:
-        if request.content_type == 'emoticon':
-            # 生成表情文字
-            result = gpt_generator.generate_emoticon(
-                emotion=request.text,
-                context=request.style or ''
-            )
-        elif request.content_type == 'podcast':
-            # 生成播客腳本
-            result = gpt_generator.generate_podcast_script(
-                text=request.text,
-                style=request.style or 'narrative',
-                duration_minutes=request.duration_minutes or 5
-            )
-        else:
-            # 生成其他內容
-            result = gpt_generator.generate_story_content(
-                text=request.text,
-                content_type=request.content_type
-            )
-        
-        return result
-    
-    except Exception as e:
-        return {
-            'error': str(e),
-            'success': False
-        }
-
-# 若要直接執行此檔案進行測試: uvicorn main:app --reload
-
-from fastapi import Response
-from gtts import gTTS
+import hashlib
 import io
+import os
+import secrets
+import sqlite3
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Optional
 
-class TTSRequest(BaseModel):
+from fastapi import Depends, FastAPI, File, Header, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
+from pydantic import BaseModel, Field
+
+try:
+    from openai import OpenAI
+except ImportError:  # optional for offline mode
+    OpenAI = None
+
+try:
+    from gtts import gTTS
+except ImportError:
+    gTTS = None
+
+DB_PATH = Path(os.getenv("MODERNREADER_DB", Path(__file__).with_name("modernreader.sqlite3")))
+app = FastAPI(title="ModernReader API", version="0.2.0")
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+
+
+def db():
+    connection = sqlite3.connect(DB_PATH)
+    connection.row_factory = sqlite3.Row
+    connection.executescript("""
+      CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, email TEXT UNIQUE NOT NULL, password_hash TEXT NOT NULL, created_at TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS sessions (token TEXT PRIMARY KEY, user_id INTEGER NOT NULL, created_at TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS books (id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL, title TEXT NOT NULL, content TEXT NOT NULL, created_at TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS annotations (id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL, book_id INTEGER NOT NULL, paragraph_index INTEGER NOT NULL, text TEXT NOT NULL, emotion TEXT NOT NULL, created_at TEXT NOT NULL);
+    """)
+    return connection
+
+
+def now():
+    return datetime.now(timezone.utc).isoformat()
+
+
+def password_hash(password: str) -> str:
+    return hashlib.sha256(password.encode("utf-8")).hexdigest()
+
+
+def current_user(authorization: Optional[str] = Header(default=None)):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(401, "需要登入")
+    with db() as connection:
+        row = connection.execute("SELECT users.* FROM sessions JOIN users ON users.id=sessions.user_id WHERE token=?", (authorization[7:],)).fetchone()
+    if not row:
+        raise HTTPException(401, "登入已失效")
+    return row
+
+
+class AuthRequest(BaseModel):
+    email: str
+    password: str = Field(min_length=6)
+
+
+class BookRequest(BaseModel):
+    title: str
+    content: str
+
+
+class TextRequest(BaseModel):
+    book_id: Optional[int] = None
     text: str
-    lang: str = 'en'
-
-@app.post("/tts", summary="Text-to-Speech", description="Converts text to speech and returns an audio file.")
-async def text_to_speech(request: TTSRequest):
-    """
-    Converts text to speech.
-
-    - **text**: The text to convert.
-    - **lang**: The language of the text.
-    """
-    tts = gTTS(text=request.text, lang=request.lang)
-    fp = io.BytesIO()
-    tts.write_to_fp(fp)
-    fp.seek(0)
-    return Response(fp.read(), media_type="audio/mpeg")
+    language: str = "zh-TW"
+    style: str = "清楚、溫暖、適合學習"
 
 
-# ========== Orchestrator Endpoints ==========
+class AskRequest(BaseModel):
+    book_id: int
+    question: str
 
-class PlayRequest(BaseModel):
+
+class AnnotationRequest(BaseModel):
+    book_id: int
+    paragraph_index: int
     text: str
-    user_id: str = "default"
-
-
-class PlayResponse(BaseModel):
-    playback_url: str
-    metadata: Dict[str, Any]
-
-
-@app.post("/orchestrator/play", response_model=PlayResponse, summary="開始播放", description="開始播放文本並生成多感官體驗")
-async def orchestrator_play(request: PlayRequest):
-    """
-    Start playback of text with multisensory experience.
-    
-    - **text**: The text content to play
-    - **user_id**: User identifier for preferences
-    """
-    result = await orchestrator.play(request.text, request.user_id)
-    
-    if 'error' in result:
-        return {"playback_url": "", "metadata": {"error": result['error']}}
-    
-    return result
-
-
-class PauseResponse(BaseModel):
-    status: str
-    current_segment: int
-    is_playing: bool
-
-
-@app.post("/orchestrator/pause", response_model=PauseResponse, summary="暫停播放", description="暫停當前播放")
-async def orchestrator_pause():
-    """
-    Pause current playback.
-    """
-    result = await orchestrator.pause()
-    return result
-
-
-class SeekRequest(BaseModel):
-    segment_index: int
-
-
-class SeekResponse(BaseModel):
-    status: str
-    current_segment: int
-    playback_url: str
-    segment_text: str
-    segment_duration: float
-
-
-@app.post("/orchestrator/seek", response_model=SeekResponse, summary="跳轉到段落", description="跳轉到指定的文本段落")
-async def orchestrator_seek(request: SeekRequest):
-    """
-    Seek to a specific segment.
-    
-    - **segment_index**: Index of the segment to seek to
-    """
-    result = await orchestrator.seek(request.segment_index)
-    
-    if 'error' in result:
-        return {
-            "status": "error",
-            "current_segment": result.get('current_segment', 0),
-            "playback_url": "",
-            "segment_text": "",
-            "segment_duration": 0.0
-        }
-    
-    return result
-
-
-class SummaryResponse(BaseModel):
-    summary: str
-    total_segments: int
-    total_highlights: int
     emotion: str
-    current_position: int
-    is_playing: bool
 
 
-@app.get("/orchestrator/summary", response_model=SummaryResponse, summary="獲取摘要", description="獲取當前會話的摘要信息")
-async def orchestrator_summary():
-    """
-    Get summary of current session.
-    """
-    result = await orchestrator.summary()
-    return result
+def llm(prompt: str, system: str) -> Optional[str]:
+    if not OpenAI or not os.getenv("OPENAI_API_KEY"):
+        return None
+    client = OpenAI()
+    result = client.chat.completions.create(model=os.getenv("MODERNREADER_MODEL", "gpt-5-mini"), messages=[{"role": "system", "content": system}, {"role": "user", "content": prompt}], max_completion_tokens=700)
+    return result.choices[0].message.content
+
+
+def book_for(user_id: int, book_id: int):
+    with db() as connection:
+        row = connection.execute("SELECT * FROM books WHERE id=? AND user_id=?", (book_id, user_id)).fetchone()
+    if not row:
+        raise HTTPException(404, "找不到這本書")
+    return row
+
+
+def relevant_passages(content: str, question: str, limit: int = 4):
+    paragraphs = [part.strip() for part in content.split("\n\n") if part.strip()]
+    terms = set(question.lower().split())
+    scored = sorted(paragraphs, key=lambda p: sum(term in p.lower() for term in terms), reverse=True)
+    return scored[:limit]
+
+
+@app.get("/")
+def health():
+    return {"name": "ModernReader API", "version": "0.2.0", "status": "ok", "features": ["auth", "books", "rag", "summary", "podcast", "tts"]}
+
+
+@app.post("/api/auth/register")
+def register(request: AuthRequest):
+    try:
+        with db() as connection:
+            cursor = connection.execute("INSERT INTO users(email,password_hash,created_at) VALUES(?,?,?)", (request.email.lower(), password_hash(request.password), now()))
+            user_id = cursor.lastrowid
+    except sqlite3.IntegrityError as error:
+        raise HTTPException(409, "Email 已註冊") from error
+    token = secrets.token_urlsafe(32)
+    with db() as connection:
+        connection.execute("INSERT INTO sessions(token,user_id,created_at) VALUES(?,?,?)", (token, user_id, now()))
+    return {"token": token, "user": {"id": user_id, "email": request.email.lower()}}
+
+
+@app.post("/api/auth/login")
+def login(request: AuthRequest):
+    with db() as connection:
+        user = connection.execute("SELECT * FROM users WHERE email=? AND password_hash=?", (request.email.lower(), password_hash(request.password))).fetchone()
+    if not user:
+        raise HTTPException(401, "Email 或密碼錯誤")
+    token = secrets.token_urlsafe(32)
+    with db() as connection:
+        connection.execute("INSERT INTO sessions(token,user_id,created_at) VALUES(?,?,?)", (token, user["id"], now()))
+    return {"token": token, "user": {"id": user["id"], "email": user["email"]}}
+
+
+@app.get("/api/books")
+def books(user=Depends(current_user)):
+    with db() as connection:
+        return {"books": [dict(row) | {"content": None} for row in connection.execute("SELECT id,title,created_at FROM books WHERE user_id=? ORDER BY id DESC", (user["id"],))]}
+
+
+@app.post("/api/books")
+def create_book(request: BookRequest, user=Depends(current_user)):
+    with db() as connection:
+        cursor = connection.execute("INSERT INTO books(user_id,title,content,created_at) VALUES(?,?,?,?)", (user["id"], request.title, request.content, now()))
+    return {"id": cursor.lastrowid, "title": request.title}
+
+
+@app.post("/api/books/upload")
+async def upload_book(file: UploadFile = File(...), user=Depends(current_user)):
+    raw = await file.read()
+    if file.filename and file.filename.lower().endswith(".epub"):
+        raise HTTPException(400, "瀏覽器已負責 EPUB 解析；請上傳解析後的文字，或使用 /api/books 建立書籍")
+    content = raw.decode("utf-8", errors="ignore")
+    with db() as connection:
+        cursor = connection.execute("INSERT INTO books(user_id,title,content,created_at) VALUES(?,?,?,?)", (user["id"], file.filename or "未命名書籍", content, now()))
+    return {"id": cursor.lastrowid, "title": file.filename}
+
+
+@app.get("/api/books/{book_id}")
+def get_book(book_id: int, user=Depends(current_user)):
+    return dict(book_for(user["id"], book_id))
+
+
+@app.post("/api/ai/summary")
+def summary(request: TextRequest, user=Depends(current_user)):
+    text = request.text[:12000]
+    result = llm(text, "你是 ModernReader 閱讀助理。請用繁體中文，給出精準、不可捏造的段落摘要與三個重點。")
+    if result:
+        return {"summary": result, "mode": "llm"}
+    sentences = [part.strip() for part in text.replace("！", "。 ").replace("？", "。 ").split("。") if part.strip()]
+    return {"summary": "本段重點：" + "。".join(sentences[:2]) + ("。" if sentences else ""), "mode": "offline"}
+
+
+@app.post("/api/ai/ask")
+def ask(request: AskRequest, user=Depends(current_user)):
+    book = book_for(user["id"], request.book_id)
+    passages = relevant_passages(book["content"], request.question)
+    context = "\n\n".join(passages)
+    result = llm(f"書籍內容：\n{context}\n\n讀者問題：{request.question}", "你是基於來源內容回答的閱讀助理。只能依據提供的書籍內容，若找不到答案就明確說不知道。")
+    return {"answer": result or f"根據書籍內容，最相關的段落是：\n\n{context[:1000]}", "mode": "llm" if result else "offline", "sources": passages}
+
+
+@app.post("/api/ai/podcast-script")
+def podcast_script(request: TextRequest, user=Depends(current_user)):
+    prompt = f"請把以下內容改寫成約 3 分鐘、兩位主持人對談的繁體中文 Podcast 腳本，風格：{request.style}。\n\n{request.text[:14000]}"
+    result = llm(prompt, "你是 ModernReader Podcast 編劇，保留原文事實，不要添加來源未提及的內容。")
+    return {"script": result or f"主持人 A：歡迎收聽 ModernReader。今天我們要理解的內容是：\n\n{request.text[:1600]}\n\n主持人 B：以上是本段的重點整理。", "mode": "llm" if result else "offline"}
+
+
+@app.post("/api/annotations")
+def annotate(request: AnnotationRequest, user=Depends(current_user)):
+    book_for(user["id"], request.book_id)
+    with db() as connection:
+        cursor = connection.execute("INSERT INTO annotations(user_id,book_id,paragraph_index,text,emotion,created_at) VALUES(?,?,?,?,?,?)", (user["id"], request.book_id, request.paragraph_index, request.text, request.emotion, now()))
+    return {"id": cursor.lastrowid, "emotion": request.emotion}
+
+
+@app.get("/api/annotations")
+def annotations(book_id: int, user=Depends(current_user)):
+    with db() as connection:
+        rows = connection.execute("SELECT * FROM annotations WHERE user_id=? AND book_id=? ORDER BY paragraph_index", (user["id"], book_id)).fetchall()
+    return {"annotations": [dict(row) for row in rows]}
+
+
+@app.post("/api/tts")
+def tts(request: TextRequest, user=Depends(current_user)):
+    if not gTTS:
+        raise HTTPException(503, "尚未安裝 gTTS")
+    language = "zh-tw" if request.language.startswith("zh") else request.language.split("-")[0]
+    output = io.BytesIO()
+    gTTS(text=request.text[:3000], lang=language).write_to_fp(output)
+    return Response(output.getvalue(), media_type="audio/mpeg", headers={"Content-Disposition": "inline; filename=modernreader.mp3"})
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", "8000")))
