@@ -9,6 +9,7 @@ const emotions = [
   { label: '困惑', icon: '?', color: '#7c3aed' },
   { label: '緊張', icon: '!', color: '#dc2626' },
 ];
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 function parseText(raw, fileName = '示範文章') {
   const clean = raw
@@ -53,10 +54,21 @@ function App() {
   const [fontSize, setFontSize] = useState('normal');
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [token, setToken] = useState(() => localStorage.getItem('modernreader-token') || '');
+  const [accountEmail, setAccountEmail] = useState(() => localStorage.getItem('modernreader-email') || '');
+  const [authOpen, setAuthOpen] = useState(false);
+  const [authMode, setAuthMode] = useState('login');
+  const [authPassword, setAuthPassword] = useState('');
+  const [authMessage, setAuthMessage] = useState('');
+  const [isAiLoading, setIsAiLoading] = useState(false);
   const fileInput = useRef(null);
 
   useEffect(() => localStorage.setItem('modernreader-book', JSON.stringify(book)), [book]);
   useEffect(() => localStorage.setItem('modernreader-marks', JSON.stringify(marks)), [marks]);
+  useEffect(() => {
+    if (token) localStorage.setItem('modernreader-token', token);
+    else localStorage.removeItem('modernreader-token');
+  }, [token]);
   useEffect(() => {
     const onKeyDown = (event) => {
       if (event.target.matches('textarea, input')) return;
@@ -71,6 +83,27 @@ function App() {
   const progress = Math.round(((active + 1) / book.paragraphs.length) * 100);
   const currentMark = marks[active];
   const wordCount = useMemo(() => book.paragraphs.join(' ').split(/\s+/).filter(Boolean).length, [book]);
+
+  async function api(path, options = {}) {
+    const response = await fetch(`${API_URL}${path}`, { ...options, headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}), ...(options.headers || {}) } });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.detail || 'API 請求失敗');
+    return data;
+  }
+
+  async function authenticate() {
+    setAuthMessage('處理中…');
+    try {
+      const data = await api(`/api/auth/${authMode}`, { method: 'POST', body: JSON.stringify({ email: accountEmail, password: authPassword }) });
+      setToken(data.token); localStorage.setItem('modernreader-email', accountEmail); setAuthPassword(''); setAuthOpen(false); setAuthMessage('');
+    } catch (error) { setAuthMessage(error.message); }
+  }
+
+  async function syncBook() {
+    if (!token) return null;
+    const data = await api('/api/books', { method: 'POST', body: JSON.stringify({ title: book.title, content: book.paragraphs.join('\n\n') }) });
+    return data.id;
+  }
 
   async function importFile(event) {
     const file = event.target.files?.[0];
@@ -100,29 +133,41 @@ function App() {
     window.speechSynthesis.speak(utterance); setIsSpeaking(true);
   }
 
-  function summarize() {
+  async function summarize() {
     const text = book.paragraphs[active];
+    if (token) {
+      setIsAiLoading(true);
+      try { const result = await api('/api/ai/summary', { method: 'POST', body: JSON.stringify({ text }) }); setAnswer(`${result.summary}\n\n[${result.mode === 'llm' ? 'AI' : '離線'} 模式]`); } catch (error) { setAnswer(`AI 摘要暫時不可用：${error.message}`); } finally { setIsAiLoading(false); }
+      return;
+    }
     const sentences = text.split(/(?<=[。！？.!?])/).filter(Boolean);
     setAnswer(`本段重點：${(sentences.slice(0, 2).join('') || text).slice(0, 180)}${text.length > 180 ? '…' : ''}`);
   }
 
-  function askBook() {
+  async function askBook() {
     const question = query.trim();
     if (!question) return;
+    if (token) {
+      setIsAiLoading(true);
+      try { const bookId = await syncBook(); const result = await api('/api/ai/ask', { method: 'POST', body: JSON.stringify({ book_id: bookId, question }) }); setAnswer(`${result.answer}\n\n[${result.mode === 'llm' ? 'RAG + AI' : 'RAG 離線'} 模式]`); } catch (error) { setAnswer(`RAG 問答暫時不可用：${error.message}`); } finally { setIsAiLoading(false); }
+      return;
+    }
     const match = book.paragraphs.find((p) => p.includes(question)) || book.paragraphs[active];
     setAnswer(`根據目前書籍內容，最相關的段落是：「${match.slice(0, 220)}${match.length > 220 ? '…' : ''}」\n\n這是離線示範模式；接上 LLM API 後，可升級為真正的 RAG 書籍問答。`);
   }
 
-  function markEmotion(emotion) {
+  async function markEmotion(emotion) {
     setMarks((old) => ({ ...old, [active]: emotion }));
+    if (token) { try { const bookId = await syncBook(); await api('/api/annotations', { method: 'POST', body: JSON.stringify({ book_id: bookId, paragraph_index: active, text: book.paragraphs[active], emotion: emotion.label }) }); } catch { /* localStorage remains the offline fallback */ } }
   }
 
   return (
     <div className="app-shell">
       <header className="topbar">
         <div className="brand"><span className="brand-mark">MR</span><div><strong>ModernReader</strong><small>讓閱讀變得可呼吸</small></div></div>
-        <div className="top-actions"><button className="ghost-button" disabled={isImporting} onClick={() => fileInput.current?.click()}>{isImporting ? '讀取中…' : '＋ 匯入書籍'}</button><input ref={fileInput} hidden type="file" accept=".epub,.txt,.md,.html,.htm" onChange={importFile} /><button className="icon-button" aria-label="切換字體大小" onClick={() => setFontSize(fontSize === 'large' ? 'normal' : 'large')}>Aa</button></div>
+        <div className="top-actions"><button className="ghost-button" disabled={isImporting} onClick={() => fileInput.current?.click()}>{isImporting ? '讀取中…' : '＋ 匯入書籍'}</button><input ref={fileInput} hidden type="file" accept=".epub,.txt,.md,.html,.htm" onChange={importFile} /><button className="icon-button" aria-label="切換字體大小" onClick={() => setFontSize(fontSize === 'large' ? 'normal' : 'large')}>Aa</button>{token ? <button className="account-button" onClick={() => { setToken(''); setAuthMessage('已登出'); }}>{accountEmail} · 登出</button> : <button className="account-button" onClick={() => setAuthOpen(true)}>登入同步</button>}</div>
       </header>
+      {authOpen && <div className="auth-overlay" role="dialog" aria-modal="true"><div className="auth-card"><button className="auth-close" onClick={() => setAuthOpen(false)}>×</button><div className="eyebrow">MODERNREADER CLOUD</div><h2>{authMode === 'login' ? '登入你的閱讀空間' : '建立閱讀帳號'}</h2><input value={accountEmail} onChange={(event) => setAccountEmail(event.target.value)} placeholder="Email" type="email" /><input value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} placeholder="密碼（至少 6 碼）" type="password" /><button className="primary-button auth-submit" onClick={authenticate}>{authMode === 'login' ? '登入' : '註冊'}</button>{authMessage && <p className="auth-message">{authMessage}</p>}<button className="auth-switch" onClick={() => { setAuthMode(authMode === 'login' ? 'register' : 'login'); setAuthMessage(''); }}>{authMode === 'login' ? '還沒有帳號？註冊' : '已有帳號？登入'}</button></div></div>}
 
       <main className="layout">
         <aside className="sidebar">
@@ -136,12 +181,12 @@ function App() {
           <div className="reader-meta"><span>正在閱讀</span><span>{active + 1} / {book.paragraphs.length}</span></div>
           <h1>{book.title}</h1><p className="reader-subtitle">你的專注閱讀空間</p>
           <div className="focus-card"><div className="focus-label">FOCUS MODE <span>●</span></div><p>{book.paragraphs[active]}</p>{currentMark && <div className="current-mark" style={{ color: currentMark.color }}>已標記為「{currentMark.label}」</div>}</div>
-          <div className="reader-controls"><button className="primary-button" onClick={speak}>{isSpeaking ? '■ 停止朗讀' : '▶ 語音導讀'}</button><button className="secondary-button" onClick={summarize}>✦ 生成摘要</button><span className="control-hint">Space 播放 · ← → 切換段落</span></div>
+          <div className="reader-controls"><button className="primary-button" onClick={speak}>{isSpeaking ? '■ 停止朗讀' : '▶ 語音導讀'}</button><button className="secondary-button" disabled={isAiLoading} onClick={summarize}>{isAiLoading ? '處理中…' : '✦ 生成摘要'}</button><span className="control-hint">Space 播放 · ← → 切換段落</span></div>
           <div className="emotion-panel"><div><h3>這段文字帶給你什麼感受？</h3><p>留下情緒標記，建立你的個人閱讀地圖。</p></div><div className="emotion-buttons">{emotions.map((emotion) => <button key={emotion.label} className={currentMark?.label === emotion.label ? 'emotion active' : 'emotion'} onClick={() => markEmotion(emotion)} style={{ '--emotion': emotion.color }}><b>{emotion.icon}</b>{emotion.label}</button>)}</div></div>
           <div className="pager"><button disabled={active === 0} onClick={() => setActive((n) => n - 1)}>← 上一段</button><button disabled={active === book.paragraphs.length - 1} onClick={() => setActive((n) => n + 1)}>下一段 →</button></div>
         </section>
 
-        <aside className="insight-panel"><div className="eyebrow">AI READING COMPANION</div><h2>一起理解這本書</h2><p className="muted">離線模式會根據目前匯入的內容提供基礎回應。</p><div className="question-box"><textarea value={query} onChange={(e) => setQuery(e.target.value)} placeholder="問問這本書，例如：這一段的重點是什麼？" rows="4" /><button onClick={askBook}>詢問 ModernReader <span>↗</span></button></div>{answer && <div className="answer-box"><div className="answer-title">ModernReader 的回應</div>{answer}</div>}<div className="insight-divider" /><div className="eyebrow">YOUR READING SIGNALS</div><div className="signal"><span className="signal-dot calm" /><div><strong>{Object.keys(marks).length ? '你正在建立閱讀情緒地圖' : '還沒有情緒標記'}</strong><small>{Object.keys(marks).length ? `${Object.keys(marks).length} 個段落已被記錄` : '標記第一段，開始觀察自己的閱讀感受'}</small></div></div></aside>
+        <aside className="insight-panel"><div className="eyebrow">AI READING COMPANION</div><h2>一起理解這本書</h2><p className="muted">{token ? '已登入：摘要與問答會優先使用後端 AI。' : '離線模式會根據目前匯入的內容提供基礎回應。登入後可同步書櫃與標記。'}</p><div className="question-box"><textarea value={query} onChange={(e) => setQuery(e.target.value)} placeholder="問問這本書，例如：這一段的重點是什麼？" rows="4" /><button disabled={isAiLoading} onClick={askBook}>{isAiLoading ? '分析中…' : '詢問 ModernReader'} <span>↗</span></button></div>{answer && <div className="answer-box"><div className="answer-title">ModernReader 的回應</div>{answer}</div>}<div className="insight-divider" /><div className="eyebrow">YOUR READING SIGNALS</div><div className="signal"><span className="signal-dot calm" /><div><strong>{Object.keys(marks).length ? '你正在建立閱讀情緒地圖' : '還沒有情緒標記'}</strong><small>{Object.keys(marks).length ? `${Object.keys(marks).length} 個段落已被記錄` : '標記第一段，開始觀察自己的閱讀感受'}</small></div></div></aside>
       </main>
     </div>
   );

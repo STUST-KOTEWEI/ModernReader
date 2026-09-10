@@ -31,7 +31,7 @@ except ImportError:
 
 DB_PATH = Path(os.getenv("MODERNREADER_DB", Path(__file__).with_name("modernreader.sqlite3")))
 app = FastAPI(title="ModernReader API", version="0.2.0")
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=False, allow_methods=["*"], allow_headers=["*"])
 
 
 def db():
